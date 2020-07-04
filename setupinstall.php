@@ -58,9 +58,9 @@ die();
    $contents = $parts[$i++]; 
 	 if(pathinfo($f, PATHINFO_EXTENSION) != 'php' ) { $contents = base64_decode($contents); } 
 	 $filename = $f;
-	 if( file_exists($filename) ) { 
-	 		 echo("The file ".$filename." is already installed.<p>"); 
-			 }
+	 if( file_exists($filename) && !isset($_GET["overwriteall"])) { 
+		echo("The file ".$filename." is already installed.<p>"); 
+	   }
 	 else { 
 	  file_put_contents($filename, $contents);
 		echo("The file ".$filename." <b>has</b> been installed.<p>"); 

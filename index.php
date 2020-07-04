@@ -44,12 +44,12 @@ include_once $varfile;
 include_once "./util.php";
 
 if (isset($systempassword["c"])) {
-   // setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'None', 'secure' => true]);
-   setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'lax' ]);
+    // setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'None', 'secure' => true]);
+    setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'lax']);
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 }
 
-$myIdx = $_GET["id"] ?? $_POST["id"] ?? 0; 
+$myIdx = $_GET["id"] ?? $_POST["id"] ?? 0;
 if (!isset($targeteta[$myIdx])) {
     $targeteta[$myIdx] = array((isLocalHost() ? 15000 : 100), false);
 }
@@ -246,7 +246,7 @@ if (count($_POST) > 0) {
     $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
     echo ', "hrtime" : "' . $eta . '"';
 
-  
+
     if ($targeteta[$myId][1] !== false) {
         if ($targeteta[$myId][1] == "autoC") {
             $targeteta[$myId][0] = 100 + 5 * $lastbgnoise;
@@ -348,46 +348,47 @@ function autocat_log($log_msg)
 }
 
 
-   if (isset($_GET["imgout"] )) {
-        $im = false;
-        $text = "...";
+if (isset($_GET["imgout"])) {
+    $im = false;
+    $text = "...";
+    /*
         if (isset($_GET["b"])) {
             $fullpath = bn2file($_GET["b"]);
             if ($fullpath !== FALSE) {
                 $im = @imagecreatefromjpeg($fullpath);
                 $text = basename2time($_GET["b"]);
             }
-        } else {
-            $myId = $_GET["id"] ?? 1; 
-            $minutes = $_GET["minutes"] ?? 20; 
-            $minutesfrom = $_GET["minutesfrom"] ?? 5; 
-            $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom);;
-            $fullpath = bn2file($bn);
-            if ($fullpath !== FALSE) {
-                $im = @imagecreatefromjpeg($fullpath);
-                $text = basename2time($bn);
-            }
+        } else { */
+    $myId = $_GET["id"] ?? 1;
+    $minutes = $_GET["minutes"] ?? 20;
+    $minutesfrom = $_GET["minutesfrom"] ?? 5;
+    $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom);;
+    $fullpath = bn2file($bn);
+    if ($fullpath !== FALSE) {
+        $im = @imagecreatefromjpeg($fullpath);
+        $text = basename2time($bn);
+        //    }
 
-        }
-
-
-        if ($im === false) {
-            $im = imagecreatefromjpeg("./nopic.jpg");
-        }
-
-        $textcolour = imagecolorallocate($im, 204, 204, 0);
-        $textshadow = imagecolorallocate($im, 0, 0, 0);
-   
-
-        $font = 'arial.ttf';
-        @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
-        @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
-
-        header('Content-Type: image/jpeg');
-      
-        imagejpeg($im, NULL, 100);
-        die();
     }
+
+
+    if ($im === false) {
+        $im = imagecreatefromjpeg("./nopic.jpg");
+    }
+
+    $textcolour = imagecolorallocate($im, 204, 204, 0);
+    $textshadow = imagecolorallocate($im, 0, 0, 0);
+
+
+    $font = dirname(__FILE__) . '/arial.ttf';
+    @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
+    @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
+
+    header('Content-Type: image/jpeg');
+
+    imagejpeg($im, NULL, 100);
+    die();
+}
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -701,10 +702,10 @@ function autocat_log($log_msg)
 
         }
 
-        function showtargets(yes = false ) { 
+        function showtargets(yes = false) {
             var overlays = document.getElementsByClassName("showtargets");
             for (var i = 0, max = overlays.length; i < max; i++) {
-                if ( yes ) {
+                if (yes) {
                     overlays[i].removeAttribute("hidden");
                 } else {
                     overlays[i].setAttribute("hidden", 1);
@@ -727,15 +728,15 @@ function autocat_log($log_msg)
 
             // console.log("here1"); 
             var overlays = document.getElementsByClassName("showtargets");
-/*
-            for (var i = 0, max = overlays.length; i < max; i++) {
-                if (newval == "showtargets") {
-                    overlays[i].removeAttribute("hidden");
-                } else {
-                    overlays[i].setAttribute("hidden", 1);
-                }
-            }
-*/
+            /*
+                        for (var i = 0, max = overlays.length; i < max; i++) {
+                            if (newval == "showtargets") {
+                                overlays[i].removeAttribute("hidden");
+                            } else {
+                                overlays[i].setAttribute("hidden", 1);
+                            }
+                        }
+            */
             var overlays = document.getElementsByClassName("showframes");
 
             for (var i = 0, max = overlays.length; i < max; i++) {
@@ -900,8 +901,7 @@ function autocat_log($log_msg)
             echo '</body></html>';
             sleep(2);
             die();
-        } */ 
-        else if ($_GET["systempassword"] !== $systempassword["pw"]) {
+        } */ else if ($_GET["systempassword"] !== $systempassword["pw"]) {
             echo "<p>The password that has been entered does not match the stored password. If you have forgotten the password then go to the server and";
             echo " delete the file " . $varfile_global . ".";
         } else {
@@ -1105,9 +1105,9 @@ function autocat_log($log_msg)
         sleep(1);
         die();
     }
-   
- 
-   
+
+
+
 
     ?>
 
@@ -1180,7 +1180,7 @@ function autocat_log($log_msg)
             echo '<form action="index.php">';
             echo '<label for="enter">Enter ETA in Milliseconds:</label><br>';
             echo '<input type="text" id="thetargeteta" name="thetargeteta" value=150>';
-            echo '<input  hidden type="text" id="id" name="id" value=' . $myId. ' >';
+            echo '<input  hidden type="text" id="id" name="id" value=' . $myId . ' >';
             echo '<input  class="button submitbtn" type="submit" value="✔️">';
             echo '<span class="button closebtn" onclick="hidebodies()" >⛔</span>';
             echo '</form>';
@@ -1292,7 +1292,7 @@ function autocat_log($log_msg)
             echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
             if ($togp != 2) { // otherwise paused
                 echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
-                echo ' <a href="index.php?t='.time().'&id='.$myId.'&setupcontrolA=2&nomenu=1">Change</a>'; 
+                echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             } else {
                 echo "The Camera will call every " . ($mingapbeforeposts[$myId] ?? 60) . "s (recording is paused; no images are made).";
             }
@@ -1321,16 +1321,16 @@ function autocat_log($log_msg)
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-                
+
                 if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
                     echo "Autocat is <b>on</b>. ";
 
-                  //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
+                    //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
                 } else {
                     echo "Autocat is <b>off</b>. ";
-                //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+                    //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
                 }
-                
+
                 echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&showclarifai=1">Manage</a>  &nbsp;';
 
                 echo "\r\n";
@@ -1375,7 +1375,7 @@ function autocat_log($log_msg)
             echo '<table summary="Files currently in each Target" class="tableTF" >' . $rowT . $rowF . "</table>";
 
             echo ' Keep at least <b>' . ($keephowmany[$myId] ?? 500) . '</b> files on Server for each target.';
-            echo ' <a href="index.php?t='.time().'&id='.$myId.'&setupcontrolA=2&nomenu=1">Change</a>'; 
+            echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             echo '</div>';
             echo '<div>';
             echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" . $fastmode[$myId] . ")" : "off") . "</b>";
@@ -1407,33 +1407,33 @@ function autocat_log($log_msg)
             echo "" . round(60 * $imgsreceivedpersecond, 2) . " imgs / minute since stats reset on server.";
 
             echo "<br> \r\n";
-            $togp = ($toggleCapture[$myId] ?? 0); 
+            $togp = ($toggleCapture[$myId] ?? 0);
             echo 'Status: <b>' . ($togp == 0 ? "capturing" : ($togp == 1 ? "request toggle" : "paused")) . '</b>. ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a></li>';
-            
+
             echo "<br> \r\n";
-            echo 'Zoom =  ' . ($zoom[$myId] ?? 1).'x; ';
+            echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
             echo ' Zoom Center at (x,y) = (' . round(100 * ($zoomX[$myId] ?? 0.5), 1);
-            echo '%,' . round(100 * ($zoomY[$myId] ?? 0.5), 1).'%).';
+            echo '%,' . round(100 * ($zoomY[$myId] ?? 0.5), 1) . '%).';
             echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setzoom=1">Change</a>.';
-            
 
 
-           
+
+
             echo "<br>   \r\n";
-       
+
             global $performance;
-           
+
             $x = $performance[$myId] ?? array(0, 0, 0, 0, 0, 0, 0, 0, 0);
             $avg = round($x[2], 2);
             $last = round($x[1], 2);
             $avg60 = round($x[5], 2);
             $last60 = round($x[4], 2);
 
-            echo 'Average time used on server for each request: '; 
-            echo $avg."ms measured over ".$x[0]." requests.";         
-     echo '; <a href="index.php?time=' . time() . '&unsetperformance=' . time() . '&id=' . $myId . '">Reset</a>';
-/*
+            echo 'Average time used on server for each request: ';
+            echo $avg . "ms measured over " . $x[0] . " requests.";
+            echo '; <a href="index.php?time=' . time() . '&unsetperformance=' . time() . '&id=' . $myId . '">Reset</a>';
+            /*
             echo "avg=$avg, last=$last ($x[0]); ";
             echo "a60=$avg60, la60=$last60 ($x[3]); ";
     
@@ -1448,40 +1448,39 @@ function autocat_log($log_msg)
             die();
         }
         write2config();
-if(isset($_GET["showclarifai"])) { 
-    if (isset($clarifaicount[2])) {
-        echo '<br>';
+        if (isset($_GET["showclarifai"])) {
+            if (isset($clarifaicount[2])) {
+                echo '<br>';
 
 
-        $c3 = $clarifaicount[3] ?? 0;
-        $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
-        echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
-        $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
-        $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
-        echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-        if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-            echo "Autocat is <b>on</b>. ";
+                $c3 = $clarifaicount[3] ?? 0;
+                $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
+                echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
+                $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
+                $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
+                echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+                if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
+                    echo "Autocat is <b>on</b>. ";
 
-            echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
-        } else {
-            echo "Autocat is <b>off</b>. ";
-            echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+                    echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
+                } else {
+                    echo "Autocat is <b>off</b>. ";
+                    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+                }
+
+                echo "\r\n";
+            } else {
+                echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
+            }
+            echo '<p><a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
+            echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
+            var_dump($clarifaicount);
+            echo "<p>";
+            var_dump($autocat);
+            echo "\r\n";
+            echo '</body></html>';
+            die();
         }
-
-        echo "\r\n";
-    } else {
-        echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
-    }
-    echo '<p><a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
-    echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
-    var_dump($clarifaicount); 
-    echo "<p>"; 
-    var_dump($autocat); 
-    echo "\r\n";
-    echo '</body></html>';
-    die();
-
-}
         if (isset($_GET["setupcontrol"])) {
             echo "\r\n";
             echoSetupMenu($myId);
@@ -2263,10 +2262,10 @@ if(isset($_GET["showclarifai"])) {
         global $imagesperpost, $targeteta;
         global $toggleCapture, $zoom, $zoomX, $zoomY, $mingapbeforeposts, $maximagesperpost;
         echo "<h3>Control Cam $myId</h3>";
-        $ntgt = count(myTargets($myId)); 
+        $ntgt = count(myTargets($myId));
         echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
         echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
-              
+
         echo '<p><ol>';
 
 
@@ -2284,7 +2283,7 @@ if(isset($_GET["showclarifai"])) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setmaximages=' . $j . '">#' . $j . ' </a>;';
         }
         echo '<br>';
-        echo  'Note that the actual number of images that are transfered may change depending on the value of <a href= index.php?time=' . time() . '&id=' . $myId . '&settargeteta=1&">target ETA</a>'; 
+        echo  'Note that the actual number of images that are transfered may change depending on the value of <a href= index.php?time=' . time() . '&id=' . $myId . '&settargeteta=1&">target ETA</a>';
         echo "</li>   \r\n";
 
         echo '<li>Number of images to keep on server for each target: ';
@@ -2296,8 +2295,6 @@ if(isset($_GET["showclarifai"])) {
         echo '<a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
 
         echo "</li>   \r\n";
-       
-        
     }
 
     function echoSetupMenu($myId)
@@ -3217,13 +3214,13 @@ if(isset($_GET["showclarifai"])) {
                 $extrahref = 'index.php?time=' . time() . '&settgts=1&id=' . $myId . $setXY . "&settargetnow=1&imgaction=default&howmany=" . intval($_GET["howmany"] ?? 6) . "&b=" . $bn . "&xy=xy";
             }
 
-            $hidetgts = "hidden=1"; 
-          //  $hidetgts = ""; 
+            $hidetgts = "hidden=1";
+            //  $hidetgts = ""; 
             if (file_exists($imgoutfoldername . $bn)) {
                 $lastBn = $bn;
                 $countImgsOut++;
                 echo "<a class=\"container\" what=1 onClick=\"imgclick('" . $bn . "', this, " . $extra . ", '" . $extrahref . "')\"  zoomhref=\"$zoomhref\" nozoomhref=\"$nozoomhref\"><img ismap width=$width height=$height src=\"" . $imgoutfoldername . $bn . "\" alt=\"" . $bn . "\" title=\"" . substr($bn, 2, 8) . "-" . substr($bn, 10, 6) . "\">";
-                echo '<img  '.$hidetgts.' width=' . $width . ' height=' . $height . ' class="showtargets" src="tmp/' . $tgtoverlay[$myTargetId] . '" alt="overlay">';
+                echo '<img  ' . $hidetgts . ' width=' . $width . ' height=' . $height . ' class="showtargets" src="tmp/' . $tgtoverlay[$myTargetId] . '" alt="overlay">';
                 echo '<img  hidden=1 id=SHOWFRAMES' . $bn . ' width=' . $width . ' height=' . $height, ' class="showframes" src="' . $framefile . '" alt="overlay">';
                 if (isset($_GET["settargetnow"])) {
                     add_caption("Target $targetid ");
