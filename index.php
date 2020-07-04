@@ -351,14 +351,7 @@ function autocat_log($log_msg)
 if (isset($_GET["imgout"])) {
     $im = false;
     $text = "...";
-    /*
-        if (isset($_GET["b"])) {
-            $fullpath = bn2file($_GET["b"]);
-            if ($fullpath !== FALSE) {
-                $im = @imagecreatefromjpeg($fullpath);
-                $text = basename2time($_GET["b"]);
-            }
-        } else { */
+
     $myId = $_GET["id"] ?? 1;
     $minutes = $_GET["minutes"] ?? 20;
     $minutesfrom = $_GET["minutesfrom"] ?? 5;
@@ -367,8 +360,6 @@ if (isset($_GET["imgout"])) {
     if ($fullpath !== FALSE) {
         $im = @imagecreatefromjpeg($fullpath);
         $text = basename2time($bn);
-        //    }
-
     }
 
 
@@ -835,14 +826,14 @@ if (isset($_GET["imgout"])) {
 
         <?php
 
-        if (($_GET["imgaction"] ?? "x") !== "showtargets") {
+      //  if (($_GET["imgaction"] ?? "x") !== "showtargets") {
             echo "var myInterval =  setTimeout(imgactionchange, 1300);";
             echo "\r\n";
             echo "var myInterval =  setTimeout(imgactionchange, 30);";
             echo "\r\n";
             //  echo "var myInterval3 =  setTimeout(setupReload, 50);";
             echo "\r\n";
-        }
+       // }
 
         ?>
     </script>
@@ -1114,12 +1105,16 @@ if (isset($_GET["imgout"])) {
     <?php
     $oldestbn = null;
     $newestbn = null;
+    /*
     if (isset($_GET["imgaction"]) && $_GET["imgaction"] == "showtargets") {
         $_GET["settargetnow"] = 4;
     }
+    */
     if (isset($_GET["id"]) && !isset($_GET["home"])) {
-        $myId = $_GET["id"];
         error_reporting(-1);
+        
+        $myId = intval($_GET["id"]);
+        
         $sessiongetinfo[$myId] = $_SERVER;
         if (isset($_GET["startcam"])) {
             echo ' <h1><a target="_blank" href="cam.php?id=' . $myId . '">Start Cam ' . $myId . '</a></h1>';
@@ -1415,7 +1410,7 @@ if (isset($_GET["imgout"])) {
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
             echo ' Zoom Center at (x,y) = (' . round(100 * ($zoomX[$myId] ?? 0.5), 1);
             echo '%,' . round(100 * ($zoomY[$myId] ?? 0.5), 1) . '%).';
-            echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setzoom=1">Change</a>.';
+            echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&day=today&setzoom=1&agelimit=900&howmany='.($_GET["howmany"] ?? 8).'" >Change</a>.';
 
 
 
@@ -1444,8 +1439,12 @@ if (isset($_GET["imgout"])) {
             echo '</ol><p>';
   */
             echo "\r\n";
+
+            if( isset($_GET["setupcontrolA"] ) ) { echoSetupMenuA($myId);}
             echo '</body></html>';
             die();
+
+
         }
         write2config();
         if (isset($_GET["showclarifai"])) {
@@ -1481,14 +1480,16 @@ if (isset($_GET["imgout"])) {
             echo '</body></html>';
             die();
         }
+        /*
         if (isset($_GET["setupcontrol"])) {
             echo "\r\n";
-            echoSetupMenu($myId);
+            echoSetupMenuA($myId);
             $fastmode[$myId] = 8;
             echo "\r\n";
             echo '</body></html>';
             die();
         }
+        */
         if (isset($_GET["setupcontrolA"])) {
             echo "\r\n";
             echoSetupMenuA($myId);
@@ -1622,27 +1623,33 @@ if (isset($_GET["imgout"])) {
             } else {
                 echo "<p>Target " . $_GET["removetarget"] . " not found by Camera $myId. <p>";
             }
-        }
+        }/*
         if (isset($_GET["resetzoom"])) {
             $zoom[$myId] = 1;
             $zoomX[$myId] = 0.5;
             $zoomY[$myId] = 0.5;
 
             echo "<p>Zoom Center is now at x =" . round(100 * $zoomX[$myId], 2) . "%, y=" . round(100 * $zoomY[$myId], 2) . "%.<p>";
-            echo '<a href="index.php?day=today&time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+            echo '<a href="index.php?day=today&time=' . time() . '&id=' . $myId . '" >Home</a><p>';
             write2config();
             sleep(1);
+            echo "</body></html>";
             die();
-        } else if (isset($_GET["zoom"]) && isset($_GET["xC"]) && isset($_GET["yC"])) {
-            $zoomX[$myId] = abs($_GET["xC"]);
-            $zoomY[$myId] = abs($_GET["yC"]);
-            $zoom[$myId] =  $_GET["zoom"];
+} else */
+
+if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
+            $zoomX[$myId] = abs($_GET["xC"] ?? 0.5);
+            $zoomY[$myId] = abs($_GET["yC"] ?? 0.5);
+            $zoom[$myId] =  $_GET["zoom"] ?? 1;
 
             echo "<p>Zoom Center is now at x =" . round(100 * $zoomX[$myId], 2) . "%, y=" . round(100 * $zoomY[$myId], 2) . "%.    ";
             echo "Zoom = " . $zoom[$myId] . ".<p>";
             echo '<a href="index.php?day=today&time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+            echo '<p>';
+            echo '<span class="button closebtn" onclick="hidebodies()" >⛔</span>';
             write2config();
-            sleep(1);
+            sleep(2);
+            echo "</body></html>";
             die();
         }/* else if (isset($_GET["settargetdisplay"])) {
             echo "<h2>Click on any of the images below to adjust the targets using this image</h2>";
@@ -1670,11 +1677,11 @@ if (isset($_GET["imgout"])) {
             echo '<p> Click here when done: <button class="button closebtn" onclick="hidebodies()" >⛔</button></p>';
             $res = addTargets($myId, $_GET["b"] ?? "nonezxz");
             displayImages($res);
-            echo '<p><a href="index.php?howmany=' . $_GET["howmany"] . '&time=' . time() . '&settargetnow=1&addtarget=1&id=' . $myId . '">Add additional target</a><p>';
+            echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1). '&time=' . time() . '&settargetnow=1&addtarget=1&id=' . $myId . '">Add additional target</a><p>';
             foreach (myTargets($myId) as $t) {
-                echo '<p><a href="index.php?howmany=' . $_GET["howmany"] . '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
+                echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1). '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
             }
-            echo '<p><a href="index.php?howmany=' . $_GET["howmany"] . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
+            echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
             die("<p>Thank you! 🙂</p>");
         } else if (isset($_GET["day"]) || isset($_GET["bntd"])) {
             $allImagesA = findImagesByDate($myId);
@@ -2261,7 +2268,7 @@ if (isset($_GET["imgout"])) {
     {
         global $imagesperpost, $targeteta;
         global $toggleCapture, $zoom, $zoomX, $zoomY, $mingapbeforeposts, $maximagesperpost;
-        echo "<h3>Control Cam $myId</h3>";
+        echo "<h3>Control Cam $myId - ".id2emoji($myId)."</h3>";
         $ntgt = count(myTargets($myId));
         echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
         echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
@@ -2295,7 +2302,18 @@ if (isset($_GET["imgout"])) {
         echo '<a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
 
         echo "</li>   \r\n";
+
+        echo '<li><a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Toggle Capture</a></li>';
+      
+        echo '<li>';
+       
+        echo '<a href="zipdelete.php?merge=1&buckets=yes&id=' . $myId . '">Download all images as a zip file.</a>; ';
+        echo '</li>';
+        echo '<li>';
+        echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
+        echo '</li>';
     }
+    /*
 
     function echoSetupMenu($myId)
     {
@@ -2307,13 +2325,10 @@ if (isset($_GET["imgout"])) {
 
         echo '<li>';
         // echo '<a href="zipdelete.php?merge=1&delete=y&buckets=yes&id='.$myId.'">merge, zip and delete</a>; ';
-        echo '<a href="zipdelete.php?merge=1&buckets=yes&id=' . $myId . '">merge, zip (no delete)</a>; ';
+        echo '<a href="zipdelete.php?merge=1&buckets=yes&id=' . $myId . '">Download all images as a zip file.</a>; ';
         echo '</li>';
 
-        echo '<li><a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Toggle Capture</a></li>';
-        echo '<li>';
-
-        echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Reset System Password</a> &nbsp; ';
+        echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
         echo '</li>';
 
         echo '<li>Gap Between Posts: ';
@@ -2379,6 +2394,7 @@ if (isset($_GET["imgout"])) {
         echo "\r\n";
         echo "\r\n";
     }
+    */
     function findImagesByDate($myId, $dd = array())
     {
         $thedayfrom = $_GET["day"] ?? "notset";
@@ -3108,6 +3124,7 @@ if (isset($_GET["imgout"])) {
         $notexist = 0;
         if (count($basenames) == 0) {
             echo '<h2>Nothing to display here</h2>';
+            echo '<a href="index.php">Home</a>';
             return;
         }
 
@@ -3240,6 +3257,11 @@ if (isset($_GET["imgout"])) {
         if ($countImgsOut == 1) {
             echo '  <a href="index.php?id=' . $myId . '&clarifaithis=' . $lastBn . '">Clarifai this image</a>;   ';
             echo '  <a  href="index.php?id=' . $myId . '&imgout=1&b=' . $lastBn . '">Retrieve as jpg</a>;   ';
+            $zhref = 'setzoom.php?id=' . $myId . '&time=' . time() . '&b='.$lastBn.'&videoinfo=' . ($videoinfo[$myId] ?? "-1,-1,-1,-1") . "&zoomx=" . ($zoomX[$myId] ?? 0.5) . "&zoomy=" . ($zoomY[$myId] ?? 0.5) . "&zoom=" . ($zoom[$myId] ?? 1) . "";
+            echo ' <a href="'.$zhref. '">Set Zoom</a>; '; 
+            echo ' <a href="index.php?settgts=1&settargetnow=1&imgaction=default&id='.$myId . '&b=' . $lastBn. '">Set Targets</a>; '; 
+        
+
         }
         echoTimeUsed();
     }
