@@ -8,11 +8,17 @@ For more information on the project feel free to contact me under http://dr.marc
 For installation and quickstart just do (on Windows): 
 
 (1) Download and istall wamp https://sourceforge.net/projects/wampserver/ or some other webserver. Run it.
+
 (2) Add a folder (say, cam) to your webserver, e.g. C:\wamp64\www\cam on the standard wampserver setup
+
 (3) Download mycctv.zip https://github.com/marcconrad/myCCTV/blob/master/mycctv.zip?raw=yes
+
 (4) Copy the file install.php from the zip file into the folder you have created, e.g.  C:\wamp64\www\cam
+
 (5) With your favourite browser navigate to http://localhost/cam/install.php
+
 (6) You can start the camera via the main site, 🔨, Setup, Start Cam. 
+
 (7) Have fun. 
 
 If you want to use the camera and the server on different devices you can expose your localhost via (e.g.) https://ngrok.com/
