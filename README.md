@@ -17,7 +17,7 @@ For installation and quickstart just do (on Windows):
 
 (5) With your favourite browser navigate to http://localhost/cam/install.php
 
-(6) You can start the camera via the main site, 🔨, Setup, Start Cam. 
+(6) You can start the camera via the main site, choose a camera, then: 🔨, Setup, Start Cam. 
 
 (7) Have fun. 
 
