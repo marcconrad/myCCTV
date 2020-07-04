@@ -317,9 +317,7 @@ if (count($_POST) > 0) {
     die();
 }
 
-?>
 
-<?php
 /**
  * Logs any interaction with Clarifai service. 
  */
@@ -349,9 +347,48 @@ function autocat_log($log_msg)
     }
 }
 
+
+   if (isset($_GET["imgout"] )) {
+        $im = false;
+        $text = "...";
+        if (isset($_GET["b"])) {
+            $fullpath = bn2file($_GET["b"]);
+            if ($fullpath !== FALSE) {
+                $im = @imagecreatefromjpeg($fullpath);
+                $text = basename2time($_GET["b"]);
+            }
+        } else {
+            $myId = $_GET["id"] ?? 1; 
+            $minutes = $_GET["minutes"] ?? 20; 
+            $minutesfrom = $_GET["minutesfrom"] ?? 5; 
+            $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom);;
+            $fullpath = bn2file($bn);
+            if ($fullpath !== FALSE) {
+                $im = @imagecreatefromjpeg($fullpath);
+                $text = basename2time($bn);
+            }
+
+        }
+
+
+        if ($im === false) {
+            $im = imagecreatefromjpeg("./nopic.jpg");
+        }
+
+        $textcolour = imagecolorallocate($im, 204, 204, 0);
+        $textshadow = imagecolorallocate($im, 0, 0, 0);
+   
+
+        $font = 'arial.ttf';
+        @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
+        @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
+
+        header('Content-Type: image/jpeg');
+      
+        imagejpeg($im, NULL, 100);
+        die();
+    }
 ?>
-
-
 <!DOCTYPE HTML>
 <html>
 
@@ -1068,41 +1105,9 @@ function autocat_log($log_msg)
         sleep(1);
         die();
     }
-    /*
-    // Returns one image as a jpg
-    if (isset($_GET["imgout"]) || (isset($_GET["imgaction"]) && $_GET["imgaction"] == "large")) {
-        $im = false;
-        $text = "...";
-        if (isset($_GET["b"])) {
-            $fullpath = bn2file($_GET["b"]);
-            if ($fullpath !== FALSE) {
-                $im = @imagecreatefromjpeg($fullpath);
-                $text = basename2time($_GET["b"]);
-            }
-        } else {
-            $tgt = $_GET["target"] ?? 101;
-            $imp = findImages($tgt);
-            if (count($imp) > 0) {
-                $im = @imagecreatefromjpeg("img/" . $tgt . "/" . $imp[0]);
-                $text = basename2time($imp[0]);
-            }
-        }
-        if (!$im) {
-            $im = imagecreatefromjpeg("nopic.jpg");
-        }
-
-        $textcolour = imagecolorallocate($im, 204, 204, 0);
-        $textshadow = imagecolorallocate($im, 0, 0, 0);
-
-        $font = 'arial.ttf';
-        @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
-        @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
-
-        header('Content-Type: image/jpeg');
-        imagejpeg($im, NULL, 100);
-        die();
-    }
-    */
+   
+ 
+   
 
     ?>
 
@@ -3237,6 +3242,7 @@ if(isset($_GET["showclarifai"])) {
         echo "<p>not exist: " . $notexist;
         if ($countImgsOut == 1) {
             echo '  <a href="index.php?id=' . $myId . '&clarifaithis=' . $lastBn . '">Clarifai this image</a>;   ';
+            echo '  <a  href="index.php?id=' . $myId . '&imgout=1&b=' . $lastBn . '">Retrieve as jpg</a>;   ';
         }
         echoTimeUsed();
     }

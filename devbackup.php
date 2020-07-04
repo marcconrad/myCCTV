@@ -112,7 +112,7 @@ if( $added > 0 ) {
 
 
 ?>
-<p><a href="http://perisic.com/cam/">Home</a><p>
-<a href="https://www.perisic.com/cam/zip/">Goto Zip File</a><p>
+<p><a href="index.php">Home</a><p>
+<a href="./zip/">Goto Zip File</a><p>
 </body>
 </html>
