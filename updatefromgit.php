@@ -47,13 +47,13 @@
         mkdir($folderprevious);
     }
 
-    /*
-$files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
+    
+$files2update =  array("setupinstall.php", "viewlog.php", "menu.php",
  "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", 
  "choosedate.php", "zipdelete.php", "setzoom.php", "archive.php", "zipcurrent.php", "arial.ttf", 
- "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENCSE"); 
-*/
-    $files2update =  array("setupinstall.php", "viewlog.php", "menu.php");
+ "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENCSE", "README.md"); 
+
+ //   $files2update =  array("setupinstall.php", "viewlog.php", "menu.php");
 
     if ($doitnow === FALSE) {
         $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip?time=" . time() . "");
