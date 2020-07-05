@@ -29,31 +29,32 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
     echo 'Zip file saved as <a href="' . $zipfilename . '">' . $zipfilename . '</a><p>';
     echo "Version control goes here (to do)<p>";
     $zip = new ZipArchive;
-$folderprevious = "./tmp/previous/";
-if( !file_exists($folderprevious)) { 
-    mkdir($folderprevious);
-}
+    $folderprevious = "./tmp/previous_".date("Ymd_H:i:s")."/";
+    if (!file_exists($folderprevious)) {
+        mkdir($folderprevious);
+    }
 
     if ($zip->open($zipfilename) === true) {
-         $zip->extractTo("tmp/");
+        $zip->extractTo("tmp/");
         foreach ($files2update as $fn) {
-            if(!file_exists($fn)) { 
+            if (!file_exists($fn)) {
                 echo "The file $fn cound not be found.<br>;";
-            } else { 
-            rename('./' . $fn, $folderprevious . $fn);
-            echo "Old version in " . $folderprevious . $fn . "<br>"; 
+            } else {
+                rename('./' . $fn, $folderprevious . $fn);
+                echo "Old version in " . $folderprevious . $fn . "<br>";
             }
-            
-            copy("./tmp/myCCTV-master/".$fn, './' . $fn) ;
+
+            copy("./tmp/myCCTV-master/" . $fn, './' . $fn);
             echo "Replaced " . $fn . "<br>";
         }
         $zip->close();
-    } else { 
-        echo "Unable to open $zipfilename. No update took place.<p>"; 
+    } else {
+        echo "Unable to open $zipfilename. No update took place.<p>";
     }
 
     ?>
     <p>
+        <h2><a href="index.php">Home</a></h2>
         <hr>Thank you. Good bye!<p>
 </body>
 
