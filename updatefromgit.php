@@ -8,9 +8,42 @@
 <body>
     <h1>Update or Install...</h1>
     <?php
-    $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip");
-    echo "Received from github: " . strlen($tmp) . " bytes.<p>";
-    $zipfilename = "tmp/inst" . time() . "B.zip";
+/**
+ * From: https://stackoverflow.com/questions/3060125/can-i-use-file-get-contents-to-compare-two-files
+ */
+function files_are_equal($a, $b)
+{
+  // Check if filesize is different
+  if(filesize($a) !== filesize($b))
+      return false;
+
+  // Check if content is different
+  $ah = fopen($a, 'rb');
+  $bh = fopen($b, 'rb');
+
+  $result = true;
+  while(!feof($ah))
+  {
+    if(fread($ah, 8192) != fread($bh, 8192))
+    {
+      $result = false;
+      break;
+    }
+  }
+
+  fclose($ah);
+  fclose($bh);
+
+  return $result;
+}
+
+$domove = $_GET["domove"] ?? false; 
+    if($domove === FALSE ) { 
+        $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip");
+        echo "Received from github: " . strlen($tmp) . " bytes.<p>";
+    }
+    $token = $_GET["token"] ?? date("YmdHis"); 
+        $zipfilename = "tmp/inst" . $token . "B.zip";
     if (!file_exists("tmp")) {
         mkdir("tmp");
     }
@@ -21,7 +54,6 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
  "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENCSE"); 
 */
     $files2update =  array("setupinstall.php", "viewlog.php", "menu.php");
-
 
     if (false === file_put_contents($zipfilename, $tmp)) {
         die("Cannot save zip file. Exiting.</body></html>");
@@ -36,33 +68,36 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
 
     if ($zip->open($zipfilename) === true) {
         $zip->extractTo("tmp/");
-        foreach ($files2update as $fn) {
-
-            $newfn = "./tmp/myCCTV-master/" . $fn;
-            $oldfn = $folderprevious . $fn;
-            $currfn = './' . $fn;
-            if (!file_exists($newfn)) {
-                echo "The file $newfn does not exist on github. No change.<br>;";
-            } else {
-                if (!file_exists($currfn)) {
-                    echo "The file $currfn cound not be found.<br>;";
-                } else {
-                    rename($currfn, $oldfn);
-                    echo "Old version in " . $oldfn . ". ";
-                    echo "Size = " . filesize($oldfn) . " bytes<br>";
-                }
-                rename($newfn, $currfn);
-                echo "Replaced " . $currfn . ". ";
-                echo "Size = " . filesize($currfn) . " bytes<br>";
-            }
-        }
         $zip->close();
     } else {
         echo "Unable to open $zipfilename. No update took place.<p>";
     }
+    foreach ($files2update as $fn) {
+
+        $newfn = "./tmp/myCCTV-master/" . $fn;
+        $oldfn = $folderprevious . $fn;
+        $currfn = './' . $fn;
+        if (!file_exists($newfn)) {
+            echo "The file $newfn does not exist on github. No change.<br>;";
+        } else {
+            if (!file_exists($currfn)) {
+                echo "The file $currfn cound not be found.<br>;";
+            } else {
+                rename($currfn, $oldfn);
+                echo "Old version in " . $oldfn . ". ";
+                echo "Size = " . filesize($oldfn) . " bytes<br>";
+            }
+            rename($newfn, $currfn);
+            echo "Replaced " . $currfn . ". ";
+            echo "Size = " . filesize($currfn) . " bytes<br>";
+        }
+    }
+
 
     ?>
     <p>
+
+    <a href="updatefromgit.php?domove=1"><button>Update for Real</button></a>
         <h2><a href="index.php">Home</a></h2>
         <hr>Thank you. Good bye!<p>
 </body>

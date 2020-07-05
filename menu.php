@@ -200,14 +200,7 @@ include_once "./util.php";
                 </div>
             </div>
             <br>
-            
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showstats=1&setupcontrolA=1')">Control</button>
-            <div class="dropdownsub">
-                <button class="button">Version &raquo;</button>
-                <div class="dropdownsub-content">
-                    <button class="button" onClick="goTo('updatefromgit.php')">Update</button>
-                    </div>
-            </div> 
             <div class="dropdownsub">
                 <button class="button">Animate &raquo;</button>
                 <div class="dropdownsub-content">
