@@ -36,15 +36,17 @@
     }
 
     $doitnow = isset($_GET["domove"]);
-    if ($doitnow === FALSE) {
-        $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip");
-        echo "Received from github: " . strlen($tmp) . " bytes.<p>";
-    }
     $token = $_GET["token"] ?? date("Ymd_His");
     $zipfilename = "tmp/inst" . $token . "B.zip";
+
     if (!file_exists("tmp")) {
         mkdir("tmp");
     }
+    $folderprevious = "./tmp/previous_" . $token . "/";
+    if (!file_exists($folderprevious)) {
+        mkdir($folderprevious);
+    }
+
     /*
 $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
  "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", 
@@ -53,59 +55,60 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
 */
     $files2update =  array("setupinstall.php", "viewlog.php", "menu.php");
 
-    if (false === file_put_contents($zipfilename, $tmp)) {
-        die("Cannot save zip file. Exiting.</body></html>");
-    };
-    echo 'Zip file saved as <a href="' . $zipfilename . '">' . $zipfilename . '</a><p>';
-    echo "Version control goes here (to do)<p>";
-    $zip = new ZipArchive;
-    $folderprevious = "./tmp/previous_" . $token . "/";
-    if (!file_exists($folderprevious)) {
-        mkdir($folderprevious);
-    }
     if ($doitnow === FALSE) {
+        $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip?time=" . time() . "");
+        echo "Received from github: " . strlen($tmp) . " bytes.<p>";
+        if (false === file_put_contents($zipfilename, $tmp)) {
+            die("Cannot save zip file. Exiting.</body></html>");
+        }
+        echo 'Zip file saved as <a href="' . $zipfilename . '">' . $zipfilename . '</a><p>';
+
+        $zip = new ZipArchive;
+
+
         if ($zip->open($zipfilename) === true) {
             $zip->extractTo("tmp/");
             $zip->close();
         } else {
             echo "Unable to open $zipfilename. No update took place.<p>";
         }
+
+
+        echo "<p><em>Updates will change as follow. Please review and prese Update when ok.</em></p>";
     }
-    if ($doitnow === false) {
-        echo "<p><em>Updates will change as follow. Please review and prese Update below when ok.</em></p>";
-        foreach ($files2update as $fn) {
+    foreach ($files2update as $fn) {
 
-            $newfn = "./tmp/myCCTV-master/" . $fn;
-            $oldfn = $folderprevious . $fn;
-            $currfn = './' . $fn;
+        $newfn = "./tmp/myCCTV-master/" . $fn;
+        $oldfn = $folderprevious . $fn;
+        $currfn = './' . $fn;
 
-            echo "<br><b>File = " . $fn . ":</b> ";
-            if (!file_exists($newfn)) {
-                echo "File not found on Git or deleted from tmp; no change.";
-            } else if (files_are_equal($newfn, $currfn)) {
-                echo "New and old file are the same. No change.";
+        echo "<br><b>File = " . $fn . ":</b> ";
+        if (!file_exists($newfn)) {
+            echo "File not found on Git or deleted from tmp; no change.";
+        } else if (files_are_equal($newfn, $currfn)) {
+            echo "New and old file are the same. No change.";
+        } else {
+            if (!file_exists($currfn)) {
+                echo "<br>Warning: the file $currfn cound not be found.<br>";
             } else {
-                if (!file_exists($currfn)) {
-                    echo "<br>Warning: the file $currfn cound not be found.<br>";
-                } else {
 
-                    //  echo "Old version move to " . $oldfn . ". ";
-                    echo "<br>Old size = " . filesize($currfn) . " bytes.";
-                    if ($doitnow) {
-                        rename($currfn, $oldfn);
-                    }
-                }
-
-                //  echo "Replace from " . $newfn . ". ";
-                echo "<br>New size = " . filesize($newfn) . " bytes.";
+                //  echo "Old version move to " . $oldfn . ". ";
+                echo "<br>Old size = " . filesize($currfn) . " bytes.";
                 if ($doitnow) {
-                    rename($newfn, $currfn);
+                    rename($currfn, $oldfn);
                 }
+            }
+
+            //  echo "Replace from " . $newfn . ". ";
+            echo "<br>New size = " . filesize($newfn) . " bytes.";
+            if ($doitnow) {
+                rename($newfn, $currfn);
             }
         }
     }
-
-    echo '<p><a href="updatefromgit.php?domove=1&token=' . $token . '"><button class="button" >Update for Real</button></a>';
+    if ($doitnow === false) {
+        echo '<p><a href="updatefromgit.php?domove=1&token=' . $token . '"><button class="button" >Update for Real</button></a>';
+    }
     ?>
     <p>
 
