@@ -8,42 +8,40 @@
 <body>
     <h1>Update or Install...</h1>
     <?php
-/**
- * From: https://stackoverflow.com/questions/3060125/can-i-use-file-get-contents-to-compare-two-files
- */
-function files_are_equal($a, $b)
-{
-  // Check if filesize is different
-  if(filesize($a) !== filesize($b))
-      return false;
-
-  // Check if content is different
-  $ah = fopen($a, 'rb');
-  $bh = fopen($b, 'rb');
-
-  $result = true;
-  while(!feof($ah))
-  {
-    if(fread($ah, 8192) != fread($bh, 8192))
+    /**
+     * From: https://stackoverflow.com/questions/3060125/can-i-use-file-get-contents-to-compare-two-files
+     */
+    function files_are_equal($a, $b)
     {
-      $result = false;
-      break;
+        // Check if filesize is different
+        if (filesize($a) !== filesize($b))
+            return false;
+
+        // Check if content is different
+        $ah = fopen($a, 'rb');
+        $bh = fopen($b, 'rb');
+
+        $result = true;
+        while (!feof($ah)) {
+            if (fread($ah, 8192) != fread($bh, 8192)) {
+                $result = false;
+                break;
+            }
+        }
+
+        fclose($ah);
+        fclose($bh);
+
+        return $result;
     }
-  }
 
-  fclose($ah);
-  fclose($bh);
-
-  return $result;
-}
-
-$domove = $_GET["domove"] ?? false; 
-    if($domove === FALSE ) { 
+    $doitnow = isset($_GET["domove"]);
+    if ($doitnow === FALSE) {
         $tmp = file_get_contents("https://github.com/marcconrad/myCCTV/archive/master.zip");
         echo "Received from github: " . strlen($tmp) . " bytes.<p>";
     }
-    $token = $_GET["token"] ?? date("YmdHis"); 
-        $zipfilename = "tmp/inst" . $token . "B.zip";
+    $token = $_GET["token"] ?? date("Ymd_His");
+    $zipfilename = "tmp/inst" . $token . "B.zip";
     if (!file_exists("tmp")) {
         mkdir("tmp");
     }
@@ -61,43 +59,57 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
     echo 'Zip file saved as <a href="' . $zipfilename . '">' . $zipfilename . '</a><p>';
     echo "Version control goes here (to do)<p>";
     $zip = new ZipArchive;
-    $folderprevious = "./tmp/previous_" . date("Ymd_His") . "/";
+    $folderprevious = "./tmp/previous_" . $token . "/";
     if (!file_exists($folderprevious)) {
         mkdir($folderprevious);
     }
-
-    if ($zip->open($zipfilename) === true) {
-        $zip->extractTo("tmp/");
-        $zip->close();
-    } else {
-        echo "Unable to open $zipfilename. No update took place.<p>";
-    }
-    foreach ($files2update as $fn) {
-
-        $newfn = "./tmp/myCCTV-master/" . $fn;
-        $oldfn = $folderprevious . $fn;
-        $currfn = './' . $fn;
-        if (!file_exists($newfn)) {
-            echo "The file $newfn does not exist on github. No change.<br>;";
+    if ($doitnow === FALSE) {
+        if ($zip->open($zipfilename) === true) {
+            $zip->extractTo("tmp/");
+            $zip->close();
         } else {
-            if (!file_exists($currfn)) {
-                echo "The file $currfn cound not be found.<br>;";
+            echo "Unable to open $zipfilename. No update took place.<p>";
+        }
+    }
+    if ($doitnow === false) {
+        echo "<p><em>Updates will change as follow. Please review and prese Update below when ok.</em></p>";
+        foreach ($files2update as $fn) {
+
+            $newfn = "./tmp/myCCTV-master/" . $fn;
+            $oldfn = $folderprevious . $fn;
+            $currfn = './' . $fn;
+
+            echo "<br><b>File = " . $fn . ":</b> ";
+            if (!file_exists($newfn)) {
+                echo "File not found on Git or deleted from tmp; no change.";
+            } else if (files_are_equal($newfn, $currfn)) {
+                echo "New and old file are the same. No change.";
             } else {
-                rename($currfn, $oldfn);
-                echo "Old version in " . $oldfn . ". ";
-                echo "Size = " . filesize($oldfn) . " bytes<br>";
+                if (!file_exists($currfn)) {
+                    echo "<br>Warning: the file $currfn cound not be found.<br>";
+                } else {
+
+                    //  echo "Old version move to " . $oldfn . ". ";
+                    echo "<br>Old size = " . filesize($currfn) . " bytes.";
+                    if ($doitnow) {
+                        rename($currfn, $oldfn);
+                    }
+                }
+
+                //  echo "Replace from " . $newfn . ". ";
+                echo "<br>New size = " . filesize($newfn) . " bytes.";
+                if ($doitnow) {
+                    rename($newfn, $currfn);
+                }
             }
-            rename($newfn, $currfn);
-            echo "Replaced " . $currfn . ". ";
-            echo "Size = " . filesize($currfn) . " bytes<br>";
         }
     }
 
-
+    echo '<p><a href="updatefromgit.php?domove=1&token=' . $token . '"><button class="button" >Update for Real</button></a>';
     ?>
     <p>
 
-    <a href="updatefromgit.php?domove=1"><button>Update for Real</button></a>
+
         <h2><a href="index.php">Home</a></h2>
         <hr>Thank you. Good bye!<p>
 </body>
