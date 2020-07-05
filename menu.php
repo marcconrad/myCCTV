@@ -202,6 +202,12 @@ include_once "./util.php";
             <br>
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showstats=1&setupcontrolA=1')">Control</button>
             <div class="dropdownsub">
+                <button class="button">Version &raquo;</button>
+                <div class="dropdownsub-content">
+                    <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Update (Git)</button>
+                    </div>
+            </div>
+            <div class="dropdownsub">
                 <button class="button">Animate &raquo;</button>
                 <div class="dropdownsub-content">
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&savecurrentasgifs=1')">No Date</button>
