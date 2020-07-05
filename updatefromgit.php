@@ -29,7 +29,7 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
     echo 'Zip file saved as <a href="' . $zipfilename . '">' . $zipfilename . '</a><p>';
     echo "Version control goes here (to do)<p>";
     $zip = new ZipArchive;
-    $folderprevious = "./tmp/previous_".date("Ymd_H:i:s")."/";
+    $folderprevious = "./tmp/previous_" . date("Ymd_His") . "/";
     if (!file_exists($folderprevious)) {
         mkdir($folderprevious);
     }
@@ -37,15 +37,24 @@ $files2update =  = array("setupinstall.php", "viewlog.php", "menu.php",
     if ($zip->open($zipfilename) === true) {
         $zip->extractTo("tmp/");
         foreach ($files2update as $fn) {
-            if (!file_exists($fn)) {
-                echo "The file $fn cound not be found.<br>;";
-            } else {
-                rename('./' . $fn, $folderprevious . $fn);
-                echo "Old version in " . $folderprevious . $fn . "<br>";
-            }
 
-            copy("./tmp/myCCTV-master/" . $fn, './' . $fn);
-            echo "Replaced " . $fn . "<br>";
+            $newfn = "./tmp/myCCTV-master/" . $fn;
+            $oldfn = $folderprevious . $fn;
+            $currfn = './' . $fn;
+            if (!file_exists($newfn)) {
+                echo "The file $newfn does not exist on github. No change.<br>;";
+            } else {
+                if (!file_exists($currfn)) {
+                    echo "The file $currfn cound not be found.<br>;";
+                } else {
+                    rename($currfn, $oldfn);
+                    echo "Old version in " . $oldfn . ". ";
+                    echo "Size = " . filesize($oldfn) . " bytes<br>";
+                }
+                rename($newfn, $currfn);
+                echo "Replaced " . $currfn . ". ";
+                echo "Size = " . filesize($currfn) . " bytes<br>";
+            }
         }
         $zip->close();
     } else {
