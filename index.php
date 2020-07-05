@@ -1122,7 +1122,9 @@ if (isset($_GET["imgout"])) {
             if (isset($_GET["resetuqt"])) {
                 $stats[$myId]["uqt"] = NULL;
                 write2config();
-                echo '<p>uqt has been reset<p>';
+                echo '<p><b>This Camera will override other cameras reporting to the same channel.</b><p>';
+            } else { 
+                echo '<p><b>This Camera may not operate if there is already another camera reporting to this channel.</b><p>';
             }
             echo "</body></html>";
             sleep(1);
