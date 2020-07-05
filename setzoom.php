@@ -295,7 +295,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 
 	?>
 	<script type="text/javascript">
-		<!--
+		
 		// Source: https://www.chestysoft.com/imagefile/javascript/get-rectangle.asp
 		var Point = 1;
 		var X1, Y1, X2, Y2;
@@ -451,7 +451,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 		}
 
 		//
-		-->
+	
 	</script>
 
 </head>
