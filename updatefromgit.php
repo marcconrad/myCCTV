@@ -3,6 +3,27 @@
 
 <head>
     <title>Download Master from git and install</title>
+    <style>
+
+
+		body {
+			background-color: lightseagreen;
+		}
+
+		.button {
+
+			background-color: limegreen;
+			/* Green */
+			border: none;
+			color: black;
+			padding: 15px 32px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 16px;
+
+		}
+	</style>
 </head>
 
 <body>
