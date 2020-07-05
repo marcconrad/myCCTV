@@ -35,7 +35,7 @@
     function files_are_equal($a, $b)
     {
         // Check if filesize is different
-        if (filesize($a) !== filesize($b))
+        if (@filesize($a) !== @filesize($b))
             return false;
 
         // Check if content is different
