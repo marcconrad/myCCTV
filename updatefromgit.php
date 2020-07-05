@@ -51,7 +51,7 @@
 $files2update =  array("setupinstall.php", "viewlog.php", "menu.php",
  "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", 
  "choosedate.php", "zipdelete.php", "setzoom.php", "archive.php", "zipcurrent.php", "arial.ttf", 
- "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENCSE", "README.md"); 
+ "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENSE", "README.md"); 
 
  //   $files2update =  array("setupinstall.php", "viewlog.php", "menu.php");
 
