@@ -1,6 +1,8 @@
 countlog4.txt
 img/*/*.jpg
 tmp/*.*
+tmp/*/*
+tmp/*/*/*
 zip/*.*
 vars/*.*
 log/*.*
