@@ -1,5 +1,5 @@
 countlog4.txt
-img/*/*.jpg
+img/*/*.*
 tmp/*.*
 tmp/*/*
 tmp/*/*/*
