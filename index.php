@@ -1530,7 +1530,7 @@ echo "<h2>Concepts:</h2>";
             echo "Click on any of the concepts below to delete them.<br>";
             $concepts = $autocat[$myId][5];
             foreach ($concepts as $c) {
-                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>.';
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>, ';
                 echo "\r\n";
             }
             echo "<p>";
