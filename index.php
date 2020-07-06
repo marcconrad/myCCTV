@@ -2278,7 +2278,7 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
 
         // $datei = fopen("config.php", "w");
 
-        file_put_contents($savefile, $content);
+        file_put_contents($savefile, $content, LOCK_EX);
     }
     function echoSetupMenuA($myId)
     {
