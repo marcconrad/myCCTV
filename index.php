@@ -13,6 +13,14 @@ if (!file_exists("agifs")) {
     mkdir("agifs", 0777, true);
 }
 
+if (!file_exists("img")) {
+    mkdir("img", 0777, true);
+}
+
+if (!file_exists("img/agif")) {
+    mkdir("img/agif", 0777, true);
+}
+
 if (!file_exists("vars")) {
     mkdir("vars", 0777, true);
 }
