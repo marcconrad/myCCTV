@@ -183,7 +183,7 @@
                     }
                 }
                 if (isset($_GET['tmp'])) { 
-                    echo "Deleting empty folders...";
+                    echo "<p>Deleting empty folders...";
                     $dirs = glob("./tmp/*"); 
                     // var_dump($dirs); 
                     foreach($dirs as $d ) { 
