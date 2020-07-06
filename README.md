@@ -11,11 +11,11 @@ For installation and quickstart just do (on Windows):
 
 (2) Add a folder (say, cam) to your webserver, e.g. C:\wamp64\www\cam on the standard wampserver setup
 
-(3) Download mycctv.zip https://github.com/marcconrad/myCCTV/blob/master/mycctv.zip?raw=yes
+(3) Download mycctv.zip https://github.com/marcconrad/myCCTV/blob/master/updatefromgit.php?raw=yes
 
 (4) Copy the file install.php from the zip file into the folder you have created, e.g.  C:\wamp64\www\cam
 
-(5) With your favourite browser navigate to http://localhost/cam/install.php
+(5) With your favourite browser navigate to http://localhost/cam/updatefromgit.php
 
 (6) You can start the camera via the main site, choose a camera, then: 🔨, Setup, Start Cam. 
 
