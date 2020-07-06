@@ -39,7 +39,7 @@
         echo "</ol>";
         echo "<p>Thank you";
     } else { 
-        echo "<p>The file $logfile does not exist."; 
+        echo "<p>No Clarifai actions recorded (the file $logfile does not exist)."; 
         echo '<p> <a href="index.php?t='.time().'&src=fromlog" >Home </a></p>';
     }
 

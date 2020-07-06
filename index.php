@@ -834,14 +834,14 @@ if (isset($_GET["imgout"])) {
 
         <?php
 
-      //  if (($_GET["imgaction"] ?? "x") !== "showtargets") {
-            echo "var myInterval =  setTimeout(imgactionchange, 1300);";
-            echo "\r\n";
-            echo "var myInterval =  setTimeout(imgactionchange, 30);";
-            echo "\r\n";
-            //  echo "var myInterval3 =  setTimeout(setupReload, 50);";
-            echo "\r\n";
-       // }
+        //  if (($_GET["imgaction"] ?? "x") !== "showtargets") {
+        echo "var myInterval =  setTimeout(imgactionchange, 1300);";
+        echo "\r\n";
+        echo "var myInterval =  setTimeout(imgactionchange, 30);";
+        echo "\r\n";
+        //  echo "var myInterval3 =  setTimeout(setupReload, 50);";
+        echo "\r\n";
+        // }
 
         ?>
     </script>
@@ -965,7 +965,7 @@ if (isset($_GET["imgout"])) {
         die();
     }
 
-    if(isset($_GET["addcam"])) { 
+    if (isset($_GET["addcam"])) {
         addCam();
     }
 
@@ -1108,6 +1108,31 @@ if (isset($_GET["imgout"])) {
         sleep(1);
         die();
     }
+    if (isset($_GET["clarifaiconcept"])) {
+        // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
+        $myId = $_GET["id"] ?? die("Error in setting concept. No id set.");
+        autocat($myId, "initonly");
+        $concepts = $autocat[$myId][5];
+        $c = $_GET["clarifaiconcept"];
+        if ($dc = $_GET["deleteconcept"] ?? false) {
+            if (isset($concepts[$dc])) {
+                unset($concepts[$dc]);
+                echo "The concept $dc has been removed.";
+            } else { 
+                echo "The concept $dc has not been found.";
+            }
+        } else {
+            $concepts[$c] = $c;
+        }
+        $autocat[$myId][5] = $concepts;
+        write2config();
+        echo "Thank You";
+      //  var_dump($autocat);
+        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
+        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+        sleep(1);
+        die();
+    }
 
 
 
@@ -1124,9 +1149,9 @@ if (isset($_GET["imgout"])) {
     */
     if (isset($_GET["id"]) && !isset($_GET["home"])) {
         error_reporting(-1);
-        
+
         $myId = intval($_GET["id"]);
-        
+
         $sessiongetinfo[$myId] = $_SERVER;
         if (isset($_GET["startcam"])) {
             echo ' <h1><a target="_blank" href="cam.php?id=' . $myId . '">Start Cam ' . $myId . '</a></h1>';
@@ -1135,7 +1160,7 @@ if (isset($_GET["imgout"])) {
                 $stats[$myId]["uqt"] = NULL;
                 write2config();
                 echo '<p><b>This Camera will override other cameras reporting to the same channel.</b><p>';
-            } else { 
+            } else {
                 echo '<p><b>This Camera may not operate if there is already another camera reporting to this channel.</b><p>';
             }
             echo "</body></html>";
@@ -1424,7 +1449,7 @@ if (isset($_GET["imgout"])) {
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
             echo ' Zoom Center at (x,y) = (' . round(100 * ($zoomX[$myId] ?? 0.5), 1);
             echo '%,' . round(100 * ($zoomY[$myId] ?? 0.5), 1) . '%).';
-            echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&day=today&setzoom=1&agelimit=900&howmany='.($_GET["howmany"] ?? 8).'" >Change</a>.';
+            echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&day=today&setzoom=1&agelimit=900&howmany=' . ($_GET["howmany"] ?? 8) . '" >Change</a>.';
 
 
 
@@ -1442,54 +1467,76 @@ if (isset($_GET["imgout"])) {
             echo 'Average time used on server for each request: ';
             echo $avg . "ms measured over " . $x[0] . " requests.";
             echo '; <a href="index.php?time=' . time() . '&unsetperformance=' . time() . '&id=' . $myId . '">Reset</a>';
-            /*
-            echo "avg=$avg, last=$last ($x[0]); ";
-            echo "a60=$avg60, la60=$last60 ($x[3]); ";
-    
-            echo "lastN=$x[6]";
-           
-            echo "\r\n";
-            echo "</li>   \r\n";
-            echo '</ol><p>';
-  */
+
             echo "\r\n";
 
-            if( isset($_GET["setupcontrolA"] ) ) { echoSetupMenuA($myId);}
+            if (isset($_GET["setupcontrolA"])) {
+                echoSetupMenuA($myId);
+            }
             echo '</body></html>';
             die();
-
-
         }
         write2config();
         if (isset($_GET["showclarifai"])) {
+            // var_dump($clarifaicount);
+            if (isset($_GET["resetclarifai"])) {
+                unset($clarifaicount);
+                write2config(true);
+                sleep(1);
+                echo "Clarifai key reset. ";
+            }
+
+            echo '<br>';
+            echo '<a target="_blank" href="https://www.clarifai.com/">More information about the Clarifai Service</a> or ';
+            echo '<a target="_blank" href="https://www.clarifai.com/pricing" >Get a Clarifai Key here</a> ';
+            echo '(links open in new tab) <p>';
+
+            $c3 = $clarifaicount[3] ?? 0;
+            $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
+            echo "$c3  Clarifai since " . gmdate("M j H:i", $c4); // . " Current: <b>" . $clarifaicount[0] . "</b>";
+            $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
+            $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
+            echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+
+            echo '<a href="viewlog.php">View Log</a>';
+            if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
+                echo "<br>Autocat is <b>on</b>. ";
+
+                echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
+            } else {
+                echo "<br>Autocat is <b>off</b>. ";
+                echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+            }
+
+            echo "\r\n";
             if (isset($clarifaicount[2])) {
-                echo '<br>';
-
-
-                $c3 = $clarifaicount[3] ?? 0;
-                $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
-                echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
-                $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
-                $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
-                echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-                if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-                    echo "Autocat is <b>on</b>. ";
-
-                    echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
-                } else {
-                    echo "Autocat is <b>off</b>. ";
-                    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
-                }
-
-                echo "\r\n";
+                echo '<br>Current Clarifai key is: ' . $clarifaicount[2] . '. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Change Clarifai Key</a>';
             } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
             }
-            echo '<p><a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
-            echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
-            var_dump($clarifaicount);
+            echo '<br><a href="index.php?t=' . time() . '&id=' . $myId . '&resetclarifai=1&showclarifai=1">Reset and delete Clarifai key.</a>';
+
+            autocat($myId, "initonly"); // Initialise autocat variable. 
+echo "<h2>Concepts:</h2>"; 
+           //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
+            echo '<form action="index.php">';
+            echo '<label for="clarifaiconcept">Enter new Concept:</label><br>';
+            echo '<input type="text" id="clarifaiconcept" name="clarifaiconcept">';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
             echo "<p>";
-            var_dump($autocat);
+
+            echo "Click on any of the concepts below to delete them.<br>";
+            $concepts = $autocat[$myId][5];
+            foreach ($concepts as $c) {
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>.';
+                echo "\r\n";
+            }
+            echo "<p>";
+          //  var_dump($clarifaicount);
+            echo "<p>";
+            // var_dump($autocat);
             echo "\r\n";
             echo '</body></html>';
             die();
@@ -1651,7 +1698,7 @@ if (isset($_GET["imgout"])) {
             die();
 } else */
 
-if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
+        if (isset($_GET["resetzoom"])    || isset($_GET["zoom"])) {
             $zoomX[$myId] = abs($_GET["xC"] ?? 0.5);
             $zoomY[$myId] = abs($_GET["yC"] ?? 0.5);
             $zoom[$myId] =  $_GET["zoom"] ?? 1;
@@ -1691,11 +1738,11 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
             echo '<p> Click here when done: <button class="button closebtn" onclick="hidebodies()" >⛔</button></p>';
             $res = addTargets($myId, $_GET["b"] ?? "nonezxz");
             displayImages($res);
-            echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1). '&time=' . time() . '&settargetnow=1&addtarget=1&id=' . $myId . '">Add additional target</a><p>';
+            echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&addtarget=1&id=' . $myId . '">Add additional target</a><p>';
             foreach (myTargets($myId) as $t) {
-                echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1). '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
+                echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
             }
-            echo '<p><a href="index.php?howmany=' . ( $_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
+            echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
             die("<p>Thank you! 🙂</p>");
         } else if (isset($_GET["day"]) || isset($_GET["bntd"])) {
             $allImagesA = findImagesByDate($myId);
@@ -1852,13 +1899,13 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
 
         echo "</script>";
 
-        $x = allCams(); 
-      //  var_dump($x);
-        if(count($x) == 0 ) { 
-            $x[1] = 1; 
+        $x = allCams();
+        //  var_dump($x);
+        if (count($x) == 0) {
+            $x[1] = 1;
         }
-       // for ($i = 1; $i < 10; $i++) {
-        foreach($x as $i) {
+        // for ($i = 1; $i < 10; $i++) {
+        foreach ($x as $i) {
 
 
             $info = getLastInfo($i);
@@ -1875,13 +1922,13 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
         } catch (exception $ex) {
         }
         echo '<a href="setupinstall.php">Generate install.php.txt file</a>';
-         if(count($x) < 10) { 
+        if (count($x) < 10) {
             echo ' <a href="index.php?addcam=1">Add Cam</a>';
-        } 
+        }
         echo ' Goto: <a href="zip/">(zip)</a>,<a href="img/">(img)</a>, <a href="log/">(log)</a>, <a href="tmp/">(tmp)</a>';
         echo ' <a href="devbackup.php">dev backup</a>';
         echo ' <a href="viewgifs.php">view gifs</a>';
-      
+
         echo "\r\n";
         echo '</body></html>';
         die();
@@ -1907,13 +1954,6 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
             write2config();
         }
         $searchterms = $autocat[$myId][5];
-        // $x = ($autocat[$myId] ?? array("", FALSE, "cat", 0, $searchterms));
-        // $x[5] = $searchterms; // overwrite; not yet configurable online.
-
-
-        // 	$mainconcept = $x[2] ?? "cat"; 
-        // $searchterms = $x[5] ?? array("cat");
-        // $autocat[$myId][5] = $searchterms; 
 
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
         if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && !$test) {
@@ -1923,7 +1963,9 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
             write2config();
         }
 
-
+        if ($test === "initonly") {
+            return;
+        }
 
         $bn = findBestImageA($myId, 60, 30); // From 30+60 minutes ago to 30 minutes ago
 
@@ -2292,7 +2334,7 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
     {
         global $imagesperpost, $targeteta;
         global $toggleCapture, $zoom, $zoomX, $zoomY, $mingapbeforeposts, $maximagesperpost;
-        echo "<h3>Control Cam $myId - ".id2emoji($myId)."</h3>";
+        echo "<h3>Control Cam $myId - " . id2emoji($myId) . "</h3>";
         $ntgt = count(myTargets($myId));
         echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
         echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
@@ -2328,9 +2370,9 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
         echo "</li>   \r\n";
 
         echo '<li><a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Toggle Capture</a></li>';
-      
+
         echo '<li>';
-       
+
         echo '<a href="zipdelete.php?merge=1&buckets=yes&id=' . $myId . '">Download all images as a zip file.</a>; ';
         echo '</li>';
         echo '<li>';
@@ -3281,11 +3323,9 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
         if ($countImgsOut == 1) {
             echo '  <a href="index.php?id=' . $myId . '&clarifaithis=' . $lastBn . '">Clarifai this image</a>;   ';
             echo '  <a  href="index.php?id=' . $myId . '&imgout=1&b=' . $lastBn . '">Retrieve as jpg</a>;   ';
-            $zhref = 'setzoom.php?id=' . $myId . '&time=' . time() . '&b='.$lastBn.'&videoinfo=' . ($videoinfo[$myId] ?? "-1,-1,-1,-1") . "&zoomx=" . ($zoomX[$myId] ?? 0.5) . "&zoomy=" . ($zoomY[$myId] ?? 0.5) . "&zoom=" . ($zoom[$myId] ?? 1) . "";
-            echo ' <a href="'.$zhref. '">Set Zoom</a>; '; 
-            echo ' <a href="index.php?settgts=1&settargetnow=1&imgaction=default&id='.$myId . '&b=' . $lastBn. '">Set Targets</a>; '; 
-        
-
+            $zhref = 'setzoom.php?id=' . $myId . '&time=' . time() . '&b=' . $lastBn . '&videoinfo=' . ($videoinfo[$myId] ?? "-1,-1,-1,-1") . "&zoomx=" . ($zoomX[$myId] ?? 0.5) . "&zoomy=" . ($zoomY[$myId] ?? 0.5) . "&zoom=" . ($zoom[$myId] ?? 1) . "";
+            echo ' <a href="' . $zhref . '">Set Zoom</a>; ';
+            echo ' <a href="index.php?settgts=1&settargetnow=1&imgaction=default&id=' . $myId . '&b=' . $lastBn . '">Set Targets</a>; ';
         }
         echoTimeUsed();
     }

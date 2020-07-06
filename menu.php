@@ -161,7 +161,7 @@ include_once "./util.php";
             <br>
             <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listconcepts=1')">Concepts</button>
             <br>
-            <button class="button" onClick="goTo('img/agif/?t='+Date.now()+'')">Stored Gifs</button> <br>
+            <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showclarifai=1')">Manage</button> <br>
 
             <br>
         </div>
@@ -178,16 +178,8 @@ include_once "./util.php";
         <button class="buttontop button" id="manage" name="manage">🔨</button>
         <div id="myDropdown" class="dropdown-content">
             <a href="index.php"><button class="button">Home</button></a>
-            <br>
-            <!--
-            <div class="dropdownsub">
-                <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showstats=1')" onmouseover="resetstatsframe()">Stats</button>
-                <div class="dropdownsub-content">
-                    <iframe id="statsframe" class="notthestatsframe" src="index.php?time=1590796951&showstats&id=<?php echo $_GET["id"] ?>"></iframe>
-                </div>
-            </div>
-    -->
-            <!-- <button class="button" onClick="removeFrame()">Remove Frame</button> -->
+          
+     
             <br>
             <div class="dropdownsub">
                 <button class="button">Setup &raquo;</button>
@@ -211,7 +203,8 @@ include_once "./util.php";
                 <button class="button">Animate &raquo;</button>
                 <div class="dropdownsub-content">
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&savecurrentasgifs=1')">No Date</button>
-                    <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showdate=1&savecurrentasgifs=1')">With Date</button>
+                    <br><button class="button" onClick="goTo('index.php?t='+Date.now()+'&showdate=1&savecurrentasgifs=1')">With Date</button>
+                    <br><button class="button" onClick="goTo('img/agif/?t='+Date.now()+'')">Stored Gifs</button> <br>
                 </div>
             </div>
             <button class="button" onClick="zipcurrent()">Zip Current</button>

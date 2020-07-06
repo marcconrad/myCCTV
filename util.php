@@ -152,7 +152,8 @@ function localtimeCam($myId, $t = false)
 
 function id2color($myId, $im = null, $s = 3.0)
 {
-    $myId = ($myId ?? 21) * 37 % 64; // 64 different colours, mix then a little bit up
+    if(is_int($myId)=== false ) { $myId = 17; }
+    $myId = $myId * 37 % 64; // 64 different colours, mix then a little bit up
 
     $r = $myId % 4;
     $g = ($myId / 4) % 4;
