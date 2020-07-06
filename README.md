@@ -17,13 +17,17 @@ For installation and quickstart just do (on Windows):
 
 (5) With your favourite browser navigate to http://localhost/cam/updatefromgit.php
 
-(6) You can start the camera via the main site, choose a camera, then: 🔨, Setup, Start Cam. 
+(6) First time it will show many files not be found. That's ok. They are not yet there. Press the button 'Update for Real'
 
-(7) Have fun. 
+(7) Follow then the link 'Home'; you have to invent a password; then you have to enter the password. 
 
-If you want to use the camera and the server on different devices you can expose your localhost via (e.g.) https://ngrok.com/
+(8) You can start the camera via the main site, choose a camera, then: 🔨, Setup, Start Cam. 
 
-(7) Contact me under http://dr.marcconrad.com/ if you like what you see. 
+(9) Have fun. 
+
+(10) If you want to use the camera and the server on different devices you can expose your localhost via (e.g.) https://ngrok.com/
+
+(11) Contact me under http://dr.marcconrad.com/ if you like what you see. 
 
 If you already own a webserver, obviously you can install it there. Just move the install.php where you need it and run it from a browser. You need https for the camera to work. 
 
