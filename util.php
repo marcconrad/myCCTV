@@ -21,9 +21,37 @@ function myCam($target)
         return intval(floor($target / 100.0));
     }
 
+function allCams() { 
+    $res = array(); 
+    $dirs = glob("./img/???/"); 
+   // var_dump($dirs); 
+    foreach($dirs as $d) { 
+        $x = explode("./img/", $d); 
+        if(count($x) > 1 ) {
+        $a = intval($x[1]);
+        if( $a > 0 && $a < 1000 ) { 
+            $b = intval(floor( $a / 100.0));
+            $res[$b] = $b;  
+        }
+        }
+    }
+    return $res; 
+}
+
+function addCam() { 
+    $x = allCams(); 
+    for($i=1; $i < 10; $i++ ) { 
+        if(!isset($x[$i])) { 
+            mkdir("./img/".$i."01"); 
+            return true; 
+        }
+    }
+    return false; 
+}
+
 function id2emoji($myId)
 {
-    $numbers = array("0", "🏡", "🧱", "🚗", "👨", "🛏️", "🛋️", "🌳");
+    $numbers = array("0", "🏡", "🧱", "🚗", "👨", "🛏️", "🛋️", "🌳", "🐦", "💡");
     if (isset($numbers[$myId])) {
         return $numbers[$myId];
     } else {

@@ -916,7 +916,7 @@ if (isset($_GET["imgout"])) {
         write2config(true);
     }
     if (!isset($systempassword)) {
-        echo '<h1>Please enter the System Password below, then submit</h1>';
+        echo '<h1>Please enter a new System Password below, then submit</h1>';
         echo "The system password has been reset or the system has been freshly installed. ";
         echo "Please set a password.";
         echo '<form action="index.php">';
@@ -955,6 +955,10 @@ if (isset($_GET["imgout"])) {
         write2config(true);
         echo '<div class="ack">Thank you. The system Password has been reset.</div>';
         die();
+    }
+
+    if(isset($_GET["addcam"])) { 
+        addCam();
     }
 
     // Export as csv starts here. 
@@ -1840,7 +1844,13 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
 
         echo "</script>";
 
-        for ($i = 1; $i < 10; $i++) {
+        $x = allCams(); 
+      //  var_dump($x);
+        if(count($x) == 0 ) { 
+            $x[1] = 1; 
+        }
+       // for ($i = 1; $i < 10; $i++) {
+        foreach($x as $i) {
 
 
             $info = getLastInfo($i);
@@ -1857,9 +1867,13 @@ if (isset($_GET["resetzoom"])    || isset($_GET["zoom"]) ) {
         } catch (exception $ex) {
         }
         echo '<a href="setupinstall.php">Generate install.php.txt file</a>';
+         if(count($x) < 10) { 
+            echo ' <a href="index.php?addcam=1">Add Cam</a>';
+        } 
         echo ' Goto: <a href="zip/">(zip)</a>,<a href="img/">(img)</a>, <a href="log/">(log)</a>, <a href="tmp/">(tmp)</a>';
         echo ' <a href="devbackup.php">dev backup</a>';
         echo ' <a href="viewgifs.php">view gifs</a>';
+      
         echo "\r\n";
         echo '</body></html>';
         die();
