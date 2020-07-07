@@ -6,4 +6,5 @@ tmp/*/*/*
 zip/*.*
 vars/*.*
 log/*.*
+agifs/*.*
 install.txt

@@ -3,7 +3,18 @@ echo "<!DOCTYPE HTML> <html> <head>";
 echo "\r\n";
 echo '<meta content="text/html;charset=utf-8" http-equiv="Content-Type">';
 echo "\r\n";
-echo '<base href="https://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/" />'; // dirname($_SERVER['PHP_SELF']) must not be empty.
+// echo '<base href="https://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/" />'; // dirname($_SERVER['PHP_SELF']) must not be empty.
+
+// var_dump($_SERVER); 
+if ($_SERVER['SERVER_NAME'] === "localhost") {
+    echo '<base href="http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/" />'; // dirname($_SERVER['PHP_SELF']) must not be empty.
+
+} else {
+    echo '<base href="https://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/" />'; // dirname($_SERVER['PHP_SELF']) must not be empty.
+}
+echo "\r\n";
+
+
 echo "\r\n";
 ?>
 <script>
@@ -257,7 +268,7 @@ echo "\r\n";
         echo '<a href="viewgifs.php?outtakes=1">Outtakes</a> ';
     }
     if ($out) {
-        echo '<a href="viewgifs.php?silent=1">Just Cats</a> ';
+        echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '">Just ' . ucfirst($concept) . 's</a> ';
     } else {
         // echo '<a href="viewgifs.php?showdate=1">Cats and Dates</a> ';
         echo '<a href="viewgifs.php?showdate=1&concept=' . $concept . '">' . ucfirst($concept) . 's and Dates (back)</a> ';
@@ -265,7 +276,8 @@ echo "\r\n";
 
 
     ?>
-
+<p>
+<a href="index.php">Home</a></p>
 </body>
 
 </html>
