@@ -2201,11 +2201,11 @@ $maxclarifaicount = 50;
         );
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
-        if($_SERVER['SERVER_NAME'] == "localhost") { 
+      //  $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
+       // if($_SERVER['SERVER_NAME'] == "localhost") { 
             $t = file_get_contents($files[0]); 
             $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
-        }
+        // }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
         // grab URL and pass it to the browser 
@@ -2279,11 +2279,13 @@ $maxclarifaicount = 50;
     function write2config($cam_agnostic = false)
     {
         global $varfile, $varfile_global;
-        global $focusX, $focusY, $zoom, $zoomX, $slaves, $batteryinfo;
+        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
         global $systempassword, $autocat;
+        global $imagedimensions; 
+       
 
         $savefile = null;
 
@@ -2296,6 +2298,7 @@ $maxclarifaicount = 50;
             $content .= PHP_EOL . " \$timezoneoffset = " . var_export($timezoneoffset, true) . "; ";
             $savefile = $varfile_global;
         } else {
+            $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
             $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
             $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
             $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
