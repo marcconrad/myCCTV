@@ -7,4 +7,5 @@ zip/*.*
 vars/*.*
 log/*.*
 agifs/*.*
+agifs/*/*.*
 install.txt
