@@ -24,11 +24,11 @@ if (!file_exists("img/agif")) {
 if (!file_exists("vars")) {
     mkdir("vars", 0777, true);
 }
-/*
+
 if (file_exists("install.php")) {
     rename("install.php", "install.NOT.txt");
 }
-*/
+
 
 $myVarfileId = intval($_POST["id"] ?? $_GET["id"] ?? 99);
 if ($myVarfileId < 0 || $myVarfileId > 20) {
@@ -62,6 +62,16 @@ if (!isset($targeteta[$myIdx])) {
     $targeteta[$myIdx] = array((isLocalHost() ? 15000 : 100), false);
 }
 
+if (!isset($imagedimensions[$myIdx])) {
+    $imagedimensions[$myIdx] = array("w" => 640, "h" => 480);
+    write2config();
+}
+$twidth =  $imagedimensions[$myIdx]["w"];
+$theight = $imagedimensions[$myIdx]["h"];
+
+//$twidth = 200;
+//$theight = 250;;
+
 $countImagesSaved = 0;
 if (count($_POST) > 0) {
     // error_reporting(-1);
@@ -72,6 +82,9 @@ if (count($_POST) > 0) {
      * when a new id shows up. 
      * */
     if ($myId <= 0 || $myId > 13) {
+        $errinfo["wrongid"] = date("Y-m-d H:i:s") . " - POST Call with id= $myId.";
+        write2config(true);
+        sleep(1);
         die('{"error"  : "id not allowed" }');
     }
 
@@ -81,7 +94,13 @@ if (count($_POST) > 0) {
      * that a camera generates as soon as been run. However, id will be different after restart. 
      * 
      */
-    $uqt = $_POST["uqt"] ?? die('{"error"  : "no uqt specified" }');
+    $uqt = $_POST["uqt"] ?? false;
+    if ($uqt === false) {
+        $errinfo["nouqt"] = gmdate("Y-m-d H:i:s") . " - POST Call with wrong unique token, uqt= $uqt; id= $myId.";
+        write2config(true);
+        sleep(1);
+        die('{"error"  : "no uqt specified" }');
+    }
     $uqtprevious = $stats[$myId]["uqt"] ?? false;
 
 
@@ -99,6 +118,8 @@ if (count($_POST) > 0) {
         }
         $pp = $performance[$myId]["uqtclash"] ?? 0;
         $performance[$myId]["uqtclash"] = 1 +  $pp;
+        $errinfo["uqtnomatch"] = gmdate("Y-m-d H:i:s") . " - Unique token do not match, uqt= $uqt; id= $myId.";
+        sleep(1);
         write2config();
         die('{"error"  : "uqt do not match. Two cams on same server?" }');
     }
@@ -296,11 +317,9 @@ if (count($_POST) > 0) {
      */
 
     echo ', "jpgcompression" : ' . ($jpgcompression[$myId] ?? 0.7);
-    echo ', "twidth" : ' . ($imagedimensions[$myId] ?? 640);
-    echo ', "theight" : ' . ($imagedimensions[$myId] ?? 480);
+    echo ', "twidth" : ' . $twidth;
+    echo ', "theight" : ' . $theight;
 
-    // echo ', "twidth" : ' . ($imagedimensions[$myId] ?? 100);
-    // echo ', "theight" : ' . ($imagedimensions[$myId] ?? 100);
 
 
     echo " }";  // close JSON
@@ -328,6 +347,18 @@ if (count($_POST) > 0) {
      * Now write all the variables we have collected into config.php
      */
     write2config();
+    die();
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // this means that $_POST was not populated or too much data in request.
+    $mps = ini_get('post_max_size');
+    echo '{ ';
+    echo '"error" : "Request method is POST but no POST data received; maybe too much data? max = ' . $mps . 'b" ';
+    echo ',"pauseCapture" : true ';
+    echo ' }';
+    $errinfo["postnodata"] = gmdate("Y-m-d H:i:s") . " - no POST data received. MAX_POST_SIZE = " . $mps;
+    write2config(true);
     die();
 }
 
@@ -417,6 +448,14 @@ if (isset($_GET["imgout"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The following styles are to show dates on top of image -->
     <style>
+        .imgwh {
+            width: 320px;
+            height: 240px;
+            object-fit: scale-down;
+        }
+
+
+
         .closebtn {
             background-color: #123183;
             cursor: pointer;
@@ -671,42 +710,22 @@ if (isset($_GET["imgout"])) {
                 b = a.replace("&bns=X", "&bns=X" + datetime + "X");
             }
             a0bns = b;
-            /*
-                d.href = b;
-
-            }
-            */
-            /*
-                        var allBn = b.split("X");
-                        allBn.pop();
-                        allBn.shift();
-
-                        if (allBn.length > 0) {
-                            allBn.sort();
-                            var start = allBn.shift();
-                            var end = (allBn.length > 0 ? allBn.pop() : start);
-                            var dd = document.getElementById("fromto");
-                            dd.innerHTML = "From " + time2ymdhis(start) + " to " + time2ymdhis(end);
-                            var dd = document.getElementById("fromtoimp");
-                            dd.innerHTML = "Important From " + time2ymdhis(start) + " to " + time2ymdhis(end);
-
-                            dd = document.getElementById("fromonly");
-                            dd.innerHTML = "From " + time2ymdhis(start) + " to now";
-                            dd = document.getElementById("fromonlyimp");
-                            dd.innerHTML = "Imp From " + time2ymdhis(start) + " to now";
-
-                            dd = document.getElementById("toonly");
-                            dd.innerHTML = "Until.. " + time2ymdhis(end) + "";
-                            dd = document.getElementById("toonlyimp");
-                            dd.innerHTML = "Imp Until.. " + time2ymdhis(end) + "";
-                        }
-
-                        console.log(b);
-                        console.log(allBn);
-            */
 
         }
 
+        function objectfitimgs(yes = false) {
+            var overlays = document.getElementsByClassName("imgwh");
+            for (var i = 0, max = overlays.length; i < max; i++) {
+                if (yes) {
+                    overlays[i].style['object-fit'] = "fill";
+                } else {
+                    overlays[i].style['object-fit'] = "scale-down";
+                }
+            }
+        }
+        /**
+         * This function is called from parent.
+         */
         function showtargets(yes = false) {
             var overlays = document.getElementsByClassName("showtargets");
             for (var i = 0, max = overlays.length; i < max; i++) {
@@ -716,7 +735,10 @@ if (isset($_GET["imgout"])) {
                     overlays[i].setAttribute("hidden", 1);
                 }
             }
+            objecfitimgs(yes);
+
         }
+
 
         async function imgactionchange(newval = "default") {
             console.log("imagactionchange; newval=" + newval);
@@ -731,17 +753,8 @@ if (isset($_GET["imgout"])) {
                 }
             }
 
-            // console.log("here1"); 
-            var overlays = document.getElementsByClassName("showtargets");
-            /*
-                        for (var i = 0, max = overlays.length; i < max; i++) {
-                            if (newval == "showtargets") {
-                                overlays[i].removeAttribute("hidden");
-                            } else {
-                                overlays[i].setAttribute("hidden", 1);
-                            }
-                        }
-            */
+
+
             var overlays = document.getElementsByClassName("showframes");
 
             for (var i = 0, max = overlays.length; i < max; i++) {
@@ -765,6 +778,8 @@ if (isset($_GET["imgout"])) {
                 return;
 
             }
+
+            objectfitimgs(true);
 
             var links = document.getElementsByTagName("a");
 
@@ -971,6 +986,12 @@ if (isset($_GET["imgout"])) {
         die();
     }
 
+    if (isset($_GET["clearerror"])) {
+        $errinfo = null;
+        write2config(true);
+        echo '<div class="ack">Thank you. All error messages are cleared.</div>';
+        die();
+    }
     if (isset($_GET["addcam"])) {
         addCam();
     }
@@ -1124,7 +1145,7 @@ if (isset($_GET["imgout"])) {
             if (isset($concepts[$dc])) {
                 unset($concepts[$dc]);
                 echo "The concept $dc has been removed.";
-            } else { 
+            } else {
                 echo "The concept $dc has not been found.";
             }
         } else {
@@ -1133,7 +1154,7 @@ if (isset($_GET["imgout"])) {
         $autocat[$myId][5] = $concepts;
         write2config();
         echo "Thank You";
-      //  var_dump($autocat);
+        //  var_dump($autocat);
         echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
         echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
         sleep(1);
@@ -1148,11 +1169,7 @@ if (isset($_GET["imgout"])) {
     <?php
     $oldestbn = null;
     $newestbn = null;
-    /*
-    if (isset($_GET["imgaction"]) && $_GET["imgaction"] == "showtargets") {
-        $_GET["settargetnow"] = 4;
-    }
-    */
+
     if (isset($_GET["id"]) && !isset($_GET["home"])) {
         error_reporting(-1);
 
@@ -1242,15 +1259,31 @@ if (isset($_GET["imgout"])) {
             die();
         }
         if (isset($_GET["setjpgcompression"])) {
-            echo '<h1>Please enter the JPG compression in percent (0-100)</h1>';
+            echo '<h2>Please enter the JPG compression in percent (0-100)</h2>';
             echo '<form action="index.php">';
-            echo '<label for="enter">Enter  JPG value in percent:</label><br>';
-            echo '<input type="text" id="thejpgcompression" name="thejpgcompression" value=70>%';
+            echo '<label for="thejpgcompression">Enter  JPG value in percent:</label><br>';
+            echo '<input type="text" id="thejpgcompression" name="thejpgcompression" value='
+                . round(100 * ($jpgcompression[$_GET["id"] ?? 0] ?? 0.7), 2) . '>%';
             echo '<input  hidden type="text" id="id" name="id" value=' . $_GET["id"] . ' >';
+            echo '<br>';
+            echo '<input  type="submit" value="Submit">';
             echo '<p>';
+            echo '<h2>Please enter below image width and height</h2>';
+            $x = explode(",", $videoinfo[$myId] ?? array());
+            if (count($x) < 4) {
+                echo "No Camera information available.";
+            }
+            echo 'Camera dimensions = ' . $x[0] . ' x ' . $x[1];
+            echo '<br>';
+            echo '<label for="imgwidth">Enter Image width in pixels</label><br>';
+            echo '<input type="text" id="imgwidth" name="imgwidth" value=' . $twidth . '>%';
+            echo '<br>';
+            echo '<label for="imgheight">Enter Image height in pixels</label><br>';
+            echo '<input type="text" id="imgheight" name="imgheight" value=' . $theight . '>%';
+            echo '<br>';
             echo '<input  type="submit" value="Submit">';
             echo '</form>';
-            echo '<p><a href="index.php">Home</a>';
+            echo '<p><a href="index.php">Home (no change)</a>';
             die();
         }
         if (isset($_GET["thejpgcompression"])) {
@@ -1261,9 +1294,21 @@ if (isset($_GET["imgout"])) {
             if ($x > 100) {
                 $x = 100;
             }
-            $jpgcompression[$_GET["id"]] = $x / 100;
+            $myId = intval($_GET["id"] ?? 0);
+            $jpgcompression[$myId] = $x / 100;
+            $w = intval($_GET["imgwidth"]);
+            $h = intval($_GET["imgheight"]);
+
+            $y = explode(",", $videoinfo[$myId] ?? array("640,480"));
+
+            $w = max(1,min($w, $y[0] ?? 640));
+            $h = max(1,min($h, $y[1] ?? 480));
+
+            $imagedimensions[$myId] = array("w" => $w, "h" => $h);
+
             write2config();
-            echo "Thank You";
+
+            echo "JPG compression set to $x% and image dimensions set to $w x $h.";
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             echo '<p><a href="index.php?id=' . $_GET["id"] . '&time=' . time() . '">Back</a><p>';
             sleep(1);
@@ -1392,7 +1437,9 @@ if (isset($_GET["imgout"])) {
                 echo '; <a href="index.php?time=' . time() . '&unsetimgsizeinfo=' . time() . '&id=' . $myId . '">Reset</a>';
                 echo '<br> Average image size: ' . round(1e-3 * ($imgsizeinfo[$myId][1] ?? 0) / max(1, ($imgsizeinfo[$myId][2] ?? 0)), 1) . ' kB;';
 
+
                 echo ' Compression: ' . round(($jpgcompression[$myId] ?? 0.7) * 100, 1) . '% <a href="index.php?time=' . time() . '&setjpgcompression=' . time() . '&id=' . $myId . '">Adjust</a>';
+                echo '<br> Image width x height = ' . $twidth . ' x ' . $theight . '; <a href="index.php?time=' . time() . '&setjpgcompression=' . time() . '&id=' . $myId . '">Adjust</a>';
             } else {
                 $imgsizeinfo[$myId][0] = localtimeCam($myId);
             }
@@ -1479,6 +1526,15 @@ if (isset($_GET["imgout"])) {
             if (isset($_GET["setupcontrolA"])) {
                 echoSetupMenuA($myId);
             }
+            if (isset($errinfo)) {
+                foreach ($errinfo as $key => $value) {
+                    echo "<br>Error [" . $key . "]: " . $value . "";
+                }
+                echo '<br><a href="index.php?clearerror=1">Clear all errors</a>';
+                echo "<br><em>All dates in UTC</em>";
+            } else {
+                echo "<br><em>No reported errors</em>";
+            }
             echo '</body></html>';
             die();
         }
@@ -1523,8 +1579,8 @@ if (isset($_GET["imgout"])) {
             echo '<br><a href="index.php?t=' . time() . '&id=' . $myId . '&resetclarifai=1&showclarifai=1">Reset and delete Clarifai key.</a>';
 
             autocat($myId, "initonly"); // Initialise autocat variable. 
-echo "<h2>Concepts:</h2>"; 
-           //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
+            echo "<h2>Concepts:</h2>";
+            //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
             echo '<form action="index.php">';
             echo '<label for="clarifaiconcept">Enter new Concept:</label><br>';
             echo '<input type="text" id="clarifaiconcept" name="clarifaiconcept">';
@@ -1540,7 +1596,7 @@ echo "<h2>Concepts:</h2>";
                 echo "\r\n";
             }
             echo "<p>";
-          //  var_dump($clarifaicount);
+            //  var_dump($clarifaicount);
             echo "<p>";
             // var_dump($autocat);
             echo "\r\n";
@@ -1633,12 +1689,12 @@ echo "<h2>Concepts:</h2>";
                 $x[2] = '[disabled]';
                 echo "<h2>The System will not save any gifs.</h2>";
             } else {
-   echo "<h2>The System will now save gifs that contain " . implode(", ", $x[5] ). "</h2>";
-   echo "(Please check that a Clarifai Key is set)"; 
+                echo "<h2>The System will now save gifs that contain " . implode(", ", $x[5]) . "</h2>";
+                echo "(Please check that a Clarifai Key is set)";
                 $x[1] = true;
                 $x[2] = $_GET["setautocat"];
             }
-         
+
             echo '<p><a href="index.php?showclarifai=1&time=' . time() . '&id=' . $myId . '" >Manage</a><p>';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Home</a><p>';
             $autocat[$myId] = $x;
@@ -1721,23 +1777,12 @@ echo "<h2>Concepts:</h2>";
             sleep(2);
             echo "</body></html>";
             die();
-        }/* else if (isset($_GET["settargetdisplay"])) {
-            echo "<h2>Click on any of the images below to adjust the targets using this image</h2>";
-            echo "(if no image is shown, wait)<p>";
-            // echo "myId = $myId"; 
-            $allImages = array();
-            foreach (myTargets($myId) as $j) {
-                $allImages = array_merge($allImages, findImages($j));
-            }
-            sort($allImages);
-            $a = array_slice($allImages, -12);
-            displayImages($a);
-            echo '<p><a href="index.php?howmany=' . $_GET["howmany"] . '&time=' . time() . '&addtarget=1&id=' . $myId . '">Add additional target</a><p>';
-        } */ else if (isset($_GET["settargetid"]) || isset($_GET["settargetnow"])) {
+        } else if (isset($_GET["settargetid"]) || isset($_GET["settargetnow"])) {
             echo "<h1>Change Targets here</h1>";
 
             if (($bucket = intval($_GET["settargetid"] ?? 0)) > 0 && $_GET["xy"]) {
                 $xy = explode(",", substr($_GET["xy"], 1 + strpos($_GET["xy"], "?")));
+
                 $focusX[$bucket] = intval($xy[0]) / 320.0;
                 $focusY[$bucket] = intval($xy[1]) / 240.0;
                 write2config();
@@ -1767,135 +1812,8 @@ echo "<h2>Concepts:</h2>";
             echo '<h1>Camera Start / Pause requested</h1><p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             write2config();
             sleep(1);
-        } /*else if (isset($_GET["bestimage30"])) {
-            $bestImage = findBestImage($myId, 30); // last 30 minutes
-            if ($bestImage !== FALSE) {
-                displayImages(array($bestImage));
-            } else {
-                displayImages(array());
-            }
-        } else if (isset($_GET["fromto"])) {
-            $buckets = myTargets($myId);
-            $h = ($history[$myId] ?? false);
-
-            $allImages = array();
-            $bnfrom = false;
-            $bnto = false;
-            if ($h !== false && count($h > 2)) {
-                $bnfrom = $h[count($h) - 2];
-                $bnto  = $h[count($h) - 1];
-                if (strcmp($bnfrom, $bnto) > 0) {
-                    $temp = $bnfrom;
-                    $bnfrom = $bnto;
-                    $bnto = $temp;
-                }
-                foreach ($buckets as $j) {
-                    $allImages = array_merge($allImages, findImages($j, ($_GET["howmany"] ?? 6), false, false, false, $bnfrom, $bnto));
-                }
-                sort($allImages);
-                displayImages($allImages);
-            } else {
-                echo "<h1>Sorry, no history saved</h1>";
-                die("Thank you");
-            }
-        } else if (isset($_GET["fromtoclick"])  || isset($_GET["fromonlyclick"]) || isset($_GET["toonlyclick"])) {
-            $bns = explode("X", ($_GET["bns"] ?? "a"));
-            if (count($bns) < 3) {
-                echo "<h1>Nothing to show here</h1>";
-                echo "<a href=\"index.php\">Home</a>";
-                die("Thank you.");
-            }
-            //var_dump($bns); 
-            array_shift($bns);
-            array_pop($bns);
-            sort($bns);
-            // var_dump($bns); 
-            //echo '<p>'; 
-            $first = $bns[0];
-            $last = $bns[count($bns) - 1];
-
-            $buckets = myTargets($myId);
-            $allImages = array();
-            foreach ($buckets as $j) {
-                if (isset($_GET["fromonlyclick"])) {
-
-                    $allImages = array_merge($allImages, findImages($j, ($_GET["howmany"] ?? 6), isset($_GET["important"]), false, false, "aa" . $first, PHP_INT_MAX));
-                } else if (isset($_GET["toonlyclick"])) {
-
-                    $allImages = array_merge($allImages, findImages($j, ($_GET["howmany"] ?? 6), isset($_GET["important"]), false, false, 0, "aa" . $last));
-                } else {
-
-                    $allImages = array_merge($allImages, findImages($j, ($_GET["howmany"] ?? 6), isset($_GET["important"]), false, false, "aa" . $first, "aa" . $last));
-                }
-            }
-            sort($allImages);
-            $nn = count($allImages);
-
-
-
-            if ($nn < 1) {
-                echo "<h1>Nothing to show here</h1>";
-                echo "<a href=\"index.php\">Home</a>";
-                die("Thank you.");
-            }
-
-            $disp = array();
-            $howmany = ($_GET["howmany"] ?? 6) - 1;
-            if ($nn > 1 && $howmany > 0) {
-                $modulus = 1.0 * ($nn - 1) / $howmany;
-                $f = 1000000.0;
-                for ($i = 0; $i < $nn - 1; $i++) {
-                    if ((intval($i * $f) % intval($modulus * $f)) / $f < 1) {
-                        $disp[] = $allImages[$i];
-                    }
-                }
-            }
-            $disp[] = $allImages[$nn - 1];
-            echo "Showing " . count($disp) . " of " . $nn . " images.<p>";
-            displayImages($disp);
-        } else if (isset($_GET["showmarked"])) {
-            $bns = explode("X", ($_GET["bns"] ?? "b"));
-            if (count($bns) < 3) {
-                echo "<h1>Nothing to show here</h1>";
-                echo "<a href=\"index.php\">Home</a>";
-                die("Thank you.");
-            }
-            // var_dump($bns); 
-            array_shift($bns);
-            array_pop($bns);
-            sort($bns);
-            // var_dump($bns); 
-            echo '<p>';
-
-            $allImages = array();
-            foreach ($bns as $bn) {
-
-                $srcfiles = glob("img/" . $myId . "??/aa" . $bn . "*.jpg");
-                $basenames = array_map("basename", $srcfiles);
-                $allImages = array_merge($allImages, $basenames);
-            }
-            sort($allImages);
-            displayImages($allImages);
-        } else if (isset($_GET["b"])) {
-            $buckets = myTargets($myId);
-            $allImages = array();
-            foreach ($buckets as $j) {
-                $allImages = array_merge($allImages, findImages($j, ($_GET["howmany"] ?? 6), false, $_GET["b"], false, 0, PHP_INT_MAX, true ));
-            }
-            if (isset($_GET["doubleclicked"])) {
-                // $allImages = array_merge($allImages, $lastgallery[$myId]);
-            }
-            rsort($allImages);
-            displayImages($allImages);
-        } else if (!isset($_GET["nogallery"])) {
-            $buckets = myTargets($myId, true);
-            $allImages = array();
-            foreach ($buckets as $j) {
-                $allImages = array_merge($allImages, findImages($j));
-            }
-            sort($allImages);
-            displayImages($allImages);
-        } */ else {
+        } else {
+            echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
         echo '</body>   </html>';
@@ -1965,14 +1883,14 @@ echo "<h2>Concepts:</h2>";
         $searchterms = $autocat[$myId][5];
 
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
-        if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && $test === false ) {
+        if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && $test === false) {
             return "Previous request too recently: $tdiff seconds ago";
-        } else if($test !== "initonly") {
+        } else if ($test !== "initonly") {
             $autocat[$myId][4] = localtimeCam($myId);
             write2config();
-        } else { 
-          write2config(); 
-          sleep(1); 
+        } else {
+            write2config();
+            sleep(1);
             return "Function called with parameter initonly.";
         }
 
@@ -2164,9 +2082,9 @@ echo "<h2>Concepts:</h2>";
             return "file cannot be found";
         }
 
-$maxclarifaicount = 50; 
+        $maxclarifaicount = 50;
         if (isset($clarifaicount[0]) && $clarifaicount[0] > $maxclarifaicount) {
-            return "request over quota: Counter =  ".$clarifaicount[0].".";
+            return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
 
         $clarifaikey = ($clarifaicount[2] ?? false);
@@ -2183,7 +2101,7 @@ $maxclarifaicount = 50;
             // todo: https://docs.clarifai.com/api-guide/predict/images
         }
         */
- 
+
         if ($silent === FALSE) {
             echo "<h2> imgurl=$imgurl </h2>";
             echo "<p><img src=\"$imgurl\" >";
@@ -2207,10 +2125,10 @@ $maxclarifaicount = 50;
         );
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-      //  $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
-       // if($_SERVER['SERVER_NAME'] == "localhost") { 
-            $t = file_get_contents($files[0]); 
-            $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
+        //  $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
+        // if($_SERVER['SERVER_NAME'] == "localhost") { 
+        $t = file_get_contents($files[0]);
+        $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
         // }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
@@ -2285,13 +2203,14 @@ $maxclarifaicount = 50;
     function write2config($cam_agnostic = false)
     {
         global $varfile, $varfile_global;
+        global $errinfo;
         global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
         global $systempassword, $autocat;
-        global $imagedimensions; 
-       
+        global $imagedimensions;
+
 
         $savefile = null;
 
@@ -2302,6 +2221,8 @@ $maxclarifaicount = 50;
             $content .= PHP_EOL . " \$systempassword = " . var_export($systempassword, true) . "; ";
             $content .= PHP_EOL . " \$clarifaicount = " . var_export($clarifaicount, true) . "; ";
             $content .= PHP_EOL . " \$timezoneoffset = " . var_export($timezoneoffset, true) . "; ";
+            $content .= PHP_EOL . " \$errinfo = " . var_export($errinfo, true) . "; ";
+
             $savefile = $varfile_global;
         } else {
             $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
@@ -2401,88 +2322,7 @@ $maxclarifaicount = 50;
         echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
         echo '</li>';
     }
-    /*
 
-    function echoSetupMenu($myId)
-    {
-        global $imagesperpost, $keephowmany;
-        global $toggleCapture, $zoom, $zoomX, $zoomY, $mingapbeforeposts;
-        echo "<h3>Control Cam $myId</h3>";
-        echo '<p><ol>';
-
-
-        echo '<li>';
-        // echo '<a href="zipdelete.php?merge=1&delete=y&buckets=yes&id='.$myId.'">merge, zip and delete</a>; ';
-        echo '<a href="zipdelete.php?merge=1&buckets=yes&id=' . $myId . '">Download all images as a zip file.</a>; ';
-        echo '</li>';
-
-        echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
-        echo '</li>';
-
-        echo '<li>Gap Between Posts: ';
-        for ($j = 20; $j < 350; $j += 20) {
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setgap=' . $j . '">' . $j . ' </a>;';
-        }
-        echo ' Seconds</li>';
-
-        echo '<li>#images / post: ';
-        for ($j = 20; $j < 240; $j += 20) {
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setmaximages=' . $j . '">#' . $j . ' </a>;';
-        }
-        echo "</li>   \r\n";
-
-        echo '<li>keep on server: ';
-        for ($j = 50; $j < 1000; $j += 50) {
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&keephowmany=' . $j . '">#' . $j . ' </a>;';
-        }
-        echo "</li>   \r\n";
-        echo '<li>';
-        echo '<a href="index.php?time=' . time() . '&enterclarifai=1">Enter a Clarifai key</a>';
-
-        echo "</li>   \r\n";
-        echo "<li>   \r\n";
-        // echo '<a id="autocattest" href="index.php?showmarked=1&time='.time().'&id='.$myId.'&autocat=1">Check best image last hour; if cat then make gif</a> &nbsp;';
-        echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable Autocat</a>  &nbsp;';
-        echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable Autocat</a>';
-        echo "</li>   \r\n";
-        echo '<li>';
-        $togp = ($toggleCapture[$myId] ?? 0);
-        echo 'Status: <b>' . ($togp == 0 ? "capturing" : ($togp == 1 ? "request toggle" : "paused")) . '</b>. ';
-        echo 'Zoom=' . ($zoom[$myId] ?? 1);
-        echo ' Zoom Center X=' . ($zoomX[$myId] ?? 0.5);
-        echo ', Y=' . ($zoomY[$myId] ?? 0.5);
-        echo ' ,' . ($imagesperpost[$myId] ?? 60) . ' imgs every ' . ($mingapbeforeposts[$myId] ?? 60) . ' seconds.';
-        // echo ' <a href="cam.php?id=' . $myId . '">Start Cam ' . $myId . '</a>';
-        echo "</li>   \r\n";
-
-
-        global $stats;
-
-        echo '<li>Stats on Camera=' . ($stats[$myId] ? implode('; ', $stats[$myId]) : "no stats");
-        echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&resetstats=yes&nomenu=1&nogallery=1&howmany=1">Reset Stats</a> &nbsp;';
-
-        echo "</li>   \r\n";
-
-        global $performance;
-        echo '<li>Performance: '; // var_dump($performance[$myId]); 
-        $x = $performance[$myId] ?? array(0, 0, 0, 0, 0, 0, 0, 0, 0);
-        $avg = round($x[2], 2);
-        $last = round($x[1], 2);
-        $avg60 = round($x[5], 2);
-        $last60 = round($x[4], 2);
-
-        echo "avg=$avg, last=$last ($x[0]); ";
-        echo "a60=$avg60, la60=$last60 ($x[3]); ";
-
-        echo "lastN=$x[6]";
-        echo '; <a href="index.php?time=' . time() . '&unsetperformance=' . time() . '&id=' . $myId . '">Reset</a>';
-        echo "\r\n";
-        echo "</li>   \r\n";
-        echo '</ol><p>';
-        echo "\r\n";
-        echo "\r\n";
-    }
-    */
     function findImagesByDate($myId, $dd = array())
     {
         $thedayfrom = $_GET["day"] ?? "notset";
@@ -2791,7 +2631,7 @@ $maxclarifaicount = 50;
     function average($tgt, $img, $addTarget = false, $highlight = false)
     {
         global $focusX, $focusY;
-
+        if($img === false ) { return 0; }
         $w = imagesx($img);
         $h = imagesy($img);
         $r = $g = $b = 0;
@@ -3122,14 +2962,18 @@ $maxclarifaicount = 50;
     {
         $filename = "tmp/transparent" . $w . "x" . $h . "T.png";
         if (!file_exists($filename)) {
-            $img = imagecreatetruecolor($w, $h);
-            imagesavealpha($img, true);
-            $color = imagecolorallocatealpha($img, 0, 0, 0, 127);
-            imagefill($img, 0, 0, $color);
-            imagepng($img, $filename);
+            $img = @imagecreatetruecolor($w, $h);
+            if ($img) {
+                imagesavealpha($img, true);
+                $color = imagecolorallocatealpha($img, 0, 0, 0, 127);
+                imagefill($img, 0, 0, $color);
+                imagepng($img, $filename);
+            }
         }
-        $img = imagecreatefrompng($filename);
-        imagesavealpha($img, true);
+        $img = @imagecreatefrompng($filename);
+        if ($img) {
+            imagesavealpha($img, true);
+        }
         return $img;
     }
 
@@ -3153,22 +2997,24 @@ $maxclarifaicount = 50;
     function addTargets($myId, $bn = false)
     {
         global $focusX, $focusY;
+        global $twidth, $theight;
         $res = array();
         if ($bn) $zz = explode("z", $bn);
 
         $sourcebn = "nopic.jpg";
+        // $transparentfilename = "tmp/transparent".$twidth."x".$theight."B.png";
         if ($bn && file_exists("img/" . ($zz[1] ?? 0) . "/" . $bn)) {
             $sourcebn = "img/" . ($zz[1] ?? 0) . "/" . $bn;
             copy($sourcebn, "tmp/" . "tgtsrc" . $myId . ".jpg");
         } else if ($bn && file_exists("tmp/tgtsrc" . $myId . ".jpg")) {
             $sourcebn = "tmp/tgtsrc" . $myId . ".jpg";
-        } else if (!file_exists("tmp/transparent320x240A.png")) {
-            $img = imagecreatetruecolor(320, 240);
+        }/* else if (!file_exists($transparentfilename)) {
+            $img = imagecreatetruecolor(floor($twidth/2), floor($theight / 2));
             imagesavealpha($img, true);
             $color = imagecolorallocatealpha($img, 0, 0, 0, 127);
             imagefill($img, 0, 0, $color);
-            imagepng($img, 'tmp/transparent320x240A.png');
-        }
+            imagepng($img, $transparentfilename);
+        }*/
 
         $imgoutfoldername = "tmp/";
 
@@ -3177,8 +3023,8 @@ $maxclarifaicount = 50;
             if ($bn) {
                 $im = @imagecreatefromjpeg($sourcebn); // does not work for png
             } else {
-                $im = getTransparentImage(); // imagecreatefrompng("tmp/transparent320x240A.png"); 
-                imagesavealpha($im, true);
+                $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
+                if($im) { imagesavealpha($im, true); }
             }
             foreach (myTargets($myId) as $x) {
                 if ($x == $bucket) {
@@ -3194,7 +3040,7 @@ $maxclarifaicount = 50;
             if ($bn) {
                 $outfilename = "tgt" . $bucket . "tgt" . time() . 'z' . $bucket . 'z.jpg';
                 imagejpeg($im, $imgoutfoldername . $outfilename);
-            } else {
+            } else if($im ) {
                 imagepng($im, $imgoutfoldername . $outfilename);
             }
             $res[$bucket] = $outfilename;
@@ -3205,7 +3051,7 @@ $maxclarifaicount = 50;
 
 
 
-    function displayImages($basenames,  $width = 320, $height = 240)
+    function displayImages($basenames)
     {
         global $lastgallery, $videoinfo, $zoom, $zoomX, $zoomY;
         //  echo '<h1>New Gallery starts here</h1>'; 		
@@ -3254,13 +3100,14 @@ $maxclarifaicount = 50;
         echo "function getNonce() { return '" . $lastgallery["nonce"] . "'; } \r\n";
         echo "</script> \r\n";
 
-        echo '<div id="images">';
+        echo '<p><div id="images">';
         $tgtoverlay = addTargets($myId);
         // var_dump($tgtoverlay); 
 
         write2config();
         // var_dump($basenamesNoDuplicates);
         $lastBn = null;
+
         foreach ($basenamesNoDuplicates as $bn) {
             $a = explode("z", $bn);
 
@@ -3319,14 +3166,16 @@ $maxclarifaicount = 50;
                 $extrahref = 'index.php?time=' . time() . '&settgts=1&id=' . $myId . $setXY . "&settargetnow=1&imgaction=default&howmany=" . intval($_GET["howmany"] ?? 6) . "&b=" . $bn . "&xy=xy";
             }
 
-            $hidetgts = "hidden=1";
-            //  $hidetgts = ""; 
+            //$hidetgts = "hidden=1";
+            //  https://www.w3schools.com/css/css3_object-fit.asp 
             if (file_exists($imgoutfoldername . $bn)) {
                 $lastBn = $bn;
                 $countImgsOut++;
-                echo "<a class=\"container\" what=1 onClick=\"imgclick('" . $bn . "', this, " . $extra . ", '" . $extrahref . "')\"  zoomhref=\"$zoomhref\" nozoomhref=\"$nozoomhref\"><img ismap width=$width height=$height src=\"" . $imgoutfoldername . $bn . "\" alt=\"" . $bn . "\" title=\"" . substr($bn, 2, 8) . "-" . substr($bn, 10, 6) . "\">";
-                echo '<img  ' . $hidetgts . ' width=' . $width . ' height=' . $height . ' class="showtargets" src="tmp/' . $tgtoverlay[$myTargetId] . '" alt="overlay">';
-                echo '<img  hidden=1 id=SHOWFRAMES' . $bn . ' width=' . $width . ' height=' . $height, ' class="showframes" src="' . $framefile . '" alt="overlay">';
+
+                echo "<a  class=\"container\" what=1 onClick=\"imgclick('" . $bn . "', this, " . $extra . ", '" . $extrahref . "')\"  zoomhref=\"$zoomhref\" nozoomhref=\"$nozoomhref\">";
+                echo "<img ismap class=\"imgwh\" src=\"" . $imgoutfoldername . $bn . "\" alt=\"" . $bn . "\" title=\"" . substr($bn, 2, 8) . "-" . substr($bn, 10, 6) . "\">";
+                echo '<img  hidden=1  class="showtargets imgwh" src="tmp/' . $tgtoverlay[$myTargetId] . '" alt="overlay">';
+                echo '<img  hidden=1 id=SHOWFRAMES' . $bn . ' class="showframes imgwh" src="' . $framefile . '" alt="overlay">';
                 if (isset($_GET["settargetnow"])) {
                     add_caption("Target $targetid ");
                 } else {
@@ -3340,7 +3189,7 @@ $maxclarifaicount = 50;
 
             echo "\r\n";
         }
-        echo '</div>';
+        echo '</div></p>  ';
         echo "<p>not exist: " . $notexist;
         if ($countImgsOut == 1) {
             echo '  <a href="index.php?id=' . $myId . '&clarifaithis=' . $lastBn . '">Clarifai this image</a>;   ';
@@ -3367,6 +3216,7 @@ $maxclarifaicount = 50;
     function receiveImagesA($myId)
     {
         global $keephowmany, $imgsizeinfo;
+        global $errinfo;
         $itotalThisUpload = 0;
         $icountThisUpload  = 0;
 
@@ -3408,9 +3258,12 @@ $maxclarifaicount = 50;
             $zoominfo = $_POST['imgZoom' . $i] ?? "0000000";
             $jpginfo = $_POST['imgJpgc' . $i] ?? "xx";
 
-            $imgout = imagecreatefromstring($fileData);
-            if (!$imgout) {
-                $imgout = imagecreatefromjpeg("nopic.jpg");
+            $imgout = @imagecreatefromstring($fileData);
+            if ($imgout === false) {
+                $errinfo["couldnotcreateimg"] = gmdate("Y-m-d H:i:s") . " - An image could not be created from the data supplied by the camera.";
+
+                write2config();
+                return false;
             }
             $imgfoldername = false;
 
