@@ -49,11 +49,16 @@
 	}
 	// var_dump($_GET); 
 
-	$dimensions = explode(',', $_GET["videoinfo"] ?? "640,480");
+	$dimensions = explode(',', $_GET["videoinfo"] ?? "640,480,640,480");
 	// var_dump($dimensions);
 
 	$w = $owidth = $dimensions[0];
 	$h = $oheight = $dimensions[1];
+
+	$t640 = $dimensions[2];
+	$t480 = $dimensions[3]; 
+
+	var_dump($dimensions);
 
 	$imfull = null;
 	$zoomX = abs($_GET["zoomx"] ?? 0.5);
@@ -61,14 +66,14 @@
 
 
 
-	$croppedVideoHeight =  $owidth * 480 / 640.0;
+	$croppedVideoHeight =  $owidth * $t480 / $t640;
 	if ($croppedVideoHeight > $oheight) {
 		$croppedVideoHeight = $oheight;
 	} // adjustment if video is too wide 
-	$croppedVideoWidth = $croppedVideoHeight * 640.0 / 480.0;
+	$croppedVideoWidth = $croppedVideoHeight * $t640 / $t480;
 
-	$maxZoomXC = $croppedVideoWidth / 640;
-	$maxZoomYC = $croppedVideoHeight / 480;
+	$maxZoomXC = $croppedVideoWidth / $t640;
+	$maxZoomYC = $croppedVideoHeight / $t480;
 
 	if (round($maxZoomXC - $maxZoomYC, 2) > 0) {
 		echo "Error maxZoom: $maxZoomXC != $mazZoomYC <p>";
@@ -145,11 +150,11 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 			$zd /= 100.0;
 			$mzoom = $zd / 100;
 
-			$mcroppedVideoHeight =  $owidth * 480 / 640.0;
+			$mcroppedVideoHeight =  $owidth * $t480 / $t640;
 			if ($mcroppedVideoHeight > $oheight) {
 				$mcroppedVideoHeight = $oheight;
 			} // adjustment if video is too wide 
-			$mcroppedVideoWidth = $mcroppedVideoHeight * 640.0 / 480.0;
+			$mcroppedVideoWidth = $mcroppedVideoHeight * $t640 / $t480;
 
 			// echo "<p>mzoomX=$mzoomX mzoomY=$mzoomY mzoom=$mzoom <p>";  
 			$mcroppedVideoHeight = ceil($mcroppedVideoHeight / $mzoom);
@@ -328,16 +333,20 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 				document.getElementById("yC").value = <?php echo ($_GET["zoomy"] ?? 0.5) ?>;
 			} else {
 
-
+				<?php
+		
+			echo "var tt640 = $t640 ; \r\n";
+			echo "var tt480 = $t480 ; \r\n";
+			?>
 		
 				var sollheight = Math.max(1, Math.abs(y2 - y1) * oheight);
 				var sollwidth = Math.max(1, Math.abs(x2 - x1) * owidth);
 
-				var croppedVideoHeight = owidth * 480 / 640.0;
+				var croppedVideoHeight = owidth * tt480 / tt640;
 				if (croppedVideoHeight > oheight) {
 					croppedVideoHeight = oheight;
 				} // adjustment if video is too wide 
-				croppedVideoWidth = croppedVideoHeight * 640.0 / 480.0;
+				croppedVideoWidth = croppedVideoHeight * tt640 / tt480;
 
 				var z1 = croppedVideoHeight / sollheight;
 				var z2 = croppedVideoWidth / sollwidth;
@@ -384,15 +393,16 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 			PosX = PosX - ImgPos[0];
 			PosY = PosY - ImgPos[1];
 			<?php
-			$ha =  640 *  $oheight / $owidth;
-			echo "ha = $ha ;";
+			$ha =  $t640 *  $oheight / $owidth;
+			echo "var ha = $ha ; \r\n";
+			echo "var t640 = $t640 ; \r\n";
 			?>
 
 			if (Point == 1) {
 				X1 = PosX;
 				Y1 = PosY;
 				Point = 2;
-				document.getElementById("x1").value = (PosX / 640).toFixed(2);
+				document.getElementById("x1").value = (PosX / t640).toFixed(2);
 				document.getElementById("y1").value = (PosY / ha).toFixed(2);
 				setXCYC()
 			} else {
@@ -400,7 +410,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 				X2 = PosX;
 				Y2 = PosY;
 				// Point = 3;
-				document.getElementById("x2").value = (PosX / 640).toFixed(2);
+				document.getElementById("x2").value = (PosX / t640).toFixed(2);
 				document.getElementById("y2").value = (PosY / ha).toFixed(2);
 				setXCYC();
 				Point = 1;
@@ -424,7 +434,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 			xC = document.getElementById("xC").value;
 			yC = document.getElementById("yC").value;
 
-			zz = "<?php echo ($_GET["videoinfo"] ?? "640,480") ?>";
+			zz = "<?php echo ($_GET["videoinfo"] ?? "640,480,640,480") ?>";
 			document.location.href = "setzoom.php?preview=1&videoinfo=" + zz + "&zoomx=" + xC + "&zoomy=" + yC +
 				"&x1=" + document.getElementById("x1").value +
 				"&y1=" + document.getElementById("y1").value +
@@ -457,8 +467,8 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 
 			<p>
 				<?php
-				$ha =  640 *  $oheight / $owidth;
-				echo '<img src="tmp/zoomnozoom.jpg?t=' . time() . '" width="640" height="' . intval($ha) . '" alt="" id="myImgId" />';
+				$ha =  $t640 *  $oheight / $owidth;
+				echo '<img src="tmp/zoomnozoom.jpg?t=' . time() . '" width="'.$t640.'" height="' . intval($ha) . '" alt="" id="myImgId" />';
 				?>
 				<!--
 <input type="button" name="submitbutton" value="Preview" onclick="Preview();" /> 
@@ -493,7 +503,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 	</form>
 
 	<a href="index.php">Home (no change)</a>;
-	<a href="setzoom.php?videoinfo=<?php echo ($_GET["videoinfo"] ?? "640,480") ?>&id=<?php echo ($_GET['id'] ?? 0); ?>&b=<?php echo ($_GET['b'] ?? 0); ?>">
+	<a href="setzoom.php?videoinfo=<?php echo ($_GET["videoinfo"] ?? "640,480,640,480") ?>&id=<?php echo ($_GET['id'] ?? 0); ?>&b=<?php echo ($_GET['b'] ?? 0); ?>">
 	Reset Zoom </a>
 	<script type="text/javascript">
 		
