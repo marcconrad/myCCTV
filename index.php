@@ -1201,7 +1201,7 @@ if (isset($_GET["imgout"])) {
         if (isset($_GET["testautocat"])) {
             var_dump($_GET);
             echo "<p>Auto Cat<p>";
-            $result = autocat($myId);
+            $result = autocat($myId, "userinitiated");
             echo "<p>";
             var_dump($result);
             echo '<p><a id="homebutton" href="index.php">Home</a>';
@@ -1959,15 +1959,15 @@ echo "<h2>Concepts:</h2>";
         $searchterms = $autocat[$myId][5];
 
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
-        if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && !$test) {
+        if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && $test === false ) {
             return "Previous request too recently: $tdiff seconds ago";
-        } else {
+        } else if($test !== "initonly") {
             $autocat[$myId][4] = localtimeCam($myId);
             write2config();
-        }
-
-        if ($test === "initonly") {
-            return;
+        } else { 
+          write2config(); 
+          sleep(1); 
+            return "Function called with parameter initonly.";
         }
 
         $bn = findBestImageA($myId, 60, 30); // From 30+60 minutes ago to 30 minutes ago
@@ -2158,9 +2158,9 @@ echo "<h2>Concepts:</h2>";
             return "file cannot be found";
         }
 
-
-        if (isset($clarifaicount[0]) && $clarifaicount[0] > 50) {
-            return "request over quota";
+$maxclarifaicount = 50; 
+        if (isset($clarifaicount[0]) && $clarifaicount[0] > $maxclarifaicount) {
+            return "request over quota: Counter =  ".$clarifaicount[0].".";
         } // Request over quota 
 
         $clarifaikey = ($clarifaicount[2] ?? false);
