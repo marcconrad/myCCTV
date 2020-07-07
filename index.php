@@ -1625,13 +1625,16 @@ echo "<h2>Concepts:</h2>";
             if ($_GET["setautocat"] == "disable") {
                 $x[1] = false;
                 $x[2] = '[disabled]';
+                echo "<h2>The System will not save any gifs.</h2>";
             } else {
-
+   echo "<h2>The System will now save gifs that contain " . implode(", ", $x[5] ). "</h2>";
+   echo "(Please check that a Clarifai Key is set)"; 
                 $x[1] = true;
                 $x[2] = $_GET["setautocat"];
             }
-            echo "<h2>The System will now save gifs that contain " . $x[2] . "</h2>";
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+         
+            echo '<p><a href="index.php?showclarifai=1&time=' . time() . '&id=' . $myId . '" >Manage</a><p>';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Home</a><p>';
             $autocat[$myId] = $x;
             write2config();
             sleep(1);
@@ -2168,7 +2171,13 @@ echo "<h2>Concepts:</h2>";
         $x = "tmp/x" . time() . ".jpg";
         copy($files[0], $x);
         $imgurl = 'https://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/' . $x;
-
+        /*
+        if($_SERVER['SERVER_NAME'] == "localhost") { 
+            return "The service cannot be used from localhost. Consider to use a service such as ngrok.com"; 
+            // todo: https://docs.clarifai.com/api-guide/predict/images
+        }
+        */
+ 
         if ($silent === FALSE) {
             echo "<h2> imgurl=$imgurl </h2>";
             echo "<p><img src=\"$imgurl\" >";
@@ -2193,6 +2202,10 @@ echo "<h2>Concepts:</h2>";
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
+        if($_SERVER['SERVER_NAME'] == "localhost") { 
+            $t = file_get_contents($files[0]); 
+            $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
+        }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
         // grab URL and pass it to the browser 
