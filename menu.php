@@ -196,7 +196,7 @@ include_once "./util.php";
             <div class="dropdownsub">
                 <button class="button">Version &raquo;</button>
                 <div class="dropdownsub-content">
-                    <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Update (Git)</button>
+                    <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Check for Update</button>
                     </div>
             </div>
             <div class="dropdownsub">

@@ -59,15 +59,7 @@
 	$zoomX = abs($_GET["zoomx"] ?? 0.5);
 	$zoomY = abs($_GET["zoomy"] ?? 0.5);
 
-	// $aX = abs( ($_GET["x2"] ?? 0.1) - ($_GET["x1"] ?? 0) );  
-	// $aY = abs( ($_GET["y2"] ?? 0.1) - ($_GET["y1"] ?? 0) ); 
 
-	/*
-$maxZoomX = $owidth / 640; 
-$maxZoomY = $oheight / 480; 
-
-echo "<p>Max Zoom X = $maxZoomX; Max Zoom Y = $maxZoomY;<p>"; 
-*/
 
 	$croppedVideoHeight =  $owidth * 480 / 640.0;
 	if ($croppedVideoHeight > $oheight) {
@@ -337,8 +329,7 @@ echo "<p>Max Zoom XC = $maxZoomXC; Max Zoom YC = $maxZoomYC;<p>";
 			} else {
 
 
-				// if( Math.abs(y2- y1) < 0.01 ) { y2 += 0.01; } 
-				// if( x2 == x1 ) { x2 += 0.01; } 
+		
 				var sollheight = Math.max(1, Math.abs(y2 - y1) * oheight);
 				var sollwidth = Math.max(1, Math.abs(x2 - x1) * owidth);
 

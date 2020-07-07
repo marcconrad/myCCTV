@@ -296,6 +296,12 @@ if (count($_POST) > 0) {
      */
 
     echo ', "jpgcompression" : ' . ($jpgcompression[$myId] ?? 0.7);
+    echo ', "twidth" : ' . ($imagedimensions[$myId] ?? 640);
+    echo ', "theight" : ' . ($imagedimensions[$myId] ?? 480);
+
+    // echo ', "twidth" : ' . ($imagedimensions[$myId] ?? 100);
+    // echo ', "theight" : ' . ($imagedimensions[$myId] ?? 100);
+
 
     echo " }";  // close JSON
 

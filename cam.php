@@ -366,6 +366,8 @@
                         }
 
                         document.getElementById('info9').innerHTML = 'offsetX=' + offsetX + ' offsetY=' + offsetY;
+                        document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
+                        document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
 
                         context.drawImage(document.getElementById('video'), // in case video has updated
                             Math.round(startX),
@@ -488,6 +490,12 @@
                                 zoom = (parsed.zoom ? parsed.zoom : 1.0);
                                 zoomX = (parsed.zoomX ? parsed.zoomX : 0.5);
                                 zoomY = (parsed.zoomY ? parsed.zoomY : 0.5);
+                                twidth = (parsed.twidth ? parsed.twidth : 640); // targeted image width
+                                theight= (parsed.theight? parsed.theight : 480); // targeted image height 
+
+                               // document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
+                                // document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
+                                
                                 jpgcompression = (jpgcompression ? parsed.jpgcompression : 0.7);
 
                                 totaljsonreturnerror += (parsed.error ?  1 : 0 );
