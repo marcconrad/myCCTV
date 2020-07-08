@@ -1,5 +1,8 @@
 countlog4.txt
 img/*/*.*
+img/*/*/*.*
+img/*/*/*/*.*
+img/*/*/*/*/*.*
 tmp/*.*
 tmp/*/*
 tmp/*/*/*
