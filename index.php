@@ -1371,8 +1371,10 @@ if (isset($_GET["imgout"])) {
                 echo ". No call recorded";
             }
             $togp = ($toggleCapture[$myId] ?? 0);
-            echo '<b>' . ($togp == 0 ? " 🎥" : ($togp == 1 ? " request toggle" : "paused ")) . '</b>. ';
-
+            echo '<b>' . ($togp == 0 ? " capturing" : ($togp == 1 ? " request toggle" : "paused")) . '</b>. ';
+            if($togp == 2 ) {
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
+            }
             $ntgt = count(myTargets($myId));
             echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
             if ($togp != 2) { // otherwise paused
@@ -1496,7 +1498,7 @@ if (isset($_GET["imgout"])) {
             echo "<br> \r\n";
             $togp = ($toggleCapture[$myId] ?? 0);
             echo 'Status: <b>' . ($togp == 0 ? "capturing" : ($togp == 1 ? "request toggle" : "paused")) . '</b>. ';
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a></li>';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
 
             echo "<br> \r\n";
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
@@ -2295,7 +2297,9 @@ if (isset($_GET["imgout"])) {
         echo ' Seconds</li>';
 
         echo '<li>Maximum number of images per post: ';
-        for ($j = 20; $j < 240; $j += 20) {
+        $nnn = array(1, 10); 
+        for ($j = 20; $j < 240; $j += 20) { $nnn[] = $j; }
+        foreach($nnn as $j ) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setmaximages=' . $j . '">#' . $j . ' </a>;';
         }
         echo '<br>';
@@ -2437,7 +2441,7 @@ if (isset($_GET["imgout"])) {
 
         if (isset($_GET["setzoom"])) {
             $fastmode[$myId] = 20;
-            echo "<p><b>Click on an image below to set zoom. <a href=\"index.php?time=" . time() . "&id=5&nogallery=1&nomenu=1&howmany=9&resetzoom=1\">Reset Zoom</a></p>";
+            echo "<p><b>Click on an image below to set zoom. <a href=\"index.php?time=" . time() . "&id=".$myId."&nogallery=1&nomenu=1&howmany=9&resetzoom=1\">Reset Zoom</a></p>";
         } else if (isset($_GET["settgts"])) {
             $fastmode[$myId] = 20;
             echo "<p><b>Click on an image below to set targets. </b></p>";
