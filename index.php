@@ -1,5 +1,7 @@
 <?php
 $start = hrtime(true);
+$lockfile= "tmp/lockpost.txt"; 
+$iowntheconfigfile = false; 
 
 
 if (!file_exists("tmp")) {
@@ -46,6 +48,10 @@ if (!file_exists($varfile_global)) {
     write2config(true);
 }
 
+if(file_exists($lockfile) === false ) { 
+    touch($lockfile);
+    $iowntheconfigfile = true; 
+} 
 include_once $varfile_global;
 include_once $varfile;
 
@@ -451,6 +457,7 @@ if (isset($_GET["imgout"])) {
     header('Content-Type: image/jpeg');
 
     imagejpeg($im, NULL, 100);
+    write2config(); 
     die();
 }
 ?>
@@ -574,20 +581,7 @@ if (isset($_GET["imgout"])) {
                 divs[i].style.display = 'none';
             }
         }
-        /*
-                if (window.parent != window) {
-                    setTimeout(function() {
-                        if ((x = document.getElementById("homebutton")) != null) {
-                            x.style.display = "none";
-                        }
-                    }, 100);
-                    setTimeout(function() {
-                        if ((x = document.getElementById("menubutton")) != null) {
-                            x.style.display = "none";
-                        }
-                    }, 10);
-                }
-          */
+ 
         // Utility to format timestamp
         function time2ymdhis(s) {
             var yyyy = s.substring(0, 4);
@@ -935,28 +929,14 @@ if (isset($_GET["imgout"])) {
             echo '</body></html>';
             sleep(2);
             die();
-        } /*else if (isset($_GET["callip"]) && !isset($systempassword["c"]) && $_GET["systempassword"] === $systempassword["pw"]) {
-            $systempassword[$_GET["callip"]] = true;
-            $cookie = password_hash("a" . time() . "y" . rand() . "h", PASSWORD_DEFAULT);
-            $systempassword[$cookie] = true;
-            $systempassword["c"] = $cookie;
-            // $systempassword["d"] = $cookie;
-            write2config(true);
-            echo " <script> ";
-            echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&callip=" . $_GET["callip"] . "&t=" . time() . "&systempassword=" . $_GET["systempassword"] . "' }, 1000);";
-            echo " </script> ";
-            echo '<div class="ack">The Cookie has been saved. Please wait...</div>';
-            echo '</body></html>';
-            sleep(2);
-            die();
-        } */ else if ($_GET["systempassword"] !== $systempassword["pw"]) {
+        }  else if ($_GET["systempassword"] !== $systempassword["pw"]) {
             echo "<p>The password that has been entered does not match the stored password. If you have forgotten the password then go to the server and";
             echo " delete the file " . $varfile_global . ".";
         } else {
             echo '<div class="ack">Please continue.</div>';
         }
         echo '<div class="ack">Thank you.</div>';
-        // write2config(true);
+        write2config(true);
         echo '<a href="index.php?xxxxid=1&t=' . time() . '"><h3>Continue...</h3></a>';
         echo '</body></html>';
         sleep(1);
@@ -1134,6 +1114,7 @@ if (isset($_GET["imgout"])) {
             file_put_contents($filename, $out);
             echo '<h1><a href="' . $filename . '" >Download ' . $filename . ' </a></h1>';
         }
+        write2config(); 
         die();
     }
     // Export as csv ends here. 
@@ -1148,6 +1129,7 @@ if (isset($_GET["imgout"])) {
         echo '<input type="submit" value="Submit">';
         echo '</form>';
         echo '<p><a href="index.php">Home</a>';
+        write2config(); 
         die();
     }
     if (isset($_GET["clarifaikey"])) {
@@ -1157,10 +1139,11 @@ if (isset($_GET["imgout"])) {
         } else {
             $clarifaicount[2] = $_GET["clarifaikey"];
         }
-        write2config(true);
+       
         echo "Thank You";
         echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
-        sleep(1);
+        sleep(1); 
+        write2config(true);
         die();
     }
     if (isset($_GET["clarifaiconcept"])) {
@@ -1209,13 +1192,13 @@ if (isset($_GET["imgout"])) {
             echo '(will open in a new window)';
             if (isset($_GET["resetuqt"])) {
                 $stats[$myId]["uqt"] = NULL;
-                write2config();
+                
                 echo '<p><b>This Camera will override other cameras reporting to the same channel.</b><p>';
             } else {
                 echo '<p><b>This Camera may not operate if there is already another camera reporting to this channel.</b><p>';
             }
             echo "</body></html>";
-            sleep(1);
+            write2config();
             die();
         }
         if (isset($_GET["testbestimage"])) {
@@ -1247,6 +1230,7 @@ if (isset($_GET["imgout"])) {
             $bna = findImagesByDate($myId, $data);
 
             displayImages($bna);
+            write2config(); 
             die();
         }
         if (isset($_GET["testautocat"])) {
@@ -1270,7 +1254,7 @@ if (isset($_GET["imgout"])) {
             echo '<span class="button closebtn" onclick="hidebodies()" >⛔</span>';
             echo '</form>';
             echo '<p>';
-
+            unlink($lockfile);
             die();
         }
         if (isset($_GET["thetargeteta"])) {
@@ -1313,6 +1297,7 @@ if (isset($_GET["imgout"])) {
             echo '<input  type="submit" value="Submit">';
             echo '</form>';
             echo '<p><a href="index.php">Home (no change)</a>';
+            unlink($lockfile);
             die();
         }
         if (isset($_GET["thejpgcompression"])) {
@@ -1357,6 +1342,7 @@ if (isset($_GET["imgout"])) {
             sort($t);
             saveasgifs($t, 20, isset($_GET["showdate"]));
             sleep(1);
+            write2config(); 
             die("<p>Thank you</p>");
         }
         if (isset($_GET["unsetperformance"])) {
@@ -1379,6 +1365,7 @@ if (isset($_GET["imgout"])) {
             }
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b>';
             echo "  clarifaicount=$clarifaicount[0]  <p>";
+            write2config(); 
             sleep(1);
             die();
         }
@@ -1567,10 +1554,11 @@ if (isset($_GET["imgout"])) {
             } else {
                 echo "<br><em>No reported errors</em>";
             }
+            write2config();
             echo '</body></html>';
             die();
         }
-        write2config();
+      
         if (isset($_GET["showclarifai"])) {
             // var_dump($clarifaicount);
             if (isset($_GET["resetclarifai"])) {
@@ -1633,6 +1621,7 @@ if (isset($_GET["imgout"])) {
             // var_dump($autocat);
             echo "\r\n";
             echo '</body></html>';
+            write2config(); 
             die();
         }
         /*
@@ -1651,6 +1640,7 @@ if (isset($_GET["imgout"])) {
             $fastmode[$myId] = 8;
             echo "\r\n";
             echo '</body></html>';
+            unlink($lockfile);
             die();
         }
 
@@ -1688,6 +1678,7 @@ if (isset($_GET["imgout"])) {
             }
 
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b><p>';
+            unlink($lockfile);
             die();
         }
         if (isset($_GET["setgap"])) {
@@ -1781,19 +1772,7 @@ if (isset($_GET["imgout"])) {
             } else {
                 echo "<p>Target " . $_GET["removetarget"] . " not found by Camera $myId. <p>";
             }
-        }/*
-        if (isset($_GET["resetzoom"])) {
-            $zoom[$myId] = 1;
-            $zoomX[$myId] = 0.5;
-            $zoomY[$myId] = 0.5;
-
-            echo "<p>Zoom Center is now at x =" . round(100 * $zoomX[$myId], 2) . "%, y=" . round(100 * $zoomY[$myId], 2) . "%.<p>";
-            echo '<a href="index.php?day=today&time=' . time() . '&id=' . $myId . '" >Home</a><p>';
-            write2config();
-            sleep(1);
-            echo "</body></html>";
-            die();
-} else */
+        }
 
         if (isset($_GET["resetzoom"])    || isset($_GET["zoom"])) {
             $zoomX[$myId] = abs($_GET["xC"] ?? 0.5);
@@ -1849,6 +1828,7 @@ if (isset($_GET["imgout"])) {
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
         echo '</body>   </html>';
+        @unlink($lockfile); 
     } else {
         error_reporting(-1);
         echo "<h1>Welcome to myCCTV!</h1><em>Choose a camera below</em><p>";
@@ -1890,6 +1870,7 @@ if (isset($_GET["imgout"])) {
 
         echo "\r\n";
         echo '</body></html>';
+        @unlink($lockfile); 
         die();
     }
 
@@ -2234,8 +2215,21 @@ if (isset($_GET["imgout"])) {
 
     function write2config($cam_agnostic = false)
     {
-        global $varfile, $varfile_global;
+        global $iowntheconfigfile, $lockfile; 
         global $errinfo;
+        if( $iowntheconfigfile === false ) { 
+            $cc = 0; 
+            while(file_exists($lockfile) && $cc++ < 5 ) { 
+                sleep(1);
+            }
+            if( file_exists($lockfile) ) { 
+                $errinfo["lockfile"] = gmdate("Y-m-d H:i:s") . " - Force take over of lockfile.";
+            }
+            touch($lockfile); 
+            $iowntheconfigfile = true; 
+        }
+        global $varfile, $varfile_global;
+       
         global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
@@ -2304,6 +2298,11 @@ if (isset($_GET["imgout"])) {
         // $datei = fopen("config.php", "w");
 
         file_put_contents($savefile, $content, LOCK_EX);
+        if(file_exists($lockfile)) {      
+                  unlink($lockfile); 
+        } else { 
+            echo "lockfile not found; should have been there?!"; 
+        }
     }
     function echoSetupMenuA($myId)
     {
@@ -3148,7 +3147,7 @@ if (isset($_GET["imgout"])) {
         $tgtoverlay = addTargets($myId);
         // var_dump($tgtoverlay); 
 
-        write2config();
+        // write2config();
         // var_dump($basenamesNoDuplicates);
         $lastBn = null;
 

@@ -20,7 +20,7 @@ include_once "./util.php";
                 linear-gradient(90deg, #B71 2%, #fb1 0, #fb1 98%, #B71 0%)0 0 #fb1;
             background-size: 40px 60px;
         }
- 
+
 
         .mainframe {
             overflow: hidden;
@@ -178,8 +178,8 @@ include_once "./util.php";
         <button class="buttontop button" id="manage" name="manage">🔨</button>
         <div id="myDropdown" class="dropdown-content">
             <a href="index.php"><button class="button">Home</button></a>
-          
-     
+
+
             <br>
             <div class="dropdownsub">
                 <button class="button">Setup &raquo;</button>
@@ -197,7 +197,7 @@ include_once "./util.php";
                 <button class="button">Version &raquo;</button>
                 <div class="dropdownsub-content">
                     <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Check for Update</button>
-                    </div>
+                </div>
             </div>
             <div class="dropdownsub">
                 <button class="button">Animate &raquo;</button>
@@ -214,7 +214,7 @@ include_once "./util.php";
 
     <select class="button select" id="topselect" onChange="selectCam()" onClick="selectCam()">
         <?php
-       // $numbers = array("0", "🏡", "🧱", "🚗", "👨", "🛏️", "🛋️", "🌳");
+        // $numbers = array("0", "🏡", "🧱", "🚗", "👨", "🛏️", "🛋️", "🌳");
         $tgts = glob("img/*0*/", GLOB_ONLYDIR);
         $cams = array();
         foreach ($tgts as $tgtdir) {
@@ -222,13 +222,13 @@ include_once "./util.php";
             $cams[$k] = $k;
         }
 
-        $cams[intval($_GET["id"] ?? 1 ) ] = intval($_GET["id"] ?? 1 ) ; 
-      
+        $cams[intval($_GET["id"] ?? 1)] = intval($_GET["id"] ?? 1);
+
 
 
         foreach ($cams as $j) {
             echo "<option name=$j value=$j ";
-            if (intval($_GET["id"] ?? 1 ) == $j) {
+            if (intval($_GET["id"] ?? 1) == $j) {
                 echo " selected ";
             }
             // $jj = $numbers[$j] ?? $j;
@@ -262,31 +262,31 @@ include_once "./util.php";
     <button class="buttontop button" id="justGO" onClick="goFromTo()">🔄</button>
     <button class="buttontop button tooltip" id="sortbtn" title="Order chronologically or by importance." onClick="toggleSort()">🕰️</button>
 
-    
+
     <button hidden=1 class="buttontop button" id="testbestimage" onClick="goTo('index.php?t='+Date.now()+'&howmany=7&testbestimage=1')">🔮</button>
 
-    &NonBreakingSpace; &NonBreakingSpace; 
+    &NonBreakingSpace; &NonBreakingSpace;
 
     <span class="button datetime" onmouseover="comeDateGlue()" onmouseout="leaveDateGlue()">
         <div class="dropdown">
             <button class="buttontop button" id="byday" name="day">📆</button>
             <div id="myDropdown2" class="dropdown-content">
                 <div class="dropdownsub">
-                    <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&howmany=12')">Today</button>
+                    <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&howmany=12')">Today</button>
                     <div class="dropdownsub-content">
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=300&addlast=1&howmany=12')">Last 5 min</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=1800&addlast=1&howmany=12')">&frac12; hr ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=3600&addlast=1&howmany=12')">1 hr ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=7200&howmany=12')">2 hrs ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=21600&howmany=12')">6 hrs ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=43200&howmany=12')">12 hrs ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=7200&minimumage=1800&howmany=12')">&frac12;-2 hrs ago</button>
-                        <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=today&agelimit=5400&minimumage=1800&howmany=12')">&frac12;-1&frac12; hrs ago</button>
-                   
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=300&addlast=1&howmany=12')">Last 5 min</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=1800&addlast=1&howmany=12')">&frac12; hr ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=3600&addlast=1&howmany=12')">1 hr ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=7200&howmany=12')">2 hrs ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=21600&howmany=12')">6 hrs ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=43200&howmany=12')">12 hrs ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=7200&minimumage=1800&howmany=12')">&frac12;-2 hrs ago</button>
+                        <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=today&agelimit=5400&minimumage=1800&howmany=12')">&frac12;-1&frac12; hrs ago</button>
+
                     </div>
                 </div>
-                <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=yesterday&howmany=12')">Yesterday</button>
-                <button class="button" onClick="goTo('index.php?t='+Date.now()+' &day=todayyesterday&howmany=12')">Today & Yesterday</button>
+                <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=yesterday&howmany=12')">Yesterday</button>
+                <button class="button" onClick="goTo('index.php?t='+Date.now()+'&day=todayyesterday&howmany=12')">Today & Yesterday</button>
 
                 <?php
                 for ($i = 2; $i < 8; $i++) {
@@ -310,9 +310,9 @@ include_once "./util.php";
     <script>
         var id = <?php echo intval($_GET["id"] ?? 1); ?>;
         <?php
-        if($_SERVER['SERVER_NAME'] === "localhost") { 
+        if ($_SERVER['SERVER_NAME'] === "localhost") {
             echo "var httpx = 'http';";
-        } else { 
+        } else {
             echo "var httpx = 'https';";
         }
         ?>
@@ -387,14 +387,14 @@ include_once "./util.php";
         function toggleTarget() {
             if (document.getElementById("target").innerHTML == "🎯") {
                 document.getElementById("target").innerHTML = "✨";
-                f = document.getElementById("mainframe"); 
-                f.contentWindow.showtargets(true); 
+                f = document.getElementById("mainframe");
+                f.contentWindow.showtargets(true);
             } else {
                 document.getElementById("target").innerHTML = "🎯";
-                f = document.getElementById("mainframe"); 
-                f.contentWindow.showtargets(false); 
+                f = document.getElementById("mainframe");
+                f.contentWindow.showtargets(false);
             }
-           // goFromTo();
+            // goFromTo();
         }
 
         function toggleDirection() {
@@ -540,7 +540,7 @@ include_once "./util.php";
             str = str.replace(/howmany=\d+/g, "howmany=" + document.getElementById("howmany").value);
             str = str.replace(/id=\d+/g, "id=" + id);
 
-            setTimeout(updateStatusEmoji, 10); 
+            setTimeout(updateStatusEmoji, 10);
             document.getElementById("target").innerHTML = "🎯";
 
             if (str.startsWith("http")) {
@@ -553,7 +553,7 @@ include_once "./util.php";
                     includeFL = "&includefirstlast=1";
                 }
 
-                newsrc = httpx+"://" + window.location.host + "" + dir + "/" + str + '&id=' + id + '&a=1' + includeFL + "&" + getDirection() + "=1&" + getSort() + "=1";
+                newsrc = httpx + "://" + window.location.host + "" + dir + "/" + str + '&id=' + id + '&a=1' + includeFL + "&" + getDirection() + "=1&" + getSort() + "=1";
                 console.log("(b)" + newsrc);
                 document.getElementById("mainframe").src = newsrc;
             }
@@ -564,34 +564,34 @@ include_once "./util.php";
             var pn = window.location.pathname;
             var dir = pn.substring(0, pn.lastIndexOf('/'));
             console.log(dir);
-            document.getElementById("statsframe").src = httpx+"://" + window.location.host + "" + dir + "/index.php?time=" + Date.now() + "&showstats&id=" + id;
-            setTimeout(updateStatusEmoji, 10); 
+            document.getElementById("statsframe").src = httpx + "://" + window.location.host + "" + dir + "/index.php?time=" + Date.now() + "&showstats&id=" + id;
+            setTimeout(updateStatusEmoji, 10);
 
         }
         // var to = setInterval(updateStatusEmoji, 60000); 
 
 
         function updateStatusEmoji() {
-            console.log("update Status Emoji called"); 
+            console.log("update Status Emoji called");
             var pn = window.location.pathname;
             var dir = pn.substring(0, pn.lastIndexOf('/'));
             var xmlhttp = new XMLHttpRequest();
-            var url =  httpx+"://" + window.location.host + "" + dir + "/info.php?t=s"+Date.now()+"&id=" + id + "&statusemoji=1";
+            var url = httpx + "://" + window.location.host + "" + dir + "/info.php?t=s" + Date.now() + "&id=" + id + "&statusemoji=1";
 
             xmlhttp.onreadystatechange = function() {
-                console.log("url = "+url); 
-                console.log("Hello from bla: "+this.readyState );
-                if (this.readyState == 4 && this.status == 200) { 
-                    console.log("Hello from bla: "+this.responseText );
-                    console.log("url = "+url); 
+                console.log("url = " + url);
+                console.log("Hello from bla: " + this.readyState);
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log("Hello from bla: " + this.responseText);
+                    console.log("url = " + url);
                     var x = document.getElementById("statusemoji");
                     var t = JSON.parse(this.responseText);
-                      x.innerHTML = t.emoji;
+                    x.innerHTML = t.emoji;
                 }
             };
             xmlhttp.open("GET", url, true);
             xmlhttp.send();
-           
+
         }
 
         function removeFrame() {
