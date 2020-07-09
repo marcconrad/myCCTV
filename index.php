@@ -82,7 +82,7 @@ if (count($_POST) > 0) {
      * when a new id shows up. 
      * */
     if ($myId <= 0 || $myId > 13) {
-        $errinfo["wrongid"] = date("Y-m-d H:i:s") . " - POST Call with id= $myId.";
+        $errinfo["wrongid"] = gmdate("Y-m-d H:i:s") . " - POST Call with id= $myId from " . $_SERVER["REMOTE_ADDR"] . ".";
         write2config(true);
         sleep(1);
         die('{"error"  : "id not allowed" }');
@@ -102,7 +102,12 @@ if (count($_POST) > 0) {
         die('{"error"  : "no uqt specified" }');
     }
     $uqtprevious = $stats[$myId]["uqt"] ?? false;
-
+    if (isset($_POST["payloadtoohigh"])) {
+        $t = $_POST["payloadtoohigh"];
+        $maxt = $_POST["maxpostsize"];
+        $errinfo["payloadhigh"] = gmdate("Y-m-d H:i:s") . " - POST Call tried to send too much data (" . $t . " bytes); no images sent; id= $myId.";
+        write2config(true);
+    }
 
     /**
      * Compare day when last accessed and day when now accessed. If new day (midnight) the archive all days
@@ -188,6 +193,7 @@ if (count($_POST) > 0) {
         "alivesince" => localtimeCam($myId, ($_POST["alivesince"] ?? false)),
         "requests" => ($_POST["requests"] ?? false),
         "timeouts" => ($_POST["timeouts"] ?? false),
+        "highpayloads" => ($_POST["highpayloads"] ?? false),
         "errors" => ($_POST["errors"] ?? false),
         "totalImgs" => ($_POST["totalImgs"] ?? false),
         "n200" => ($_POST["n200"] ?? false),
@@ -233,6 +239,7 @@ if (count($_POST) > 0) {
     if (isset($clarifaicount) && (time() - $clarifaicount[1]) > 720) { // 1200 = every 20 minutes; every x seconds
         $clarifaicount[0] = max($clarifaicount[0] - 1, 0);
         $clarifaicount[1] = time();
+        write2config(true);
     }
     /**
      * Here we check if there is a cat. Most requests will be denied because 'too recently', therefore we do 
@@ -319,6 +326,7 @@ if (count($_POST) > 0) {
     echo ', "jpgcompression" : ' . ($jpgcompression[$myId] ?? 0.7);
     echo ', "twidth" : ' . $twidth;
     echo ', "theight" : ' . $theight;
+    echo ', "post_max_size" : ' . return_bytes(ini_get('post_max_size'));
 
 
 
@@ -328,6 +336,7 @@ if (count($_POST) > 0) {
      * Some cummulative performane data: in particular how much eta (see above) is used on the server on average; 
      * separatly calculated for normal and fastmode
      */
+
     if (!isset($performance[$myId]) || $performance[$myId][0] == -1) {
         $performance[$myId] = array(0, 0, 0, 0, 0, 0, 0);
     }
@@ -361,7 +370,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     write2config(true);
     die();
 }
+/**
+ * Utility function to return post_max_size in bytes.
+ */
+function return_bytes($val)
+{
+    $val = trim($val);
+    $last = strtolower($val[strlen($val) - 1]);
+    $val = intval($val);
+    switch ($last) {
+            // The 'G' modifier is available since PHP 5.1.0
+        case 'g':
+            $val *= 1024;
+        case 'm':
+            $val *= 1024;
+        case 'k':
+            $val *= 1024;
+    }
 
+    return $val;
+}
 
 /**
  * Logs any interaction with Clarifai service. 
@@ -1302,8 +1330,8 @@ if (isset($_GET["imgout"])) {
 
             $y = explode(",", $videoinfo[$myId] ?? array("640,480"));
 
-            $w = max(1,min($w, $y[0] ?? 640));
-            $h = max(1,min($h, $y[1] ?? 480));
+            $w = max(1, min($w, $y[0] ?? 640));
+            $h = max(1, min($h, $y[1] ?? 480));
 
             $imagedimensions[$myId] = array("w" => $w, "h" => $h);
 
@@ -1373,8 +1401,8 @@ if (isset($_GET["imgout"])) {
             }
             $togp = ($toggleCapture[$myId] ?? 0);
             echo '<b>' . ($togp == 0 ? " capturing" : ($togp == 1 ? " request toggle" : "paused")) . '</b>. ';
-            if($togp == 2 ) {
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
+            if ($togp == 2) {
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
             }
             $ntgt = count(myTargets($myId));
             echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
@@ -1479,6 +1507,7 @@ if (isset($_GET["imgout"])) {
             echo " and " . ($k["nNot200"] ?? "?");
             echo " with other status codes. " . ($k["jsonerr"] ?? "?") . " requests were processed by the server; but controlledly rejected with error. ";
             echo " " . ($k["jsoninvalid"] ?? "?") . " requests returned invalid json. ";
+            echo " Images were dropped " . ($k["timeouts"] ?? "?") . " times because of too high payload. ";
 
             echo ($k["totalImgs"] ?? "?") . " images were sent in total of which " . ($k["totalImgsSaved"] ?? "?") . " have been acknowledged by the Server";
 
@@ -2292,15 +2321,21 @@ if (isset($_GET["imgout"])) {
         echo '<li><a href="index.php?time=' . time() . '&id=' . $myId . '&settgts=1&day=today">Set targets</a></li>';
 
         echo '<li>Gap Between Posts: ';
-        for ($j = 10; $j < 510; $j += 20) {
+        $nnn = array(1, 10 );
+        for ($j = 20; $j < 510; $j += 20) {
+            $nnn[] = $j;
+        }
+        foreach ($nnn as $j) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setgap=' . $j . '">' . $j . ' </a>;';
         }
         echo ' Seconds</li>';
 
         echo '<li>Maximum number of images per post: ';
-        $nnn = array(1, 10); 
-        for ($j = 20; $j < 240; $j += 20) { $nnn[] = $j; }
-        foreach($nnn as $j ) {
+        $nnn = array(1, 10, 20, 30);
+        for ($j = 50; $j < 250; $j += 20) {
+            $nnn[] = $j;
+        }
+        foreach ($nnn as $j) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&setmaximages=' . $j . '">#' . $j . ' </a>;';
         }
         echo '<br>';
@@ -2442,7 +2477,7 @@ if (isset($_GET["imgout"])) {
 
         if (isset($_GET["setzoom"])) {
             $fastmode[$myId] = 20;
-            echo "<p><b>Click on an image below to set zoom. <a href=\"index.php?time=" . time() . "&id=".$myId."&nogallery=1&nomenu=1&howmany=9&resetzoom=1\">Reset Zoom</a></p>";
+            echo "<p><b>Click on an image below to set zoom. <a href=\"index.php?time=" . time() . "&id=" . $myId . "&nogallery=1&nomenu=1&howmany=9&resetzoom=1\">Reset Zoom</a></p>";
         } else if (isset($_GET["settgts"])) {
             $fastmode[$myId] = 20;
             echo "<p><b>Click on an image below to set targets. </b></p>";
@@ -2636,7 +2671,9 @@ if (isset($_GET["imgout"])) {
     function average($tgt, $img, $addTarget = false, $highlight = false)
     {
         global $focusX, $focusY;
-        if($img === false ) { return 0; }
+        if ($img === false) {
+            return 0;
+        }
         $w = imagesx($img);
         $h = imagesy($img);
         $r = $g = $b = 0;
@@ -3029,7 +3066,9 @@ if (isset($_GET["imgout"])) {
                 $im = @imagecreatefromjpeg($sourcebn); // does not work for png
             } else {
                 $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
-                if($im) { imagesavealpha($im, true); }
+                if ($im) {
+                    imagesavealpha($im, true);
+                }
             }
             foreach (myTargets($myId) as $x) {
                 if ($x == $bucket) {
@@ -3045,7 +3084,7 @@ if (isset($_GET["imgout"])) {
             if ($bn) {
                 $outfilename = "tgt" . $bucket . "tgt" . time() . 'z' . $bucket . 'z.jpg';
                 imagejpeg($im, $imgoutfoldername . $outfilename);
-            } else if($im ) {
+            } else if ($im) {
                 imagepng($im, $imgoutfoldername . $outfilename);
             }
             $res[$bucket] = $outfilename;

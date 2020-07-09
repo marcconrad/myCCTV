@@ -63,8 +63,7 @@
             </p>
             <p>
 
-                <a href="https://perisic.com/cam/img/old/d20200616/t401/">Go to Folder</a>
-                <a href="https://perisic.com/cam/img/old/">Go img old to Folder</a>
+               
             </p>
             <p>
                 */

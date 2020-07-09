@@ -83,8 +83,8 @@
         <button class="button button5" onclick="hideSomething('olinfo')">Show/Hide Debug Info</button>
         <script>
             <?php
-           // $updateInMilliseconds = (intval($_GET["update"] ?? 0 ) > 0 ? intval($_GET["update"] ?? 0) : 1000);
-           $updateInMilliseconds = intval($_GET["update"] ?? 1000 ) ;
+            // $updateInMilliseconds = (intval($_GET["update"] ?? 0 ) > 0 ? intval($_GET["update"] ?? 0) : 1000);
+            $updateInMilliseconds = intval($_GET["update"] ?? 1000);
             echo "var updateInMilliseconds = " . $updateInMilliseconds . ";";
 
             $uniquetoken = "U" . base_convert("b" . rand(11, 99) . (time() % rand(99999, 999999)), rand(12, 24), 33);
@@ -94,9 +94,9 @@
 
             var newUpdateInMilliseconds = updateInMilliseconds;
             var imgMaxHardLimit = 240;
-            var gapBetweenPostsHardLowerLimit = 10000; // Millieconds
+            var gapBetweenPostsHardLowerLimit = 1000; // Millieconds
             var gapBetweenPostsHardUpperLimit = 3600000; // Millieconds
-
+        
 
 
             var battery;
@@ -158,7 +158,11 @@
                 if (donotsend) {
                     addLI("cycle", getTimeNow(true) + "REQUEST IN PROGRESS; PLEASE TRY AGAIN LATER", 3);
                 } else {
-                    pauseCapture = !pauseCapture;
+                    if (Number.isInteger(pauseCapture)) {
+                        pauseCapture = false;
+                    } else {
+                        pauseCapture = !pauseCapture;
+                    }
                 }
             }
 
@@ -177,32 +181,35 @@
             var twidth = 640; // target width
             var theight = 480; // target width
             var jpgcompression = 0.7;
+            var maxpostsize = 8388608; // 8M
+
 
             var droppedFrames = 0;
             var averageDroppedFrames = 0;
             var numberOfRequests = 0;
             var numberOfTimeouts = 0;
+            var numberOfHighPayloads = 0;
             var numberOfConnectErrors = 0;
-            var numberOfSuccesses200 = 0; 
-            var numberOfSuccessesNot200 = 0; 
-            var totalImagesSent = 0; 
-            var totalImagesSavedByServer = 0; 
+            var numberOfSuccesses200 = 0;
+            var numberOfSuccessesNot200 = 0;
+            var totalImagesSent = 0;
+            var totalImagesSavedByServer = 0;
 
-            var totaljsonreturnerror = 0; 
-            var totalinvalidjson = 0; 
+            var totaljsonreturnerror = 0;
+            var totalinvalidjson = 0;
 
             var donotsend = false;
 
             var lastConnect = Date.now();
             var minWaitBetweenConnections = 30000; // in milliseconds
 
-           
+
 
             document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
             document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
             <?php
             // echo 'var maxImagesPost = ' . (intval($_GET["imagesperpost"]) ? intval($_GET["imagesperpost"]) : 60) . ';';
-            echo 'var maxImagesPost = ' . intval($_GET["imagesperpost"] ?? 60); 
+            echo 'var maxImagesPost = ' . intval($_GET["imagesperpost"] ?? 60);
             ?>
 
             var timeTaken = "notworking";
@@ -229,9 +236,9 @@
                 ].join(separator);
             };
 
-             var dt = new Date(); 
-             var  alivesince = Math.round(dt.getTime() / 1000);
-            
+            var dt = new Date();
+            var alivesince = Math.round(dt.getTime() / 1000);
+
             function addLI(listId, what, maxNumber = 5) {
 
                 var newItem = document.createElement("LI");
@@ -267,7 +274,7 @@
 
             function updateClock() {
 
-                addLI("cycle", getTimeNow(true) + " (" + updateInMilliseconds + ") " + (pauseCapture ? "pause" : "rec"), 4);
+                addLI("cycle", getTimeNow(true) + " (" + updateInMilliseconds + ") " + (pauseCapture ? "pause: "+pauseCapture : "rec"), 4);
                 var now = new Date();
 
                 var elem = document.getElementById('clock_time');
@@ -394,7 +401,7 @@
                     } else { // if(d < 1)
                         // newUpdateInMilliseconds = 2 *  updateInMilliseconds;
                         if (maxImagesPost == 0) {
-                           //  newUpdateInMilliseconds = minWaitBetweenConnections;
+                            //  newUpdateInMilliseconds = minWaitBetweenConnections;
                         } else {
                             newUpdateInMilliseconds = Math.round(minWaitBetweenConnections / maxImagesPost);
                         }
@@ -433,19 +440,20 @@
                         // var bat = document.getElementById('batteryinfo').innerHTML; 
                         var info = "re" + numberOfRequests + ";up" + updateInMilliseconds + ";to" + numberOfTimeouts + ";er" + numberOfConnectErrors + ";";
                         info += "vw" + video.videoWidth + "vh" + video.videoHeight;
-                        totalImagesSent += imagesAdded; 
+                        totalImagesSent += imagesAdded;
                         var statusInfo = "n=" + imagesAdded + "&tzo=" + tzo + "&bat=" + batteryinfo +
                             "&alivesince=" + alivesince +
-                            "&jsonerr=" +  totaljsonreturnerror +
+                            "&jsonerr=" + totaljsonreturnerror +
                             "&jsoninvalid=" + totalinvalidjson +
                             "&requests=" + numberOfRequests +
                             "&timeouts=" + numberOfTimeouts +
+                            "&highpayloads="+numberOfHighPayloads+
                             "&errors=" + numberOfConnectErrors +
                             "&updms=" + updateInMilliseconds +
                             "&totalImgs=" + totalImagesSent +
-                            "&totalImgsSaved=" + totalImagesSavedByServer + 
-                            "&n200=" +  numberOfSuccesses200 + 
-                            "&nNot200=" +  numberOfSuccessesNot200 +   
+                            "&totalImgsSaved=" + totalImagesSavedByServer +
+                            "&n200=" + numberOfSuccesses200 +
+                            "&nNot200=" + numberOfSuccessesNot200 +
                             "&uqt=" + uniquetoken +
                             "&dpf=" + droppedFrames +
                             "&avdpf=" + averageDroppedFrames +
@@ -454,8 +462,12 @@
                             "&id=" + myId + "&pauseCapture=" + (pauseCapture ? 1 : 0);
                         var dataToPost = thePostData + statusInfo;
                         thePostData = "";
-
-                        addLI("statusinfo", getTimeNow() + ": " + statusInfo + " length=" + dataToPost.length, 5);
+                        dtpl = dataToPost.length;
+                        if( dtpl > (maxpostsize - 1024) ) { // drop all images and send error
+                            dataToPost = statusInfo+"&payloadtoohigh="+dtpl+"&maxpostsize="+maxpostsize; 
+                            numberOfHighPayloads++; 
+                        }
+                        addLI("statusinfo", getTimeNow() + ": " + statusInfo + " actual length=" + dataToPost.length +" planned length=" + dtpl, 5);
 
                         ajax.open("POST", "index.php", true); // true == asynchronous request.
                         ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -479,7 +491,7 @@
                         // ajax.onreadystatechange = function() { // see https://teamtreehouse.com/community/xhronreadystatechange-vs-xhronload
                         ajax.onload = function() {
                             document.getElementById('ajaxresponse').innerHTML = ajax.responseText;
-                          
+
                             var resp = ajax.responseText;
 
                             try {
@@ -491,15 +503,17 @@
                                 zoomX = (parsed.zoomX ? parsed.zoomX : 0.5);
                                 zoomY = (parsed.zoomY ? parsed.zoomY : 0.5);
                                 twidth = (parsed.twidth ? parsed.twidth : 640); // targeted image width
-                                theight= (parsed.theight? parsed.theight : 480); // targeted image height 
+                                theight = (parsed.theight ? parsed.theight : 480); // targeted image height 
 
-                               // document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
+                                maxpostsize = (parsed.post_max_size? parsed.post_max_size : 4096); 
+
+                                // document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
                                 // document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
-                                
+
                                 jpgcompression = (jpgcompression ? parsed.jpgcompression : 0.7);
 
-                                totaljsonreturnerror += (parsed.error ?  1 : 0 );
-                                totalImagesSavedByServer += (parsed.imsaved ? parsed.imsaved : 0); 
+                                totaljsonreturnerror += (parsed.error ? 1 : 0);
+                                totalImagesSavedByServer += (parsed.imsaved ? parsed.imsaved : 0);
 
                                 //  newUpdateInMilliseconds = ( parsed.update ? parsed.update : updateInMilliseconds);
                                 speedupfactor = (parsed.speedupfactor ? parsed.speedupfactor : 1);
@@ -524,17 +538,17 @@
                                 // if( newzoom != zoom ) { zoom = newzoom; }  
                             } catch (e) {
                                 document.getElementById('info8').innerHTML = "JSON parse error. e=" + e + " resp=" + resp + ' at ' + getTimeNow();
-                                totalinvalidjson++; 
+                                totalinvalidjson++;
                             }
 
                             document.getElementById('info4').innerHTML = JSON.stringify(parsed);
                             addLI("ajaxreceived", getTimeNow() + ": " + JSON.stringify(parsed), 5)
                             addLI("ajaxsuccess", getTimeNow() + ": Received " + ajax.status, 4);
-                            if( ajax.status == 200 ) { 
+                            if (ajax.status == 200) {
                                 numberOfSuccesses200++;
-                            } else { 
-                                numberOfSuccessesNot200++; 
-                            } 
+                            } else {
+                                numberOfSuccessesNot200++;
+                            }
                             donotsend = false;
 
 
