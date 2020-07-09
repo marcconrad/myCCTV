@@ -1269,6 +1269,7 @@ if (isset($_GET["imgout"])) {
             echo '<input  type="submit" value="Submit">';
             echo '<p>';
             echo '<h2>Please enter below image width and height</h2>';
+            echo '<em>Please note that values other than 640 x 480 or 320 x 240 might lead to inconsistencies.</em><p>';
             $x = explode(",", $videoinfo[$myId] ?? array());
             if (count($x) < 4) {
                 echo "No Camera information available.";
