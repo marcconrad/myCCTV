@@ -112,7 +112,7 @@ if (count($_POST) > 0) {
         $t = $_POST["payloadtoohigh"];
         $maxt = $_POST["maxpostsize"];
         $errinfo["payloadhigh"] = gmdate("Y-m-d H:i:s") . " - POST Call tried to send too much data (" . $t . " bytes); no images sent; id= $myId.";
-        write2config(true);
+        write2config(true, true);
     }
 
     /**
@@ -177,7 +177,7 @@ if (count($_POST) > 0) {
 
     if (($timezoneoffset[$_POST["id"]] ?? "y") !== ($_POST["tzo"] ?? "x")) {
         $timezoneoffset[$_POST["id"]]    = $_POST["tzo"] ?? die('{"error"  : "no timezone offset" }');
-        write2config(true); // Timezoneoffset is used by homepage, therefore added to global config file. 
+        write2config(true, true); // Timezoneoffset is used by homepage, therefore added to global config file. 
     }
 
     /**
@@ -199,6 +199,7 @@ if (count($_POST) > 0) {
         "alivesince" => localtimeCam($myId, ($_POST["alivesince"] ?? false)),
         "requests" => ($_POST["requests"] ?? false),
         "timeouts" => ($_POST["timeouts"] ?? false),
+        "donotsends" => ($_POST["donotsends"] ?? false),
         "highpayloads" => ($_POST["highpayloads"] ?? false),
         "errors" => ($_POST["errors"] ?? false),
         "totalImgs" => ($_POST["totalImgs"] ?? false),
@@ -245,7 +246,7 @@ if (count($_POST) > 0) {
     if (isset($clarifaicount) && (time() - $clarifaicount[1]) > 720) { // 1200 = every 20 minutes; every x seconds
         $clarifaicount[0] = max($clarifaicount[0] - 1, 0);
         $clarifaicount[1] = time();
-        write2config(true);
+        write2config(true, true);
     }
     /**
      * Here we check if there is a cat. Most requests will be denied because 'too recently', therefore we do 
@@ -950,7 +951,8 @@ if (isset($_GET["imgout"])) {
     if (isset($systempassword["c"])) {
         unset($systempassword["c"]);
 
-        write2config(true);
+        write2config(true, true);
+
     }
     if (!isset($systempassword)) {
         echo '<h1>Please enter a new System Password below, then submit</h1>';
@@ -1494,7 +1496,8 @@ if (isset($_GET["imgout"])) {
             echo " and " . ($k["nNot200"] ?? "?");
             echo " with other status codes. " . ($k["jsonerr"] ?? "?") . " requests were processed by the server; but controlledly rejected with error. ";
             echo " " . ($k["jsoninvalid"] ?? "?") . " requests returned invalid json. ";
-            echo " Images were dropped " . ($k["timeouts"] ?? "?") . " times because of too high payload. ";
+            echo " Images were dropped " . ($k["timeouts"] ?? "?") . " times because of too high payload and " . ($k["donotsends"] ?? "?") . 
+            " times because of gap between posts too small. ";
 
             echo ($k["totalImgs"] ?? "?") . " images were sent in total of which " . ($k["totalImgsSaved"] ?? "?") . " have been acknowledged by the Server";
 
@@ -2177,7 +2180,7 @@ if (isset($_GET["imgout"])) {
         $clarifaicount[3] = ($clarifaicount[3] ?? 0) + 1;
         $clarifaicount[4] = ($clarifaicount[4] ?? time());
 
-        write2config(true);
+        write2config(true, true);
 
         return $ret;
         // var_dump($conceptlist); 
@@ -2213,7 +2216,7 @@ if (isset($_GET["imgout"])) {
     }
 
 
-    function write2config($cam_agnostic = false)
+    function write2config($cam_agnostic = false, $leave_locked = false )
     {
         global $iowntheconfigfile, $lockfile; 
         global $errinfo;
@@ -2294,15 +2297,13 @@ if (isset($_GET["imgout"])) {
 
         $content .= PHP_EOL . " ?>";
 
-
-        // $datei = fopen("config.php", "w");
-
         file_put_contents($savefile, $content, LOCK_EX);
-        if(file_exists($lockfile)) {      
+        if(file_exists($lockfile) && $leave_locked === false ) {      
                   unlink($lockfile); 
         } else { 
-            echo "lockfile not found; should have been there?!"; 
+            // echo "lockfile not found; should have been there?!"; 
         }
+        $errinfo["unlocktwice"] = gmdate("Y-m-d H:i:s") . " - Attempt to unlock lockfile twice?!"; // this will only be saved if write2config is called again.
     }
     function echoSetupMenuA($myId)
     {

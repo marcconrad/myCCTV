@@ -187,6 +187,7 @@
             var droppedFrames = 0;
             var averageDroppedFrames = 0;
             var numberOfRequests = 0;
+            var numberOfDonotsends = 0; 
             var numberOfTimeouts = 0;
             var numberOfHighPayloads = 0;
             var numberOfConnectErrors = 0;
@@ -425,6 +426,7 @@
                         thePostData = "";
                         countImages = 0;
                         imagesAdded = 0;
+                        numberOfDonotsends++; 
 
                     } else {
 
@@ -446,6 +448,7 @@
                             "&jsonerr=" + totaljsonreturnerror +
                             "&jsoninvalid=" + totalinvalidjson +
                             "&requests=" + numberOfRequests +
+                            "&donotsends=" + numberOfDonotsends + 
                             "&timeouts=" + numberOfTimeouts +
                             "&highpayloads="+numberOfHighPayloads+
                             "&errors=" + numberOfConnectErrors +
