@@ -1357,13 +1357,19 @@ if (isset($_GET["imgout"])) {
             $myId = intval($_GET["id"] ?? 0);
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             $bntd = bn2bntd($_GET["deletethis"]);
-            $path = bntd2file($myId, $bn, true);
+            $path = bntd2file($myId, $bntd, true);
+            if(count($path) > count(myTargets($myId, true))) { 
+                echo "<p>Something went wrong. Nothing deleted."; 
+                var_dump($path); 
+            } else { 
             foreach ($path as $x) {
                 $a = "tmp/delete_" .basename($x);
                 rename($x,  $a);
                 echo "<br>Moved $x to $a.";
-            }
+            } 
             echo "<p>Note that files are still in tmp folder.<p>";
+        }
+           
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             write2config();
             sleep(1);
