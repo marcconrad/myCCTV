@@ -1,7 +1,7 @@
 <?php
 $start = hrtime(true);
-$lockfile= "tmp/lockpost.txt"; 
-$iowntheconfigfile = false; 
+$lockfile = "tmp/lockpost.txt";
+$iowntheconfigfile = false;
 
 
 if (!file_exists("tmp")) {
@@ -48,10 +48,10 @@ if (!file_exists($varfile_global)) {
     write2config(true);
 }
 
-if(file_exists($lockfile) === false ) { 
+if (file_exists($lockfile) === false) {
     touch($lockfile);
-    $iowntheconfigfile = true; 
-} 
+    $iowntheconfigfile = true;
+}
 include_once $varfile_global;
 include_once $varfile;
 
@@ -458,7 +458,7 @@ if (isset($_GET["imgout"])) {
     header('Content-Type: image/jpeg');
 
     imagejpeg($im, NULL, 100);
-    write2config(); 
+    write2config();
     die();
 }
 ?>
@@ -582,7 +582,7 @@ if (isset($_GET["imgout"])) {
                 divs[i].style.display = 'none';
             }
         }
- 
+
         // Utility to format timestamp
         function time2ymdhis(s) {
             var yyyy = s.substring(0, 4);
@@ -930,7 +930,7 @@ if (isset($_GET["imgout"])) {
             echo '</body></html>';
             sleep(2);
             die();
-        }  else if ($_GET["systempassword"] !== $systempassword["pw"]) {
+        } else if ($_GET["systempassword"] !== $systempassword["pw"]) {
             echo "<p>The password that has been entered does not match the stored password. If you have forgotten the password then go to the server and";
             echo " delete the file " . $varfile_global . ".";
         } else {
@@ -952,7 +952,6 @@ if (isset($_GET["imgout"])) {
         unset($systempassword["c"]);
 
         write2config(true, true);
-
     }
     if (!isset($systempassword)) {
         echo '<h1>Please enter a new System Password below, then submit</h1>';
@@ -1116,7 +1115,7 @@ if (isset($_GET["imgout"])) {
             file_put_contents($filename, $out);
             echo '<h1><a href="' . $filename . '" >Download ' . $filename . ' </a></h1>';
         }
-        write2config(); 
+        write2config();
         die();
     }
     // Export as csv ends here. 
@@ -1131,7 +1130,7 @@ if (isset($_GET["imgout"])) {
         echo '<input type="submit" value="Submit">';
         echo '</form>';
         echo '<p><a href="index.php">Home</a>';
-        write2config(); 
+        write2config();
         die();
     }
     if (isset($_GET["clarifaikey"])) {
@@ -1141,10 +1140,10 @@ if (isset($_GET["imgout"])) {
         } else {
             $clarifaicount[2] = $_GET["clarifaikey"];
         }
-       
+
         echo "Thank You";
         echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
-        sleep(1); 
+        sleep(1);
         write2config(true);
         die();
     }
@@ -1194,7 +1193,7 @@ if (isset($_GET["imgout"])) {
             echo '(will open in a new window)';
             if (isset($_GET["resetuqt"])) {
                 $stats[$myId]["uqt"] = NULL;
-                
+
                 echo '<p><b>This Camera will override other cameras reporting to the same channel.</b><p>';
             } else {
                 echo '<p><b>This Camera may not operate if there is already another camera reporting to this channel.</b><p>';
@@ -1232,7 +1231,7 @@ if (isset($_GET["imgout"])) {
             $bna = findImagesByDate($myId, $data);
 
             displayImages($bna);
-            write2config(); 
+            write2config();
             die();
         }
         if (isset($_GET["testautocat"])) {
@@ -1344,7 +1343,7 @@ if (isset($_GET["imgout"])) {
             sort($t);
             saveasgifs($t, 20, isset($_GET["showdate"]));
             sleep(1);
-            write2config(); 
+            write2config();
             die("<p>Thank you</p>");
         }
         if (isset($_GET["unsetperformance"])) {
@@ -1354,7 +1353,21 @@ if (isset($_GET["imgout"])) {
             sleep(1);
             die("Thank you");
         }
-
+        if (isset($_GET["deletethis"])) {
+            echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+            $bn = $_GET["deletethis"];
+            $path = bn2file($bn, true);
+            foreach ($path as $x) {
+                $a = "tmp/delete_" .basename($x);
+                rename($x,  $a);
+                echo "<br>Moved $x to $a.";
+            }
+            echo "Note that files are still in tmp folder.<p>";
+            echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+            write2config();
+            sleep(1);
+            die();
+        }
         if (isset($_GET["clarifaithis"])) {
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             $clarifaiinfo = clarifaiImage($_GET["clarifaithis"]);
@@ -1367,7 +1380,7 @@ if (isset($_GET["imgout"])) {
             }
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b>';
             echo "  clarifaicount=$clarifaicount[0]  <p>";
-            write2config(); 
+            write2config();
             sleep(1);
             die();
         }
@@ -1496,8 +1509,8 @@ if (isset($_GET["imgout"])) {
             echo " and " . ($k["nNot200"] ?? "?");
             echo " with other status codes. " . ($k["jsonerr"] ?? "?") . " requests were processed by the server; but controlledly rejected with error. ";
             echo " " . ($k["jsoninvalid"] ?? "?") . " requests returned invalid json. ";
-            echo " Images were dropped " . ($k["highpayloads"] ?? "?") . " times because of too high payload and " . ($k["donotsends"] ?? "?") . 
-            " times because of gap between posts too small. ";
+            echo " Images were dropped " . ($k["highpayloads"] ?? "?") . " times because of too high payload and " . ($k["donotsends"] ?? "?") .
+                " times because of gap between posts too small. ";
 
             echo ($k["totalImgs"] ?? "?") . " images were sent in total of which " . ($k["totalImgsSaved"] ?? "?") . " have been acknowledged by the Server";
 
@@ -1561,7 +1574,7 @@ if (isset($_GET["imgout"])) {
             echo '</body></html>';
             die();
         }
-      
+
         if (isset($_GET["showclarifai"])) {
             // var_dump($clarifaicount);
             if (isset($_GET["resetclarifai"])) {
@@ -1624,7 +1637,7 @@ if (isset($_GET["imgout"])) {
             // var_dump($autocat);
             echo "\r\n";
             echo '</body></html>';
-            write2config(); 
+            write2config();
             die();
         }
         /*
@@ -1831,7 +1844,7 @@ if (isset($_GET["imgout"])) {
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
         echo '</body>   </html>';
-        @unlink($lockfile); 
+        @unlink($lockfile);
     } else {
         error_reporting(-1);
         echo "<h1>Welcome to myCCTV!</h1><em>Choose a camera below</em><p>";
@@ -1873,7 +1886,7 @@ if (isset($_GET["imgout"])) {
 
         echo "\r\n";
         echo '</body></html>';
-        @unlink($lockfile); 
+        @unlink($lockfile);
         die();
     }
 
@@ -2216,23 +2229,23 @@ if (isset($_GET["imgout"])) {
     }
 
 
-    function write2config($cam_agnostic = false, $leave_locked = false )
+    function write2config($cam_agnostic = false, $leave_locked = false)
     {
-        global $iowntheconfigfile, $lockfile; 
+        global $iowntheconfigfile, $lockfile;
         global $errinfo;
-        if( $iowntheconfigfile === false ) { 
-            $cc = 0; 
-            while(file_exists($lockfile) && $cc++ < 5 ) { 
+        if ($iowntheconfigfile === false) {
+            $cc = 0;
+            while (file_exists($lockfile) && $cc++ < 5) {
                 sleep(1);
             }
-            if( file_exists($lockfile) ) { 
+            if (file_exists($lockfile)) {
                 $errinfo["lockfile"] = gmdate("Y-m-d H:i:s") . " - Force take over of lockfile.";
             }
-            touch($lockfile); 
-            $iowntheconfigfile = true; 
+            touch($lockfile);
+            $iowntheconfigfile = true;
         }
         global $varfile, $varfile_global;
-       
+
         global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
@@ -2298,9 +2311,9 @@ if (isset($_GET["imgout"])) {
         $content .= PHP_EOL . " ?>";
 
         file_put_contents($savefile, $content, LOCK_EX);
-        if(file_exists($lockfile) && $leave_locked === false ) {      
-                  unlink($lockfile); 
-        } else { 
+        if (file_exists($lockfile) && $leave_locked === false) {
+            unlink($lockfile);
+        } else {
             // echo "lockfile not found; should have been there?!"; 
         }
         $errinfo["unlocktwice"] = gmdate("Y-m-d H:i:s") . " - Attempt to unlock lockfile twice?!"; // this will only be saved if write2config is called again.
@@ -2321,7 +2334,7 @@ if (isset($_GET["imgout"])) {
         echo '<li><a href="index.php?time=' . time() . '&id=' . $myId . '&settgts=1&day=today">Set targets</a></li>';
 
         echo '<li>Gap Between Posts: ';
-        $nnn = array(1, 10 );
+        $nnn = array(1, 10);
         for ($j = 20; $j < 510; $j += 20) {
             $nnn[] = $j;
         }
@@ -3241,6 +3254,7 @@ if (isset($_GET["imgout"])) {
             $zhref = 'setzoom.php?id=' . $myId . '&time=' . time() . '&b=' . $lastBn . '&videoinfo=' . ($videoinfo[$myId] ?? "-1,-1,-1,-1") . "&zoomx=" . ($zoomX[$myId] ?? 0.5) . "&zoomy=" . ($zoomY[$myId] ?? 0.5) . "&zoom=" . ($zoom[$myId] ?? 1) . "";
             echo ' <a href="' . $zhref . '">Set Zoom</a>; ';
             echo ' <a href="index.php?settgts=1&settargetnow=1&imgaction=default&id=' . $myId . '&b=' . $lastBn . '">Set Targets</a>; ';
+            echo ' <a href="index.php?a=1&id=' . $myId . '&deletethis=' . $lastBn . '">Delete this Image</a>; ';
         }
         echoTimeUsed();
     }
