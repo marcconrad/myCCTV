@@ -2351,8 +2351,8 @@ if (isset($_GET["imgout"])) {
         echo ' Seconds</li>';
 
         echo '<li>Maximum number of images per post: ';
-        $nnn = array(1, 10, 20, 30);
-        for ($j = 50; $j < 250; $j += 20) {
+        $nnn = array(1, 10, 20, 30 );
+        for ($j = 40; $j < 250; $j += 20) {
             $nnn[] = $j;
         }
         foreach ($nnn as $j) {
