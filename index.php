@@ -1354,15 +1354,16 @@ if (isset($_GET["imgout"])) {
             die("Thank you");
         }
         if (isset($_GET["deletethis"])) {
+            $myId = intval($_GET["id"] ?? 0);
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
-            $bn = $_GET["deletethis"];
-            $path = bn2file($bn, true);
+            $bntd = bn2bntd($_GET["deletethis"]);
+            $path = bntd2file($myId, $bn, true);
             foreach ($path as $x) {
                 $a = "tmp/delete_" .basename($x);
                 rename($x,  $a);
                 echo "<br>Moved $x to $a.";
             }
-            echo "Note that files are still in tmp folder.<p>";
+            echo "<p>Note that files are still in tmp folder.<p>";
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             write2config();
             sleep(1);
