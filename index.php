@@ -1701,7 +1701,8 @@ if (isset($_GET["imgout"])) {
             }
 
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b><p>';
-            unlink($lockfile);
+            // unlink($lockfile);
+            write2config();
             die();
         }
         if (isset($_GET["setgap"])) {
@@ -1831,11 +1832,13 @@ if (isset($_GET["imgout"])) {
                 echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
             }
             echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
+           write2config(); 
             die("<p>Thank you! 🙂</p>");
         } else if (isset($_GET["day"]) || isset($_GET["bntd"])) {
             $allImagesA = findImagesByDate($myId);
 
             displayImages($allImagesA);
+            write2config();
         } else if (isset($_GET['cleanup'])) {
             echo '<h1>Cleaning up Files</h1>';
             foreach (myTargets($myId) as $target) {
