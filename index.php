@@ -2275,6 +2275,7 @@ if (isset($_GET["imgout"])) {
         $content = "<?php ";
         if( $cam_agnostic === "cam") { 
             // To do: add here the variables that are changed by the camera via post requests. 
+            return; /** do nothing for now */
         } if ($cam_agnostic === true) {
             $content .= PHP_EOL . " \$systempassword = " . var_export($systempassword, true) . "; ";
             $content .= PHP_EOL . " \$clarifaicount = " . var_export($clarifaicount, true) . "; ";
