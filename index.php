@@ -36,12 +36,17 @@ $myVarfileId = intval($_POST["id"] ?? $_GET["id"] ?? 99);
 if ($myVarfileId < 0 || $myVarfileId > 20) {
     $myVarfileId = 99;
 }
+$varfile_cam = "./vars/cam_info" . $myVarfileId . ".php";
+// $varfile_server = "./vars/server_config" . $myVarfileId . ".php";
 $varfile = "./vars/cam" . $myVarfileId . ".php";
 $varfile_global = "./vars/allcams.php";
 
 
 if (!file_exists($varfile)) {
     write2config();
+}
+if (!file_exists($varfile_cam)) {
+    write2config("cam");
 }
 
 if (!file_exists($varfile_global)) {
@@ -2251,7 +2256,7 @@ if (isset($_GET["imgout"])) {
             touch($lockfile);
             $iowntheconfigfile = true;
         }
-        global $varfile, $varfile_global;
+        global $varfile, $varfile_global, $varfile_cam;
 
         global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
@@ -2265,8 +2270,9 @@ if (isset($_GET["imgout"])) {
 
 
         $content = "<?php ";
-
-        if ($cam_agnostic === true) {
+        if( $cam_agnostic === "cam") { 
+            // To do: add here the variables that are changed by the camera via post requests. 
+        } if ($cam_agnostic === true) {
             $content .= PHP_EOL . " \$systempassword = " . var_export($systempassword, true) . "; ";
             $content .= PHP_EOL . " \$clarifaicount = " . var_export($clarifaicount, true) . "; ";
             $content .= PHP_EOL . " \$timezoneoffset = " . var_export($timezoneoffset, true) . "; ";
@@ -2274,24 +2280,25 @@ if (isset($_GET["imgout"])) {
 
             $savefile = $varfile_global;
         } else {
+            // Todo: remove here the variables that come from post requests. 
+            $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
+            $content .= PHP_EOL . " \$batteryinfo = " . var_export($batteryinfo, true) . "; ";
+            $content .= PHP_EOL . " \$performance = " . var_export($performance, true) . "; ";
+            $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";
+            $content .= PHP_EOL . " \$imgsizeinfo = " . var_export($imgsizeinfo, true) . "; ";
+            $content .= PHP_EOL . " \$targeteta = " . var_export($targeteta, true) . "; ";
+            $content .= PHP_EOL . " \$stats = " . var_export($stats, true) . "; ";
+            $content .= PHP_EOL . " \$videoinfo = " . var_export($videoinfo, true) . "; ";
+            $content .= PHP_EOL . " \$toggleCapture = " . var_export($toggleCapture, true) . "; ";
+
+
             $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
             $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
             $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
             $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
-
             $content .= PHP_EOL . " \$autocat = " . var_export($autocat, true) . "; ";
-
-
-            $content .= PHP_EOL . " \$performance = " . var_export($performance, true) . "; ";
-            $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";
             $content .= PHP_EOL . " \$sessiongetinfo = " . var_export($sessiongetinfo, true) . "; ";
-            $content .= PHP_EOL . " \$targeteta = " . var_export($targeteta, true) . "; ";
-            $content .= PHP_EOL . " \$imgsizeinfo = " . var_export($imgsizeinfo, true) . "; ";
             $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
-
-
-
-
 
             $content .= PHP_EOL . " \$mingapbeforeposts = " . var_export($mingapbeforeposts, true) . "; ";
             $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
@@ -2302,16 +2309,15 @@ if (isset($_GET["imgout"])) {
             $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";
             $content .= PHP_EOL . " \$zoomY = " . var_export($zoomY, true) . "; ";
 
-            $content .= PHP_EOL . " \$stats = " . var_export($stats, true) . "; ";
+         
             $content .= PHP_EOL . " \$resetstats = " . var_export($resetstats, true) . "; ";
-            $content .= PHP_EOL . " \$videoinfo = " . var_export($videoinfo, true) . "; ";
+         
 
 
-            $content .= PHP_EOL . " \$toggleCapture = " . var_export($toggleCapture, true) . "; ";
+      
             $content .= PHP_EOL . " \$history = " . var_export($history, true) . "; ";
             $content .= PHP_EOL . " \$lastgallery = " . var_export($lastgallery, true) . "; ";
-            $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
-            $content .= PHP_EOL . " \$batteryinfo = " . var_export($batteryinfo, true) . "; ";
+          
             $savefile = $varfile;
         }
 
