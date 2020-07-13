@@ -11,13 +11,13 @@ For installation and quickstart just do (on Windows):
 
 (2) Add a folder (say, cam) to your webserver, e.g. C:\wamp64\www\cam on the standard wampserver setup
 
-(3) Download mycctv.zip https://github.com/marcconrad/myCCTV/blob/master/updatefromgit.php?raw=yes
+(3) Download https://github.com/marcconrad/myCCTV/blob/master/updatefromgit.php?raw=yes
 
-(4) Copy the file install.php from the zip file into the folder you have created, e.g.  C:\wamp64\www\cam
+(4) Move the file updatefromgit.php into the folder you have created, e.g.  C:\wamp64\www\cam
 
 (5) With your favourite browser navigate to http://localhost/cam/updatefromgit.php
 
-(6) First time it will show many files not be found. That's ok. They are not yet there. Press the button 'Update for Real'
+(6) First time it will show many files not be found. That's ok. They are not yet there. Press the big button 'Update for Real'
 
 (7) Follow then the link 'Home'; you have to invent a password; then you have to enter the password. 
 
@@ -27,7 +27,9 @@ For installation and quickstart just do (on Windows):
 
 (10) If you want to use the camera and the server on different devices you can expose your localhost via (e.g.) https://ngrok.com/
 
-(11) Contact me under http://dr.marcconrad.com/ if you like what you see. 
+(11) Contact me under http://dr.marcconrad.com/ if you like what you see. Also contact me for any questions.
 
-If you already own a webserver, obviously you can install it there. Just move the install.php where you need it and run it from a browser. You need https for the camera to work. 
+(12) Feel free to contribute to this project. If you use the software for one of your own projects, please tell me. 
+
+If you already own a webserver, obviously you can install it there. Just move the unpdatefromgit.php where you need it and run it from a browser. You need https for the camera to work. 
 
