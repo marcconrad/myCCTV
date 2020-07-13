@@ -81,7 +81,23 @@
     <p>
         <button class="button button4" onclick="hideSomething('ulinfo')">Show/Hide Info</button>
         <button class="button button5" onclick="hideSomething('olinfo')">Show/Hide Debug Info</button>
+        <button class="button button2" onclick="openFullscreen('canvas')">Fullscreen Canvas</button>
+        <button class="button button4" onclick="openFullscreen('video')">Fullscreen Video</button>
         <script>
+
+
+function openFullscreen(x = 'video') {
+    var elem = document.getElementById(x);
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
             <?php
             // $updateInMilliseconds = (intval($_GET["update"] ?? 0 ) > 0 ? intval($_GET["update"] ?? 0) : 1000);
             $updateInMilliseconds = intval($_GET["update"] ?? 1000);
