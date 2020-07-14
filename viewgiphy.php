@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML>
 
 <html>
 
@@ -15,7 +15,7 @@
 			background-color: #8c7D70;
 			overflow: hidden;
 
-			background-image: url('https://www.sanfoh.com/cam/bg1.jpg');
+			background-image: url('./bg1.jpg');
 		}
 
 		#delta {
@@ -203,9 +203,11 @@
 				console.log("(b) delta=" + delta_time);
 			}
 		}
-
+/**
+* Can use this for debugging. 
+ */
 		function addLI(listId, what, maxNumber = 50) {
-			return;
+			return;/*
 			var newItem = document.createElement("LI");
 			var txt = document.createTextNode(what);
 			newItem.appendChild(txt);
@@ -228,6 +230,7 @@
 					}
 				}
 			}
+			*/
 		}
 
 		var last_time = Date.now()
@@ -253,7 +256,7 @@
 
 <body id="bd" onclick="change_video()">
 	<ol id="ontop"></ol>
-	<h1 id="delta">.</h1>
+	<a href="viewgiphy_h.php"><h1 id="delta" title="Click for more information.">.</h1></a>
 	<h1 id="err">.</h1>
 	<script>
 		// var intv = setInterval('change_video()', 60000); 
@@ -372,7 +375,7 @@
 
 	echo '<script>';
 	for ($i = 0; $i < 50; $i++) {
-		// echo 'var a'.$i.' = setTimeout(\'change_video()\', 500 * '.$i.'); ';  
+	
 		echo 'var a' . $i . ' = setTimeout(\'add_video()\', 500 * ' . $i . '); ';
 	}
 	echo '</script>';
