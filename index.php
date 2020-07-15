@@ -2622,8 +2622,16 @@ if (isset($_GET["imgout"])) {
 
                     // $font = 'arial.ttf'; does not work on windows.
                     $font = dirname(__FILE__) . '/arial.ttf';
-                    @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
-                    @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
+                    $fontsize  = 24 * imagesx($im) / 640.0; 
+                    $x = round(10 * imagesx($im) / 640.0);
+                    $y = round(imagesy($im) - (34 * imagesy($im) / 640.0));
+                  
+
+                   // for 640 x 480:  @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text); 
+                    // for 640 x 480: @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
+
+                    @imagettftext($im, $fontsize, 0, $x, $y, $textshadow, $font, $text); 
+                    @imagettftext($im, $fontsize, 0, $x-1, $y-1, $textcolour, $font, $text);
                 }
                 ob_start();
                 imagegif($im);

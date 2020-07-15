@@ -102,7 +102,7 @@
 			document.getElementById('err').innerHTML = errcount;
 			errcount++;
 			if (document.getElementsByTagName('video').length < 2 && errcount > 10) {
-				window.location.href = "http://www.sanfoh.com/cam/viewgiphy.php?t=" + n;
+				window.location.href = "viewgiphy.php?t=" + n;
 			}
 			//alert("SRC ERROR: "+str+" n="+n); 
 
