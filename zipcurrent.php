@@ -16,12 +16,14 @@
     $myVarfileId = intval($_POST["id"] ?? $_GET["id"] ?? 99);
 
     $varfile = "./vars/cam" . $myVarfileId . ".php";
+    $varfile_config = "./vars/server_config" . $myVarfileId . ".php"; 
     // $varfile_global = "./vars/cam99.php";
 
     // @include $varfile_global;
 
-    @include $varfile;
-    include "util.php";
+    @include_once $varfile;
+@include_once $varfile_config; 
+    include_once "./util.php";
 
 
     $myId = ($_GET["id"] ?? 0);

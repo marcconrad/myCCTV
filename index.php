@@ -36,17 +36,15 @@ $myVarfileId = intval($_POST["id"] ?? $_GET["id"] ?? 99);
 if ($myVarfileId < 0 || $myVarfileId > 20) {
     $myVarfileId = 99;
 }
-$varfile_cam = "./vars/cam_info" . $myVarfileId . ".php";
-// $varfile_server = "./vars/server_config" . $myVarfileId . ".php";
+
+// $varfile_cam = "./vars/cam_info" . $myVarfileId . ".php";
+$varfile_config = "./vars/server_config" . $myVarfileId . ".php"; // variables that are not changed by the camera go here. 
 $varfile = "./vars/cam" . $myVarfileId . ".php";
 $varfile_global = "./vars/allcams.php";
 
 
 if (!file_exists($varfile)) {
     write2config();
-}
-if (!file_exists($varfile_cam)) {
-    write2config("cam");
 }
 
 if (!file_exists($varfile_global)) {
@@ -59,6 +57,12 @@ if (file_exists($lockfile) === false) {
 }
 include_once $varfile_global;
 include_once $varfile;
+
+if (!file_exists($varfile_config)) {
+    write2configS();
+}
+
+include_once $varfile_config;
 
 include_once "./util.php";
 
@@ -76,6 +80,7 @@ if (!isset($targeteta[$myIdx])) {
 if (!isset($imagedimensions[$myIdx])) {
     $imagedimensions[$myIdx] = array("w" => 640, "h" => 480);
     write2config();
+    write2configS();
 }
 $twidth =  $imagedimensions[$myIdx]["w"];
 $theight = $imagedimensions[$myIdx]["h"];
@@ -1174,7 +1179,7 @@ if (isset($_GET["imgout"])) {
         //  var_dump($autocat);
         echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
         echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
-        sleep(1);
+
         die();
     }
 
@@ -1193,6 +1198,7 @@ if (isset($_GET["imgout"])) {
         $myId = intval($_GET["id"]);
 
         $sessiongetinfo[$myId] = $_SERVER;
+
         if (isset($_GET["startcam"])) {
             echo ' <h1><a target="_blank" href="cam.php?id=' . $myId . '">Start Cam ' . $myId . '</a></h1>';
             echo '(will open in a new window)';
@@ -1205,6 +1211,7 @@ if (isset($_GET["imgout"])) {
             }
             echo "</body></html>";
             write2config();
+
             die();
         }
         if (isset($_GET["testbestimage"])) {
@@ -1328,10 +1335,11 @@ if (isset($_GET["imgout"])) {
 
             write2config();
 
+
             echo "JPG compression set to $x% and image dimensions set to $w x $h.";
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             echo '<p><a href="index.php?id=' . $_GET["id"] . '&time=' . time() . '">Back</a><p>';
-            sleep(1);
+            sleep(4);
             die();
         }
         if (isset($_GET["unsetimgsizeinfo"])) {
@@ -1349,6 +1357,7 @@ if (isset($_GET["imgout"])) {
             saveasgifs($t, 20, isset($_GET["showdate"]));
             sleep(1);
             write2config();
+
             die("<p>Thank you</p>");
         }
         if (isset($_GET["unsetperformance"])) {
@@ -1363,18 +1372,18 @@ if (isset($_GET["imgout"])) {
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             $bntd = bn2bntd($_GET["deletethis"]);
             $path = bntd2file($myId, $bntd, true);
-            if(count($path) > count(myTargets($myId, true))) { 
-                echo "<p>Something went wrong. Nothing deleted."; 
-                var_dump($path); 
-            } else { 
-            foreach ($path as $x) {
-                $a = "tmp/delete_" .basename($x);
-                rename($x,  $a);
-                echo "<br>Moved $x to $a.";
-            } 
-            echo "<p>Note that files are still in tmp folder.<p>";
-        }
-           
+            if (count($path) > count(myTargets($myId, true))) {
+                echo "<p>Something went wrong. Nothing deleted.";
+                var_dump($path);
+            } else {
+                foreach ($path as $x) {
+                    $a = "tmp/delete_" . basename($x);
+                    rename($x,  $a);
+                    echo "<br>Moved $x to $a.";
+                }
+                echo "<p>Note that files are still in tmp folder.<p>";
+            }
+
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             write2config();
             sleep(1);
@@ -1652,16 +1661,7 @@ if (isset($_GET["imgout"])) {
             write2config();
             die();
         }
-        /*
-        if (isset($_GET["setupcontrol"])) {
-            echo "\r\n";
-            echoSetupMenuA($myId);
-            $fastmode[$myId] = 8;
-            echo "\r\n";
-            echo '</body></html>';
-            die();
-        }
-        */
+
         if (isset($_GET["setupcontrolA"])) {
             echo "\r\n";
             echoSetupMenuA($myId);
@@ -1672,7 +1672,7 @@ if (isset($_GET["imgout"])) {
             die();
         }
 
-
+        /*
         if (isset($_GET["history"])) {
             $what = $_GET["history"];
             if ($what == "add") {
@@ -1690,7 +1690,7 @@ if (isset($_GET["imgout"])) {
                 $displaythis = array();
                 // var_dump($history[$myId] ); 
                 foreach ($history[$myId] ?? array() as $bn) {
-                    $f = glob("img/*/" . substr($bn, 0, 25) . "*.jpg");
+                    $f = glob("img/*?/" . substr($bn, 0, 25) . "*.jpg");
                     // var_dump($f); 
                     if (isset($f[0])) {
                         $fbn = basename($f[0]);
@@ -1710,27 +1710,73 @@ if (isset($_GET["imgout"])) {
             write2config();
             die();
         }
+        */
+
         if (isset($_GET["setgap"])) {
-            $mingapbeforeposts[$myId] = intval($_GET["setgap"]);
-            echo "<h2>The Camera will send something to you every " . $mingapbeforeposts[$myId] . " seconds</h2>";
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-            write2config();
-            sleep(1);
+            if ($mingapbeforeposts[$myId] != intval($_GET["setgap"])) {
+                $mingapbeforeposts[$myId] = intval($_GET["setgap"]);
+                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&setgap=" . $_GET["setgap"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2configS();
+            } else {
+                echo "<h2>The Camera will send something to you every " . $mingapbeforeposts[$myId] . " seconds</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
         }
 
         if (isset($_GET["setmaximages"])) {
+            if ($maximagesperpost[$myId] != intval($_GET["setmaximages"])) {
+                $maximagesperpost[$myId] = intval($_GET["setmaximages"]);
+                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&setmaximages=" . $_GET["setmaximages"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2configS();
+            } else {
+                echo "<h2>The Camera will send a maximum of " . $maximagesperpost[$myId] . " images with each post.</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
+            /*
             $maximagesperpost[$myId] = intval($_GET["setmaximages"]);
             echo "<h2>The Camera will send a maximum of " . $maximagesperpost[$myId] . " images with each post.</h2>";
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-            write2config();
-            sleep(1);
+            write2configS();
+            die();
+            */
         }
         if (isset($_GET["keephowmany"])) {
+            if ($keephowmany[$myId] != intval($_GET["keephowmany"])) {
+                $keephowmany[$myId] = intval($_GET["keephowmany"]);
+                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&keephowmany=" . $_GET["keephowmany"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2configS();
+            } else {
+                echo "<h2>The System will keep at least " . $keephowmany[$myId] . " images on the server for each bucket.</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
+            /*
             $keephowmany[$myId] = intval($_GET["keephowmany"]);
             echo "<h2>The System will keep at least " . $keephowmany[$myId] . " images on the server for each bucket.</h2>";
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-            write2config();
-            sleep(1);
+            write2configS();
+            die();
+            */
         }
         if (isset($_GET["setautocat"])) {
 
@@ -1781,7 +1827,6 @@ if (isset($_GET["imgout"])) {
             // var_dump($targets);
             echo "<p>Target $i added to Camera $myId. <p>";
             write2config();
-            sleep(1);
         }
         if (isset($_GET["removetarget"])) {
             $a = $targets[$myId] ?? array();
@@ -1792,12 +1837,10 @@ if (isset($_GET["imgout"])) {
                 unset($a[$key]);
                 $targets[$myId] = $a;
                 write2config();
-                sleep(1);
             } else if ($_GET["removetarget"] == "all") {
                 $tgt = 1 + 100 * $myId;
                 $targets[$myId] = array($tgt => $tgt);
                 write2config();
-                sleep(1);
             } else {
                 echo "<p>Target " . $_GET["removetarget"] . " not found by Camera $myId. <p>";
             }
@@ -1813,8 +1856,8 @@ if (isset($_GET["imgout"])) {
             echo '<a href="index.php?day=today&time=' . time() . '&id=' . $myId . '" >Back</a><p>';
             echo '<p>';
             echo '<span class="button closebtn" onclick="hidebodies()" >⛔</span>';
-            write2config();
-            sleep(2);
+            // write2config();
+            write2configS();
             echo "</body></html>";
             die();
         } else if (isset($_GET["settargetid"]) || isset($_GET["settargetnow"])) {
@@ -1825,8 +1868,8 @@ if (isset($_GET["imgout"])) {
 
                 $focusX[$bucket] = intval($xy[0]) / 320.0;
                 $focusY[$bucket] = intval($xy[1]) / 240.0;
-                write2config();
-                sleep(1);
+                write2configS();
+
                 echo "<p>New target has been set for target $bucket </p>";
             }
             echo '<p> Click here when done: <button class="button closebtn" onclick="hidebodies()" >⛔</button></p>';
@@ -1837,7 +1880,7 @@ if (isset($_GET["imgout"])) {
                 echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=' . $t . '&id=' . $myId . '">Remove Target ' . $t . '</a><p>';
             }
             echo '<p><a href="index.php?howmany=' . ($_GET["howmany"] ?? 1) . '&time=' . time() . '&settargetnow=1&removetarget=all&id=' . $myId . '">Remove all targets.</a><p>';
-           write2config(); 
+            write2config();
             die("<p>Thank you! 🙂</p>");
         } else if (isset($_GET["day"]) || isset($_GET["bntd"])) {
             $allImagesA = findImagesByDate($myId);
@@ -2242,12 +2285,66 @@ if (isset($_GET["imgout"])) {
             echo '<em class="bottom-left-yellow">' . $str . '</em>';
         }
     }
+    function write2configS()
+    {
 
+        global $varfile_config;
+
+        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
+        global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
+        global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
+        global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
+        global $systempassword, $autocat;
+        global $imagedimensions;
+
+
+        $savefile = $varfile_config;
+
+
+        $content = "<?php ";
+
+        $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
+        $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
+
+        $content .= PHP_EOL . " \$zoom = " . var_export($zoom, true) . "; ";
+        $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";
+        $content .= PHP_EOL . " \$zoomY = " . var_export($zoomY, true) . "; ";
+
+        $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
+        $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
+
+        $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
+
+
+        $content .= PHP_EOL . " \$sessiongetinfo = " . var_export($sessiongetinfo, true) . "; ";
+
+
+        $content .= PHP_EOL . " \$mingapbeforeposts = " . var_export($mingapbeforeposts, true) . "; ";
+        $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
+        $content .= PHP_EOL . " \$maximagesperpost = " . var_export($maximagesperpost, true) . "; ";
+        $content .= PHP_EOL . " \$keephowmany = " . var_export($keephowmany, true) . "; ";
+
+
+
+        $content .= PHP_EOL . " \$history = " . var_export($history, true) . "; ";
+        $content .= PHP_EOL . " \$lastgallery = " . var_export($lastgallery, true) . "; ";
+
+
+
+
+
+        $content .= PHP_EOL . " ?>";
+
+        file_put_contents($savefile, $content);
+    }
 
     function write2config($cam_agnostic = false, $leave_locked = false)
     {
-        global $iowntheconfigfile, $lockfile;
+        global $iowntheconfigfile, $lockfile, $varfile_config;
         global $errinfo;
+        if (isset($_GET["id"]) && file_exists($varfile_config)) {
+            write2configS();
+        }
         if ($iowntheconfigfile === false) {
             $cc = 0;
             while (file_exists($lockfile) && $cc++ < 5) {
@@ -2273,10 +2370,12 @@ if (isset($_GET["imgout"])) {
 
 
         $content = "<?php ";
-        if( $cam_agnostic === "cam") { 
+        if ($cam_agnostic === "cam") {
             // To do: add here the variables that are changed by the camera via post requests. 
-            return; /** do nothing for now */
-        } if ($cam_agnostic === true) {
+            return;
+            /** do nothing for now */
+        }
+        if ($cam_agnostic === true) {
             $content .= PHP_EOL . " \$systempassword = " . var_export($systempassword, true) . "; ";
             $content .= PHP_EOL . " \$clarifaicount = " . var_export($clarifaicount, true) . "; ";
             $content .= PHP_EOL . " \$timezoneoffset = " . var_export($timezoneoffset, true) . "; ";
@@ -2284,23 +2383,29 @@ if (isset($_GET["imgout"])) {
 
             $savefile = $varfile_global;
         } else {
-            // Todo: remove here the variables that come from post requests. 
-            $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
+
+
             $content .= PHP_EOL . " \$batteryinfo = " . var_export($batteryinfo, true) . "; ";
             $content .= PHP_EOL . " \$performance = " . var_export($performance, true) . "; ";
             $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";
             $content .= PHP_EOL . " \$imgsizeinfo = " . var_export($imgsizeinfo, true) . "; ";
+            $content .= PHP_EOL . " \$videoinfo = " . var_export($videoinfo, true) . "; ";
+
+            // These variables are written by both client and server. 
+            $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
             $content .= PHP_EOL . " \$targeteta = " . var_export($targeteta, true) . "; ";
             $content .= PHP_EOL . " \$stats = " . var_export($stats, true) . "; ";
-            $content .= PHP_EOL . " \$videoinfo = " . var_export($videoinfo, true) . "; ";
             $content .= PHP_EOL . " \$toggleCapture = " . var_export($toggleCapture, true) . "; ";
+            $content .= PHP_EOL . " \$resetstats = " . var_export($resetstats, true) . "; ";
+            $content .= PHP_EOL . " \$autocat = " . var_export($autocat, true) . "; ";
 
-
+            // Later: remove everything below here: 
+            /*
             $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
             $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
             $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
             $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
-            $content .= PHP_EOL . " \$autocat = " . var_export($autocat, true) . "; ";
+       
             $content .= PHP_EOL . " \$sessiongetinfo = " . var_export($sessiongetinfo, true) . "; ";
             $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
 
@@ -2312,16 +2417,10 @@ if (isset($_GET["imgout"])) {
             $content .= PHP_EOL . " \$zoom = " . var_export($zoom, true) . "; ";
             $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";
             $content .= PHP_EOL . " \$zoomY = " . var_export($zoomY, true) . "; ";
-
-         
-            $content .= PHP_EOL . " \$resetstats = " . var_export($resetstats, true) . "; ";
-         
-
-
       
             $content .= PHP_EOL . " \$history = " . var_export($history, true) . "; ";
             $content .= PHP_EOL . " \$lastgallery = " . var_export($lastgallery, true) . "; ";
-          
+             */
             $savefile = $varfile;
         }
 
@@ -2361,7 +2460,7 @@ if (isset($_GET["imgout"])) {
         echo ' Seconds</li>';
 
         echo '<li>Maximum number of images per post: ';
-        $nnn = array(1, 10, 20, 30 );
+        $nnn = array(1, 10, 20, 30);
         for ($j = 40; $j < 250; $j += 20) {
             $nnn[] = $j;
         }
@@ -2622,16 +2721,16 @@ if (isset($_GET["imgout"])) {
 
                     // $font = 'arial.ttf'; does not work on windows.
                     $font = dirname(__FILE__) . '/arial.ttf';
-                    $fontsize  = 24 * imagesx($im) / 640.0; 
+                    $fontsize  = 24 * imagesx($im) / 640.0;
                     $x = round(10 * imagesx($im) / 640.0);
                     $y = round(imagesy($im) - (34 * imagesy($im) / 640.0));
-                  
 
-                   // for 640 x 480:  @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text); 
+
+                    // for 640 x 480:  @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text); 
                     // for 640 x 480: @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
 
-                    @imagettftext($im, $fontsize, 0, $x, $y, $textshadow, $font, $text); 
-                    @imagettftext($im, $fontsize, 0, $x-1, $y-1, $textcolour, $font, $text);
+                    @imagettftext($im, $fontsize, 0, $x, $y, $textshadow, $font, $text);
+                    @imagettftext($im, $fontsize, 0, $x - 1, $y - 1, $textcolour, $font, $text);
                 }
                 ob_start();
                 imagegif($im);
@@ -3226,8 +3325,6 @@ if (isset($_GET["imgout"])) {
 
             if (isset($_GET["setzoomdisplay"])) {
                 $targetfile = $targetfileA;
-
-                //"setzoom.php?videoinfo=".($videoinfo[$myId] ?? "-1,-1,-1,-1")."&zoomx=".($zoomX[$myId] ?? 0.5)."&zoomy=".($zoomY[$myId] ?? 0.5)."&zoom=".($zoom[$myId] ?? 1)."&"; 
             }
 
 
