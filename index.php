@@ -3202,7 +3202,8 @@ if (isset($_GET["imgout"])) {
             if ($bn) {
                 $im = @imagecreatefromjpeg($sourcebn); // does not work for png
             } else {
-                $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
+               // $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
+               $im = getTransparentImage($twidth , $theight ); // imagecreatefrompng("tmp/transparent320x240A.png"); 
                 if ($im) {
                     imagesavealpha($im, true);
                 }
