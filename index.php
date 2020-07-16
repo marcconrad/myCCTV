@@ -1528,7 +1528,7 @@ if (isset($_GET["imgout"])) {
             echo " " . ($k["n200"] ?? "?") . " where successful (status 200).";
             echo " There were " . ($k["errors"] ?? "?") . " errors and " . ($k["timeouts"] ?? "?") . " timeouts ";
             echo " and " . ($k["nNot200"] ?? "?");
-            echo " with other status codes. " . ($k["jsonerr"] ?? "?") . " requests were processed by the server; but controlledly rejected with error. ";
+            echo " with other status codes. " . ($k["jsonerr"] ?? "?") . " requests were rejected by server. ";
             echo " " . ($k["jsoninvalid"] ?? "?") . " requests returned invalid json. ";
             echo " Images were dropped " . ($k["highpayloads"] ?? "?") . " times because of too high payload and " . ($k["donotsends"] ?? "?") .
                 " times because of gap between posts too small. ";

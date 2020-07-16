@@ -524,7 +524,7 @@ function openFullscreen(x = 'video') {
                                 twidth = (parsed.twidth ? parsed.twidth : 640); // targeted image width
                                 theight = (parsed.theight ? parsed.theight : 480); // targeted image height 
 
-                                maxpostsize = (parsed.post_max_size? parsed.post_max_size : 4096); 
+                                maxpostsize = (parsed.post_max_size? parsed.post_max_size : 8388608); 
 
                                 // document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
                                 // document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
