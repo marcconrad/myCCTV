@@ -278,11 +278,9 @@ if (count($_POST) > 0) {
     $lastbgnoise = receiveImagesA($myId);
     echo ', "imsaved" : ' . $countImagesSaved;
     foreach (myTargets($myId) as $j) {
-        // $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
-        // echo ', "hrtimeB' . $myId . 'x' . $j . '" : "' . $eta . '"';
+     
         cleanFiles($j);
-        // $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
-        // echo ', "hrtimeC' . $myId . 'x' . $j . '" : "' . $eta . '"';
+      
     }
     /**
      * Tell the camera every how many seconds it should send something to the server (default 60, onces a minute) 
@@ -299,6 +297,12 @@ if (count($_POST) > 0) {
     $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
     echo ', "hrtime" : "' . $eta . '"';
 
+    
+    if (strpos($servertargeteta[$myId], "auto") !== false) {
+            $targeteta[$myId] = array(99, $servertargeteta[$myId] );
+        } else {
+            $targeteta[$myId] = array(intval($servertargeteta[$myId]), false );
+        }
 
     if ($targeteta[$myId][1] !== false) {
         if ($targeteta[$myId][1] == "autoC") {
@@ -1269,7 +1273,25 @@ if (isset($_GET["imgout"])) {
             echo '<p>';
             @unlink($lockfile);
             die();
+        }    
+        if (isset($_GET["thetargeteta"])) {
+            if ($servertargeteta[$myId] != $_GET["thetargeteta"]) {
+                $servertargeteta[$myId] = $_GET["thetargeteta"];
+                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&thetargeteta=" . $_GET["thetargeteta"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2configS();
+            } else {
+                echo "<h2>Target eta now set to " . $servertargeteta[$myId] . " seconds</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
         }
+        /*
         if (isset($_GET["thetargeteta"])) {
             if(!isset($targeteta[$myId])) { 
                 $targeteta[$myId] = array(87, 0, 0);
@@ -1295,7 +1317,7 @@ if (isset($_GET["imgout"])) {
             }
             die();
         }
-        /*
+        
         if (isset($_GET["thetargeteta"])) {
             if (strpos($_GET["thetargeteta"], "auto") !== false) {
                 $targeteta[$myId] = array(99, $_GET["thetargeteta"], 0);
@@ -1470,6 +1492,8 @@ if (isset($_GET["imgout"])) {
 
 
             echo '<br>Target ETA = ';  // var_dump($targeteta); 
+
+            echo ($servertargeteta[$myId] ?? 149)." / "; 
             if (isset($targeteta[$myId])) {
                 echo round($targeteta[$myId][0], 2) . ($targeteta[$myId][1] !== false ? "ms (" . $targeteta[$myId][1] . ") " : "ms ");
             } else {
@@ -2321,7 +2345,7 @@ if (isset($_GET["imgout"])) {
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
-        global $systempassword, $autocat;
+        global $servertargeteta;
         global $imagedimensions;
 
 
@@ -2341,6 +2365,7 @@ if (isset($_GET["imgout"])) {
         $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
 
         $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
+        $content .= PHP_EOL . " \$servertargeteta = " . var_export($servertargeteta, true) . "; ";
 
 
         $content .= PHP_EOL . " \$sessiongetinfo = " . var_export($sessiongetinfo, true) . "; ";
