@@ -2320,7 +2320,7 @@ if (isset($_GET["imgout"])) {
 
 
         $content .= PHP_EOL . " \$mingapbeforeposts = " . var_export($mingapbeforeposts, true) . "; ";
-        $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
+     
         $content .= PHP_EOL . " \$maximagesperpost = " . var_export($maximagesperpost, true) . "; ";
         $content .= PHP_EOL . " \$keephowmany = " . var_export($keephowmany, true) . "; ";
 
@@ -2384,7 +2384,7 @@ if (isset($_GET["imgout"])) {
             $savefile = $varfile_global;
         } else {
 
-
+            $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
             $content .= PHP_EOL . " \$batteryinfo = " . var_export($batteryinfo, true) . "; ";
             $content .= PHP_EOL . " \$performance = " . var_export($performance, true) . "; ";
             $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";
