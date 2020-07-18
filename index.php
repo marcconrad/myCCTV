@@ -1460,22 +1460,22 @@ if (isset($_GET["imgout"])) {
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-
+ } else {
+                echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
+            }
                 if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-                    echo "Autocat is <b>on</b>. ";
+                    echo " Autocat is <b>on</b>. ";
 
                     //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
                 } else {
-                    echo "Autocat is <b>off</b>. ";
+                    echo " Autocat is <b>off</b>. ";
                     //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
                 }
 
                 echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&showclarifai=1">Manage</a>  &nbsp;';
 
                 echo "\r\n";
-            } else {
-                echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
-            }
+           
 
 
             $imgsreceivedpersecond = 0;
@@ -1608,7 +1608,7 @@ if (isset($_GET["imgout"])) {
             echo '<br>';
             echo '<a target="_blank" href="https://www.clarifai.com/">More information about the Clarifai Service</a> or ';
             echo '<a target="_blank" href="https://www.clarifai.com/pricing" >Get a Clarifai Key here</a> ';
-            echo '(links open in new tab) <p>';
+            echo '(link opens in new tab) <p>';
 
             $c3 = $clarifaicount[3] ?? 0;
             $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
@@ -2490,6 +2490,7 @@ if (isset($_GET["imgout"])) {
         echo '<li>';
         echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
         echo '</li>';
+        echo '</ol></p>';
     }
 
     function findImagesByDate($myId, $dd = array())
