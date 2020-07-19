@@ -301,7 +301,7 @@ if (count($_POST) > 0) {
     if (strpos($servertargeteta[$myId], "auto") !== false) {
             $targeteta[$myId] = array(99, $servertargeteta[$myId] );
         } else {
-            $targeteta[$myId] = array(intval($servertargeteta[$myId]), false );
+            $targeteta[$myId] = array(intval($servertargeteta[$myId] ?? 149), false );
         }
 
     if ($targeteta[$myId][1] !== false) {
