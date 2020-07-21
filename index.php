@@ -3,6 +3,42 @@ $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
 $iowntheconfigfile = false;
 
+function addIndex($dirname, $doit = true) { 
+    echo "Dirname: $dirname <p>"; 
+    if(!is_string(($dirname)) || strlen($dirname) < 2 || strpos($dirname, "./") !== 0 ) { return; }
+   //$idxname = "./".$dirname."/index.php"; 
+   $idxname = $dirname."/index.php"; 
+    if( !file_exists($idxname) && $doit === true ) {
+        $text = "<script> \r\n"; 
+        $text .= 'window.location.href="../index.php?showfolder='.$dirname.'";';
+        $text .= " \r\n </script>";  
+       //  $text = '<a href="../index.php?showfolder='.$dirname.'">Continue...</a>'; 
+        file_put_contents($idxname, $text); 
+        echo "Done: $dirname <p>"; 
+    } else if($doit === false) { 
+        @unlink($idxname); 
+    }
+}
+
+function addAllIndex($doit = true) { 
+    $dirs = array("tmp", "img", "log", "zip"); 
+    foreach($dirs as $dir) { 
+        addIndex("./".$dir, $doit); 
+        foreach(glob("./".$dir."/*", GLOB_ONLYDIR) as $f) { 
+            echo "Dir: $f <p>"; 
+            addIndex($f, $doit); 
+        }
+        foreach(glob("./".$dir."/*/*", GLOB_ONLYDIR) as $f) { 
+            echo "Dir: $f <p>"; 
+            addIndex($f, $doit); 
+        }
+        foreach(glob("./".$dir."/*/*/*", GLOB_ONLYDIR) as $f) { 
+            echo "Dir: $f <p>"; 
+            addIndex($f, $doit); 
+        }
+    }
+
+}
 
 if (!file_exists("tmp")) {
     mkdir("tmp", 0777, true);
@@ -1019,6 +1055,17 @@ if (isset($_GET["imgout"])) {
         addCam();
     }
 
+    if(isset($_GET["addindexfiles"])) { 
+        addAllIndex(true); 
+        echo "Thank you"; 
+        die(); 
+    }
+    if(isset($_GET["removeindexfiles"])) { 
+        addAllIndex(false); 
+        echo "Thank you"; 
+        die(); 
+    }
+
     // Export as csv starts here. 
     function getClosestKey($search, $arr)
     {
@@ -1992,6 +2039,8 @@ if (isset($_GET["imgout"])) {
         echo ' Goto: <a href="zip/">(zip)</a>,<a href="img/">(img)</a>, <a href="log/">(log)</a>, <a href="tmp/">(tmp)</a>';
         echo ' <a href="devbackup.php">dev backup</a>';
         echo ' <a href="viewgifs.php">view gifs</a>';
+        echo ' <a href="index.php?addindexfiles=1">protect folders</a>';
+        echo ' <a href="index.php?removeindexfiles=1">unprotect folders</a>';
 
         echo "\r\n";
         echo '</body></html>';
