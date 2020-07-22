@@ -2037,7 +2037,7 @@ if (isset($_GET["imgout"])) {
             echo ' <a href="index.php?addcam=1">Add Cam</a>';
         }
         echo ' Goto: <a href="zip/">(zip)</a>,<a href="img/">(img)</a>, <a href="log/">(log)</a>, <a href="tmp/">(tmp)</a>';
-        echo ' <a href="devbackup.php">dev backup</a>';
+        echo ' <a href="devbackup.php">dev backup</a>'; 
         echo ' <a href="viewgifs.php">view gifs</a>';
         echo ' <a href="index.php?addindexfiles=1">protect folders</a>';
         echo ' <a href="index.php?removeindexfiles=1">unprotect folders</a>';
