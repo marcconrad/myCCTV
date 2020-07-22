@@ -15,8 +15,21 @@
 			background-color: #8c7D70;
 			overflow: hidden;
 
-			background-image: url('./bg1.jpg');
+			
 		}
+
+		.bg { 
+background-image: url("data:image/png;base64,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");
+
+		}
+
+		.img1 {
+			float: left;
+			margin-right: 15px;
+			width: 80px;
+			height: 60px;
+		}
+
 
 		#delta {
 			position: absolute;
@@ -35,7 +48,7 @@
 			z-index: 2;
 			color: red;
 			background-color: black;
-
+			display: none;
 			opacity: 0.8;
 		}
 
@@ -47,6 +60,37 @@
 			color: yellow;
 			background-color: black;
 			opacity: 0.5;
+		}
+
+		.statsframe {
+			width: 50vw;
+			position: absolute;
+			min-height: 380px;
+			overflow: hidden;
+			z-index: 5;
+		}
+
+		.dropdown {
+
+			position: absolute;
+			display: inline-block;
+		}
+
+		.dropdown-content {
+			border-radius: 5px;
+			display: none;
+			position: absolute;
+			background-color:whitesmoke;
+			width: 62vw;
+			min-width: 80px;
+			box-shadow: 20px 20px 10px rgba(50, 50, 0, 0.7);
+			padding: 0px 10px;
+			z-index: 2;
+			left: 10%;
+		}
+
+		.dropdown:hover .dropdown-content {
+			display: block;
 		}
 	</style>
 	<script>
@@ -203,34 +247,35 @@
 				console.log("(b) delta=" + delta_time);
 			}
 		}
-/**
-* Can use this for debugging. 
- */
+		/**
+		 * Can use this for debugging. 
+		 */
 		function addLI(listId, what, maxNumber = 50) {
-			return;/*
-			var newItem = document.createElement("LI");
-			var txt = document.createTextNode(what);
-			newItem.appendChild(txt);
+			return;
+			/*
+						var newItem = document.createElement("LI");
+						var txt = document.createTextNode(what);
+						newItem.appendChild(txt);
 
-			var listOfItems = document.getElementById(listId);
-			if (listOfItems == null) {
-				document.getElementById("info6").innerHTML = "listId=" + listId + " for:" + what;
+						var listOfItems = document.getElementById(listId);
+						if (listOfItems == null) {
+							document.getElementById("info6").innerHTML = "listId=" + listId + " for:" + what;
 
-			} else {
-				listOfItems.insertBefore(newItem, listOfItems.childNodes[0]);
+						} else {
+							listOfItems.insertBefore(newItem, listOfItems.childNodes[0]);
 
-				// remove: 
-				var theItems = document.getElementById(listId);
-				var numberofchildren = theItems.children.length;
-				for (i = maxNumber; i < numberofchildren; i++) {
-					try {
-						theItems.removeChild(theItems.children[i]);
-					} catch (e) {
-						document.getElementById('info8').innerHTML = "addLI error. e=" + e + ' at ' + getTimeNow();
-					}
-				}
-			}
-			*/
+							// remove: 
+							var theItems = document.getElementById(listId);
+							var numberofchildren = theItems.children.length;
+							for (i = maxNumber; i < numberofchildren; i++) {
+								try {
+									theItems.removeChild(theItems.children[i]);
+								} catch (e) {
+									document.getElementById('info8').innerHTML = "addLI error. e=" + e + ' at ' + getTimeNow();
+								}
+							}
+						}
+						*/
 		}
 
 		var last_time = Date.now()
@@ -251,12 +296,45 @@
 			document.getElementById('delta').innerHTML = document.getElementsByTagName('video').length;
 			checkDelta = setTimeout('check_delta()', 50);
 		}
+
+		function showinfo() {
+			document.getElementById("statsframe").src = "viewgiphy_h.php?b=1";
+
+		}
 	</script>
 </head>
 
-<body id="bd" onclick="change_video()">
+<body id="bd" class="bg" onclick="change_video()">
 	<ol id="ontop"></ol>
-	<a href="viewgiphy_h.php"><h1 id="delta" title="Click for more information.">.</h1></a>
+	<div class="dropdown">
+		<a href="viewgiphy_h.php">
+			<h1 id="delta" title="Click for more information." onmouseover="showinfo()">.</h1>
+		</a>
+		<div id="myDropdown" class="dropdown-content">
+			<!-- <iframe id="statsframe" class="statsframe" src="index.php?time=1590796951&showstats&id=1"></iframe> -->
+			<p><a href="viewgiphy.php"><span class="img1 bg" src="bg1.jpg" alt="no cat" title="Picture with no cat"></span></a>
+				<h1>What is this about?</h1>
+				It is well known that the main purpose of the Internet in general and the World Wide Web in particular is the consumption of cat themed videos.
+				This site provides the opportunity to test the capabilities of your software device in relation to showing videos of cats. 
+				The higher the score the better. On a decent system  you should get a score of at least 50.
+
+				<p>The videos were made as animted gifs using the <a href="https://github.com/marcconrad/myCCTV" target="_blank">myCTTV</a> software
+					and then uploaded to <a href="https://giphy.com/channel/sanfoh" target="_blank">Giphy</a></p>
+
+				<p><em> This is a piece of art and no warranty is implied. </em>
+				</p>
+				<p>
+
+				</p>
+			</p>
+			<hr>
+			<em>&copy; <a href="http://dr.marcconrad.com/" target="_blank">Marc Conrad, 2020</a></em>
+			<br>
+			<br>
+		</div>
+
+	</div>
+
 	<h1 id="err">.</h1>
 	<script>
 		// var intv = setInterval('change_video()', 60000); 
@@ -375,7 +453,7 @@
 
 	echo '<script>';
 	for ($i = 0; $i < 50; $i++) {
-	
+
 		echo 'var a' . $i . ' = setTimeout(\'add_video()\', 500 * ' . $i . '); ';
 	}
 	echo '</script>';

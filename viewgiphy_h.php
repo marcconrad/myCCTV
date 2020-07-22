@@ -8,6 +8,10 @@ img {
     float: left;
     margin-right : 15px
 }
+
+body { 
+    background-color: whitesmoke;
+}
 </style>
 </head>
 <body>
