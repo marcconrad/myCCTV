@@ -3,41 +3,44 @@ $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
 $iowntheconfigfile = false;
 
-function addIndex($dirname, $doit = true) { 
-    echo "Dirname: $dirname <p>"; 
-    if(!is_string(($dirname)) || strlen($dirname) < 2 || strpos($dirname, "./") !== 0 ) { return; }
-   //$idxname = "./".$dirname."/index.php"; 
-   $idxname = $dirname."/index.php"; 
-    if( !file_exists($idxname) && $doit === true ) {
-        $text = "<script> \r\n"; 
-        $text .= 'window.location.href="../index.php?showfolder='.$dirname.'";';
-        $text .= " \r\n </script>";  
-       //  $text = '<a href="../index.php?showfolder='.$dirname.'">Continue...</a>'; 
-        file_put_contents($idxname, $text); 
-        echo "Done: $dirname <p>"; 
-    } else if($doit === false) { 
-        @unlink($idxname); 
+function addIndex($dirname, $doit = true)
+{
+    echo "Dirname: $dirname <p>";
+    if (!is_string(($dirname)) || strlen($dirname) < 2 || strpos($dirname, "./") !== 0) {
+        return;
+    }
+    //$idxname = "./".$dirname."/index.php"; 
+    $idxname = $dirname . "/index.php";
+    if (!file_exists($idxname) && $doit === true) {
+        $text = "<script> \r\n";
+        $text .= 'window.location.href="../index.php?showfolder=' . $dirname . '";';
+        $text .= " \r\n </script>";
+        //  $text = '<a href="../index.php?showfolder='.$dirname.'">Continue...</a>'; 
+        file_put_contents($idxname, $text);
+        echo "Done: $dirname <p>";
+    } else if ($doit === false) {
+        @unlink($idxname);
     }
 }
 
-function addAllIndex($doit = true) { 
-    $dirs = array("tmp", "img", "log", "zip"); 
-    foreach($dirs as $dir) { 
-        addIndex("./".$dir, $doit); 
-        foreach(glob("./".$dir."/*", GLOB_ONLYDIR) as $f) { 
-            echo "Dir: $f <p>"; 
-            addIndex($f, $doit); 
+function addAllIndex($doit = true)
+{
+    $dirs = array("tmp", "img", "log", "zip");
+    foreach ($dirs as $dir) {
+        addIndex("./" . $dir, $doit);
+        foreach (glob("./" . $dir . "/*", GLOB_ONLYDIR) as $f) {
+            echo "Dir: $f <p>";
+            addIndex($f, $doit);
         }
-        foreach(glob("./".$dir."/*/*", GLOB_ONLYDIR) as $f) { 
-            echo "Dir: $f <p>"; 
-            addIndex($f, $doit); 
+        foreach (glob("./" . $dir . "/*/*", GLOB_ONLYDIR) as $f) {
+            echo "Dir: $f <p>";
+            addIndex($f, $doit);
         }
-        foreach(glob("./".$dir."/*/*/*", GLOB_ONLYDIR) as $f) { 
-            echo "Dir: $f <p>"; 
-            addIndex($f, $doit); 
+        foreach (glob("./" . $dir . "/*/*/*", GLOB_ONLYDIR) as $f) {
+            echo "Dir: $f <p>";
+            addIndex($f, $doit);
         }
     }
-
 }
 
 if (!file_exists("tmp")) {
@@ -266,6 +269,8 @@ if (count($_POST) > 0) {
     echo ', "zoomX" : ' . ($zoomX[$myId] ?? 0.5);
     echo ', "zoomY" : ' . ($zoomY[$myId] ?? 0.5);
 
+    echo ', "reloadnow" :  "'. ($reloadnow[$myId] ?? 'no'). '"';
+
     /**
      * If resetstats is set to true then tell camera to reset its statistics.
      */
@@ -294,6 +299,8 @@ if (count($_POST) > 0) {
         $clarifaicount[1] = time();
         write2config(true, true);
     }
+
+
     /**
      * Here we check if there is a cat. Most requests will be denied because 'too recently', therefore we do 
      * not log that. 
@@ -314,9 +321,8 @@ if (count($_POST) > 0) {
     $lastbgnoise = receiveImagesA($myId);
     echo ', "imsaved" : ' . $countImagesSaved;
     foreach (myTargets($myId) as $j) {
-     
+
         cleanFiles($j);
-      
     }
     /**
      * Tell the camera every how many seconds it should send something to the server (default 60, onces a minute) 
@@ -333,12 +339,12 @@ if (count($_POST) > 0) {
     $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
     echo ', "hrtime" : "' . $eta . '"';
 
-    
+
     if (strpos($servertargeteta[$myId], "auto") !== false) {
-            $targeteta[$myId] = array(99, $servertargeteta[$myId] );
-        } else {
-            $targeteta[$myId] = array(intval($servertargeteta[$myId] ?? 149), false );
-        }
+        $targeteta[$myId] = array(99, $servertargeteta[$myId]);
+    } else {
+        $targeteta[$myId] = array(intval($servertargeteta[$myId] ?? 149), false);
+    }
 
     if ($targeteta[$myId][1] !== false) {
         if ($targeteta[$myId][1] == "autoC") {
@@ -412,6 +418,7 @@ if (count($_POST) > 0) {
     /**
      * Now write all the variables we have collected into config.php
      */
+    $reloadnow[$myId] = "no"; 
     write2config();
     die();
 }
@@ -1055,15 +1062,15 @@ if (isset($_GET["imgout"])) {
         addCam();
     }
 
-    if(isset($_GET["addindexfiles"])) { 
-        addAllIndex(true); 
-        echo "Thank you"; 
-        die(); 
+    if (isset($_GET["addindexfiles"])) {
+        addAllIndex(true);
+        echo "Thank you";
+        die();
     }
-    if(isset($_GET["removeindexfiles"])) { 
-        addAllIndex(false); 
-        echo "Thank you"; 
-        die(); 
+    if (isset($_GET["removeindexfiles"])) {
+        addAllIndex(false);
+        echo "Thank you";
+        die();
     }
 
     // Export as csv starts here. 
@@ -1320,17 +1327,35 @@ if (isset($_GET["imgout"])) {
             echo '<p>';
             @unlink($lockfile);
             die();
-        }    
+        }
         if (isset($_GET["thetargeteta"])) {
             if ($servertargeteta[$myId] != $_GET["thetargeteta"]) {
                 $servertargeteta[$myId] = $_GET["thetargeteta"];
-                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&thetargeteta=" . $_GET["thetargeteta"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script> </body></html>";
                 write2configS();
             } else {
                 echo "<h2>Target eta now set to " . $servertargeteta[$myId] . " seconds</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
+        }
+
+        if (isset($_GET["reloadnow"])) {
+            if ($reloadnow[$myId] != $_GET["reloadnow"]) {
+                $reloadnow[$myId] = $_GET["reloadnow"];
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&reloadnow=" . $_GET["reloadnow"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2config();
+            } else {
+                echo "<h2>Reload now set to:" . $reloadnow[$myId] . ".</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -1540,7 +1565,7 @@ if (isset($_GET["imgout"])) {
 
             echo '<br>Target ETA = ';  // var_dump($targeteta); 
 
-            echo ($servertargeteta[$myId] ?? 149)." / "; 
+            echo ($servertargeteta[$myId] ?? 149) . " / ";
             if (isset($targeteta[$myId])) {
                 echo round($targeteta[$myId][0], 2) . ($targeteta[$myId][1] !== false ? "ms (" . $targeteta[$myId][1] . ") " : "ms ");
             } else {
@@ -1558,22 +1583,22 @@ if (isset($_GET["imgout"])) {
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
- } else {
+            } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
             }
-                if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-                    echo " Autocat is <b>on</b>. ";
+            if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
+                echo " Autocat is <b>on</b>. ";
 
-                    //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
-                } else {
-                    echo " Autocat is <b>off</b>. ";
-                    //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
-                }
+                //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
+            } else {
+                echo " Autocat is <b>off</b>. ";
+                //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+            }
 
-                echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&showclarifai=1">Manage</a>  &nbsp;';
+            echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&showclarifai=1">Manage</a>  &nbsp;';
 
-                echo "\r\n";
-           
+            echo "\r\n";
+
 
 
             $imgsreceivedpersecond = 0;
@@ -1813,7 +1838,7 @@ if (isset($_GET["imgout"])) {
         if (isset($_GET["setgap"])) {
             if ($mingapbeforeposts[$myId] != intval($_GET["setgap"])) {
                 $mingapbeforeposts[$myId] = intval($_GET["setgap"]);
-                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&setgap=" . $_GET["setgap"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script> </body></html>";
@@ -1831,7 +1856,7 @@ if (isset($_GET["imgout"])) {
         if (isset($_GET["setmaximages"])) {
             if ($maximagesperpost[$myId] != intval($_GET["setmaximages"])) {
                 $maximagesperpost[$myId] = intval($_GET["setmaximages"]);
-                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&setmaximages=" . $_GET["setmaximages"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script> </body></html>";
@@ -1855,7 +1880,7 @@ if (isset($_GET["imgout"])) {
         if (isset($_GET["keephowmany"])) {
             if ($keephowmany[$myId] != intval($_GET["keephowmany"])) {
                 $keephowmany[$myId] = intval($_GET["keephowmany"]);
-                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&keephowmany=" . $_GET["keephowmany"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script> </body></html>";
@@ -2037,7 +2062,7 @@ if (isset($_GET["imgout"])) {
             echo ' <a href="index.php?addcam=1">Add Cam</a>';
         }
         echo ' Goto: <a href="zip/">(zip)</a>,<a href="img/">(img)</a>, <a href="log/">(log)</a>, <a href="tmp/">(tmp)</a>';
-        echo ' <a href="devbackup.php">dev backup</a>'; 
+        echo ' <a href="devbackup.php">dev backup</a>';
         echo ' <a href="viewgifs.php">view gifs</a>';
         echo ' <a href="index.php?addindexfiles=1">protect folders</a>';
         echo ' <a href="index.php?removeindexfiles=1">unprotect folders</a>';
@@ -2395,7 +2420,7 @@ if (isset($_GET["imgout"])) {
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
         global $servertargeteta;
-        global $imagedimensions;
+        global $imagedimensions, $reloadnow;
 
 
         $savefile = $varfile_config;
@@ -2421,7 +2446,7 @@ if (isset($_GET["imgout"])) {
 
 
         $content .= PHP_EOL . " \$mingapbeforeposts = " . var_export($mingapbeforeposts, true) . "; ";
-     
+
         $content .= PHP_EOL . " \$maximagesperpost = " . var_export($maximagesperpost, true) . "; ";
         $content .= PHP_EOL . " \$keephowmany = " . var_export($keephowmany, true) . "; ";
 
@@ -2464,7 +2489,7 @@ if (isset($_GET["imgout"])) {
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
         global $systempassword, $autocat;
-        global $imagedimensions;
+        global $imagedimensions, $reloadnow;;
 
 
         $savefile = null;
@@ -2491,6 +2516,7 @@ if (isset($_GET["imgout"])) {
             $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";
             $content .= PHP_EOL . " \$imgsizeinfo = " . var_export($imgsizeinfo, true) . "; ";
             $content .= PHP_EOL . " \$videoinfo = " . var_export($videoinfo, true) . "; ";
+            $content .= PHP_EOL . " \$reloadnow = " . var_export($reloadnow, true) . "; ";
 
             // These variables are written by both client and server. 
             $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
@@ -2590,6 +2616,9 @@ if (isset($_GET["imgout"])) {
         echo '</li>';
         echo '<li>';
         echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&resetsystempassword=1">Delete all cookies and reset System Password</a> &nbsp; ';
+        echo '</li>';
+        echo '<li>';
+        echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&howmany=9&reloadnow=yes">Force Camera Reload</a> &nbsp; ';
         echo '</li>';
         echo '</ol></p>';
     }
@@ -3304,8 +3333,8 @@ if (isset($_GET["imgout"])) {
             if ($bn) {
                 $im = @imagecreatefromjpeg($sourcebn); // does not work for png
             } else {
-               // $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
-               $im = getTransparentImage($twidth , $theight ); // imagecreatefrompng("tmp/transparent320x240A.png"); 
+                // $im = getTransparentImage(ceil($twidth / 2), ceil($theight / 2)); // imagecreatefrompng("tmp/transparent320x240A.png"); 
+                $im = getTransparentImage($twidth, $theight); // imagecreatefrompng("tmp/transparent320x240A.png"); 
                 if ($im) {
                     imagesavealpha($im, true);
                 }

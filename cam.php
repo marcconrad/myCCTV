@@ -515,6 +515,13 @@ function openFullscreen(x = 'video') {
 
                             try {
                                 var parsed = JSON.parse(resp);
+
+                                reloadnow = (parsed.reloadnow ? parsed.reloadnow : false);
+
+                                if(reloadnow == "yes") { 
+                                    
+                                    window.location.reload(); 
+                                    }
                                 buckets = (parsed.buckets ? parsed.buckets : false);
                                 pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);
 
