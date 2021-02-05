@@ -294,7 +294,7 @@ if (count($_POST) > 0) {
      * is decreased by 1 every 720 seconds allowing on average a request every 720 seconds.
      */
     
-    if(isset($clarifaycount)) {
+    if(isset($clarifaicount)) {
         $clarifaicountgap = $clarifaicount[720] ?? 720; 
         if ((time() - $clarifaicount[1]) > $clarifaicountgap) { // 1200 = every 20 minutes; every x seconds
         $clarifaicount[0] = max($clarifaicount[0] - 1, 0);
@@ -473,10 +473,11 @@ function autocat_log($log_msg)
     $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount[3] / $ctd, 0);
     $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth;
-    if($clarifaipermonth > 700) { 
+    $targetclarifaipermonth = ($clarifaicount["target"] ?? 700 );
+    if($clarifaipermonth > $targetclarifaipermonth * 1.01 ) { 
         $clarifaicount[720] += 60; 
         write2config(true);
-    } else if($clarifaipermonth < 600 ) { 
+    } else if($clarifaipermonth < $targetclarifaipermonth * 0.99 ) { 
         $clarifaicount[720] -= 60; 
         write2config(true);
     }
@@ -1593,7 +1594,8 @@ if (isset($_GET["imgout"])) {
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-                echo "Clarifaigap = ".($clarifaicount[720] ?? 720).";";
+               //  echo "Target is ".($clarifaicount["target"] ?? 700).". "; 
+                // echo "Clarifaigap is ".($clarifaicount[720] ?? 720).";";
             } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
             }
@@ -1750,6 +1752,26 @@ if (isset($_GET["imgout"])) {
             $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
             echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+            echo "Target is ".($clarifaicount["target"] ?? 700).". "; 
+            echo "Max count is ".($clarifaicount["max"] ?? 25).". "; 
+            echo "Clarifaigap is ".($clarifaicount[720] ?? 720).";";
+
+            echo '<form action="index.php">';
+            echo '<label for="clarifaimonthtarget">Change target per month:</label><br>';
+            echo '<input type="text" id="clarifaimonthtarget" name="clarifaimonthtarget" value="'.($clarifaicount["target"] ?? 700).'" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
+
+            
+            echo '<form action="index.php">';
+            echo '<label for="clarifaimaxcount">Change max count:</label><br>';
+            echo '<input type="text" id="clarifaimaxcount" name="clarifaimaxcount" value="'.($clarifaicount["max"] ?? 25).'" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
 
             echo '<a href="viewlog.php">View Log</a>';
             if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
@@ -1845,7 +1867,48 @@ if (isset($_GET["imgout"])) {
             die();
         }
         */
-
+        if (isset($_GET["clarifaimaxcount"])) {
+            if (!isset($clarifaicount)) {
+                $clarifaicount = array("0", time(), false);
+                $clarifaicount["max"] = -9393939; 
+            }
+            if (($clarifaicount["max"] ?? NULL) != intval($_GET["clarifaimaxcount"])) {
+                $clarifaicount["max"] = intval($_GET["clarifaimaxcount"]);
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&clarifaimaxcount=" . $_GET["clarifaimaxcount"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2config(true);
+            } else {
+                echo "<h2>Clarifaimaxcount set to: " . $clarifaicount["max"]. " iterations.</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(Cfai)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
+        }
+        if (isset($_GET["clarifaimonthtarget"])) {
+            if (!isset($clarifaicount)) {
+                $clarifaicount = array("0", time(), false);
+                $clarifaicount["target"] = NULL; 
+            }
+            if (($clarifaicount["target"] ?? NULL) != intval($_GET["clarifaimonthtarget"])) {
+                $clarifaicount["target"] = intval($_GET["clarifaimonthtarget"]);
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&clarifaimonthtarget=" . $_GET["clarifaimonthtarget"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+                write2config(true);
+            } else {
+                echo "<h2>Clarifaimonthtarget set to: " . $clarifaicount["target"]. " seconds.</h2>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(Cfai)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script> </body></html>";
+            }
+            die();
+        }
         if (isset($_GET["setgap"])) {
             if ($mingapbeforeposts[$myId] != intval($_GET["setgap"])) {
                 $mingapbeforeposts[$myId] = intval($_GET["setgap"]);
@@ -2305,8 +2368,8 @@ if (isset($_GET["imgout"])) {
             return "file cannot be found";
         }
 
-        $maxclarifaicount = 50; // magic clarifai constant = 50
-        if (isset($clarifaicount[0]) && $clarifaicount[0] > $maxclarifaicount) {
+        $maxclarifaicount = ($clarifaicount["max"] ?? 25); // magic clarifai constant = 50
+        if ( $clarifaicount[0] > $maxclarifaicount) {
             return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
 
