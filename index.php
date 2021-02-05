@@ -293,11 +293,14 @@ if (count($_POST) > 0) {
      * Clarifai is a paid service so we use a counter to ensure that there are not too many requests, the counter 
      * is decreased by 1 every 720 seconds allowing on average a request every 720 seconds.
      */
-
-    if (isset($clarifaicount) && (time() - $clarifaicount[1]) > 720) { // 1200 = every 20 minutes; every x seconds
+    
+    if(isset($clarifaycount)) {
+        $clarifaicountgap = $clarifaicount[720] ?? 720; 
+        if ((time() - $clarifaicount[1]) > $clarifaicountgap) { // 1200 = every 20 minutes; every x seconds
         $clarifaicount[0] = max($clarifaicount[0] - 1, 0);
         $clarifaicount[1] = time();
         write2config(true, true);
+        }
     }
 
 
@@ -470,6 +473,13 @@ function autocat_log($log_msg)
     $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount[3] / $ctd, 0);
     $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth;
+    if($clarifaipermonth > 700) { 
+        $clarifaicount[720] += 60; 
+        write2config(true);
+    } else if($clarifaipermonth < 600 ) { 
+        $clarifaicount[720] -= 60; 
+        write2config(true);
+    }
 
 
     $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "<br>\n";
@@ -1583,6 +1593,7 @@ if (isset($_GET["imgout"])) {
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+                echo "Clarifaigap = ".($clarifaicount[720] ?? 720).";";
             } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
             }
@@ -2294,7 +2305,7 @@ if (isset($_GET["imgout"])) {
             return "file cannot be found";
         }
 
-        $maxclarifaicount = 50;
+        $maxclarifaicount = 50; // magic clarifai constant = 50
         if (isset($clarifaicount[0]) && $clarifaicount[0] > $maxclarifaicount) {
             return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
