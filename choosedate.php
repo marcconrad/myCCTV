@@ -82,7 +82,7 @@ https://leaverou.github.io/css3patterns/
         }
     }
     echo "Working on it...\n"; 
-    ob_flush();
+   
     flush();
     
 
