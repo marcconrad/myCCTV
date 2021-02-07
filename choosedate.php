@@ -11,7 +11,7 @@
 
 
     include "./util.php";
-    $bgcolor = id2color($_GET["id"], "hexbg");
+    $bgcolor = id2color(($_GET["id"] ?? 17), "hexbg");
     echo "<style> body { background-color: $bgcolor; } </style>";
 
     ?>
@@ -56,6 +56,8 @@ https://leaverou.github.io/css3patterns/
 
     error_reporting(-1);
 
+  
+
 
     $myId = ($_GET["id"] ?? 0);
 
@@ -79,9 +81,18 @@ https://leaverou.github.io/css3patterns/
             echo "<p>$a has been un-archived for Camera $myId with result: $ret </p>";
         }
     }
-
+    echo "Working on it...\n"; 
+    ob_flush();
+    flush();
+    
 
     $x = glob("img/old/d*/t" . $myId . "??");
+
+    // var_dump($x);
+
+    if( sizeof($x) == 0 ) { 
+        echo "<p>Nothing found for id=$myId. </p> "; 
+    }
 
     $available_dates = array();
     foreach ($x as $ad) {
@@ -103,12 +114,12 @@ https://leaverou.github.io/css3patterns/
     }
     // var_dump($available_dates); 
     if (isset($_GET["archive7"])) {
-        $max = ($_GET["howmanydaysback"] ?? 30 ); // one years back 
+        $max = ($_GET["howmanydaysback"] ?? 30 ); // one month back 
         for ($i = 2; $i < $max; $i++) {
             archive_day($myId, 0 - $i);
         }
 
-        $archiveThese = array();
+        // $archiveThese = array();
         $tNow = localtimeCam($myId);
         foreach ($available_dates as $key => $value) {
             $t = localtimeCam($myId, $value[2]);
@@ -116,10 +127,26 @@ https://leaverou.github.io/css3patterns/
                 // $archiveThese[] = $key; 
                 $ret = zipDateId($key, $myId);
                 echo "<p>$key has been archived for Camera $myId with result: $ret </p>";
+                ob_flush();
+                flush();
+            } else { 
+                echo "<p>$key has not been archived for Camera $myId (too recent)</p>";
+                ob_flush();
+                flush();
             }
         }
         // var_dump($archiveThese);
-
+        if(isset($_GET["autoarchive"]) && $myId <= 13 ) { 
+            echo "<p> Please wait...      (" . ($_GET["cc"] ?? 0) . ")</p>";
+            echo " <script> ";
+            echo "setTimeout(function(){ window.location = 'choosedate.php?cc=" . 
+                (($_GET["cc"] ?? 0) + 1) . "&autoarchive=" . $_GET["autoarchive"] . 
+                "&archive7=" . $_GET["archive7"] .
+                "&howmanydaysback=" . $max .
+                "&t=" . time() . "&id=" . ($myId + 1). "' }, 5000);";
+            echo " </script> </body></html>";
+            die(); 
+        }
         echo '<p><a href=choosedate.php?t=' . time() . '&id=' . $myId . '&howmany=1 ><button class="button">Back</button></a></p>';
         echo '</body></html>';
         die();

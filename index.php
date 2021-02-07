@@ -2126,6 +2126,8 @@ if (isset($_GET["imgout"])) {
         }
         echo '<p>';
         echo '<a href="zipdelete.php?homepage=yes&delete=1">Zip and Delete Preview</a>, ';
+        echo '<a href="choosedate.php?autoarchive=1&archive7=1&t=1612620229&id=0">Auto Archive All</a>, ';
+       
         try {
             $fi = new FilesystemIterator(__DIR__ . '/tmp', FilesystemIterator::SKIP_DOTS);
             echo '<a href="zipdelete.php?tmp=yes&delete=1 ">Zip and Delete tmp (' . iterator_count($fi) . ' files)</a>, ';
