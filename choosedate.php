@@ -127,16 +127,16 @@ https://leaverou.github.io/css3patterns/
                 // $archiveThese[] = $key; 
                 $ret = zipDateId($key, $myId);
                 echo "<p>$key has been archived for Camera $myId with result: $ret </p>";
-                ob_flush();
+              
                 flush();
             } else { 
                 echo "<p>$key has not been archived for Camera $myId (too recent)</p>";
-                ob_flush();
+               
                 flush();
             }
         }
         // var_dump($archiveThese);
-        if(isset($_GET["autoarchive"]) && $myId <= 13 ) { 
+        if(isset($_GET["autoarchive"]) && $myId < 13 ) { 
             echo "<p> Please wait...      (" . ($_GET["cc"] ?? 0) . ")</p>";
             echo " <script> ";
             echo "setTimeout(function(){ window.location = 'choosedate.php?cc=" . 
