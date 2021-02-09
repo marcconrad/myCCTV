@@ -157,10 +157,13 @@ include_once "./util.php";
             <br>
             <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&silent=1')">Only Cats</button>
             <br>
+            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1')">Recent</button>
+            <br>
+            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1&textonly=yes&dx=100')">List</button>
+            <br>
             <button class="button" onClick="goTo('viewlog.php?t='+Date.now()+'')">Cfai Log</button>
             <br>
-            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listconcepts=1')">Concepts</button>
-            <br>
+         
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showclarifai=1')">Manage</button> <br>
 
             <br>

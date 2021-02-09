@@ -18,15 +18,34 @@ echo "\r\n";
 echo "\r\n";
 ?>
 <script>
-    
-    if( window.parent != window) { 
-      // setTimeout(function(){document.getElementById("homebutton").style.display = "none";}, 100);
+    if (window.parent != window) {
+        // setTimeout(function(){document.getElementById("homebutton").style.display = "none";}, 100);
     }
-
 </script>
 <style>
     body {
         background-color: rgb(222, 185, 63);
+    }
+
+    .container {
+        position: relative;
+        color: magenta;
+    }
+
+    .bottom-left {
+        position: absolute;
+        bottom: 8px;
+        left: 16px;
+        color: black;
+    }
+
+    .bottom-left-yellow {
+        position: absolute;
+        bottom: 9px;
+        left: 17px;
+        /* color: #FFD700; */
+        color: <?php echo ($_GET["captioncolor"] ?? "#FFD700"); ?>;
+        background-color: rgba(0, 0, 0, 0.3);
     }
 
     .button {
@@ -67,24 +86,26 @@ echo "\r\n";
 
 <title>View Gifs</title>
 <script>
-  <?php
-        if($_SERVER['SERVER_NAME'] === "localhost") { 
-            echo "var httpx = 'http';";
-        } else { 
-            echo "var httpx = 'https';";
-        }
-        ?>
+    <?php
+    if ($_SERVER['SERVER_NAME'] === "localhost") {
+        echo "var httpx = 'http';";
+    } else {
+        echo "var httpx = 'https';";
+    }
+    ?>
 
     function copy2clipboard(str) {
         var copyText = document.getElementById(str);
-        if(copyText.value.startsWith("/cam/")) { copyText.value = httpx+'://' + window.location.host +'' + copyText.value; }
+        if (copyText.value.startsWith("/cam/")) {
+            copyText.value = httpx + '://' + window.location.host + '' + copyText.value;
+        }
         copyText.type = 'text';
         copyText.select();
         copyText.setSelectionRange(0, 99999)
         document.execCommand("copy");
         copyText.type = 'hidden';
         // alert("Copied the text: " + copyText.value);
-        
+
     }
 </script>
 
@@ -96,11 +117,73 @@ echo "\r\n";
 
     include "./util.php";
 
-    if (isset($_GET["listconcepts"])) {
-        $dirs = glob("agifs/*/", GLOB_ONLYDIR);
-        // var_dump($dirs); 
+    if (isset($_GET["listbydate"])) {
+        $allgifs = glob("agifs/*/aa*.gif");
+        // var_dump($allgifs); 
 
-        foreach ($dirs as $dir) {
+        $allbydate = array();
+        foreach ($allgifs as $fn) {
+            $parts = explode("/", $fn);
+            $key = $parts[2] . "_" . $parts[1];
+            $parts["fn"] = $fn;
+            $allbydate[$key] = $parts;
+        }
+        // var_dump($allbydate); 
+        if (isset($_GET["oldesfirst"])) {
+            ksort($allbydate);
+        } else {
+            krsort($allbydate);
+        }
+        // var_dump($allbydate); 
+        $from = $_GET["from"] ?? 1;
+        $dx = ($_GET["dx"] ?? 12); 
+        $textonly = $_GET["textonly"] ?? "no"; 
+        $to = $from + $dx;
+        $z = 1;
+
+        foreach ($allbydate as $parts) {
+            if ($z >= $from && $z < $to) {
+                $concept = $parts[1];
+                $bn = $parts[2];
+                $ts = basename2timestamp($bn);
+                $date = gmdate("d M 'y; H:i:s", $ts);
+               
+                if ($textonly == "yes") {
+                    
+
+                   //  echo "<b> $date </b> ";
+                    echo '<a href="viewgifs.php?edit=1&concept=' . $concept . '" >' . $date. ' - '. ucfirst($concept)  . '</a>; ';
+                    /*
+                    echo '<a href="viewgifs.php?edit=1&concept=' . $concept . '" >' . ucfirst($concept) . ' (Edit)</a>; ';
+                    echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '" >' . ucfirst($concept) . ' (no Dates)</a>; ';
+                    echo "\r\n <br>\r\n";
+                    echo '<img width="320" height="240" src="' . $parts["fn"] . '" alt="' . $concept . '">';
+                    */
+                    echo "\r\n";
+                    echo '<p>';
+                } else {
+                    echo '<a class="container" href="viewgifs.php?edit=1&concept=' . $concept . '"><img width=320 height=240  src="' . $parts["fn"] . '" alt="' . $concept . '">';
+                    $str = $date . " - " . ucfirst($concept);
+                    echo '<em class="bottom-left">' . $str . '</em>';
+                    echo '<em class="bottom-left-yellow">' . $str . '</em>';
+                    echo "</a>  \r\n";
+                }
+            }
+            $z++;
+        }
+        echo "<hr>";
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=' . $to . '&dx=' . $dx . '"><button class="button4" id="morebutton">More</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=' . ($from - $dx) . '&dx=' . $dx . '"><button class="button4" id="prevbutton">Previous</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=1&dx=' . $dx . '"><button class="button4" id="prevbutton">First</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listconcepts=1&id=4&a=1&oldestfirst=1&sortbyage=1' . $dx . '"><button class="button4" id="prevbutton">Concepts</button></a> ';
+        echo '<a href="menu.php"><button class="button3" id="homebutton">Home</button></a><p>';
+        die("Thank you very much!<p></body></html>");
+    }
+    if (isset($_GET["listconcepts"])) {
+        $allgifs = glob("agifs/*/", GLOB_ONLYDIR);
+        // var_dump($allgifs); 
+
+        foreach ($allgifs as $dir) {
             $concept = explode("/", $dir)[1];
             echo '<a href="viewgifs.php?concept=' . $concept . '" >' . ucfirst($concept) . '</a>; ';
             echo '<a href="viewgifs.php?edit=1&concept=' . $concept . '" >' . ucfirst($concept) . ' (Edit)</a>; ';
@@ -153,7 +236,7 @@ echo "\r\n";
 
     if ($out) {
 
-        echo "<h1>" . ucfirst($concept) . "s</h1>";
+        echo "<h1>Concept: " . ucfirst($concept) . "</h1>";
 
         if ($edit) {
             echo '<a href="index.php">Home</a> ';
@@ -163,7 +246,7 @@ echo "\r\n";
                 echo '<a href="viewgifs.php?' . ($edit ? 'edit=1&' : '') . 'outtakes=1&concept=' . $concept . '">Outtakes</a> ';
             }
         }
-        echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '">Just ' . ucfirst($concept) . 's</a> ';
+        echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '">Just ' . ucfirst($concept) . '</a> ';
     }
     // var_dump($files); 
     $txt = array();
@@ -268,16 +351,17 @@ echo "\r\n";
         echo '<a href="viewgifs.php?outtakes=1">Outtakes</a> ';
     }
     if ($out) {
-        echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '">Just ' . ucfirst($concept) . 's</a> ';
+        echo '<a href="viewgifs.php?silent=1&concept=' . $concept . '">Just ' . ucfirst($concept) . '</a> ';
     } else {
         // echo '<a href="viewgifs.php?showdate=1">Cats and Dates</a> ';
-        echo '<a href="viewgifs.php?showdate=1&concept=' . $concept . '">' . ucfirst($concept) . 's and Dates (back)</a> ';
+        echo '<a href="viewgifs.php?showdate=1&concept=' . $concept . '">' . ucfirst($concept) . ' and Dates (back)</a> ';
     }
 
 
     ?>
-<p>
-<a href="index.php">Home</a></p>
+    <p>
+        <a href="index.php">Home</a>
+    </p>
 </body>
 
 </html>
