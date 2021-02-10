@@ -478,7 +478,7 @@ function autocat_log($log_msg)
         $clarifaicount[720] += 60; 
         write2config(true);
     } else if($clarifaipermonth < $targetclarifaipermonth * 0.99 ) { 
-        $clarifaicount[720] -= 60; 
+        $clarifaicount[720] = max($clarifaicount[720] - 60, 0); 
         write2config(true);
     }
 
