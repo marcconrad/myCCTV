@@ -21,13 +21,23 @@
     <em>Times are in UTC.</em>
     <p>
         <?php
+        //phpinfo(); 
         $logfile = $_GET["logfile"] ?? "log/__log.html";
         if(file_exists($logfile)) { 
         $txt = file_get_contents($logfile);
         // echo $txt; 
+        
+        $ex = explode("<br>", $txt);
+        $nextlink = $ex[0] ?? "(nothing to show)";
+        
+        $pp = explode("log/_", $nextlink); 
+        $ex[0] = implode("viewlog.php?logfile=log/_", $pp); 
 
 
-        $tt = array_reverse(explode("<br>", $txt));
+       // echo "<h2>".$nextlink."</h2>"; 
+       
+
+        $tt = array_reverse($ex);
         array_shift($tt);
 
         echo "<ol>";
