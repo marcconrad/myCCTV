@@ -155,9 +155,9 @@ include_once "./util.php";
             <br>
             <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&edit=1')">Cats (Edit)</button>
             <br>
-            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&silent=1')">Only Cats</button>
+            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1&ext=jpg')"><b>Recent</b></button>
             <br>
-            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1')">Recent</button>
+            <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1')"><em>Recent</em></button>
             <br>
             <button class="button" onClick="goTo('viewgifs.php?t='+Date.now()+'&listbydate=1&textonly=yes&dx=100')">List</button>
             <br>

@@ -118,7 +118,8 @@ echo "\r\n";
     include "./util.php";
 
     if (isset($_GET["listbydate"])) {
-        $allgifs = glob("agifs/*/aa*.gif");
+        $ext = $_GET["ext"] ?? "gif"; 
+        $allgifs = glob("agifs/*/aa*.".$ext);
         // var_dump($allgifs); 
 
         $allbydate = array();
@@ -172,9 +173,9 @@ echo "\r\n";
             $z++;
         }
         echo "<hr>";
-        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=' . $to . '&dx=' . $dx . '"><button class="button4" id="morebutton">More</button></a> ';
-        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=' . ($from - $dx) . '&dx=' . $dx . '"><button class="button4" id="prevbutton">Previous</button></a> ';
-        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&textonly='.$textonly.'&from=1&dx=' . $dx . '"><button class="button4" id="prevbutton">First</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&ext='.$ext.'&textonly='.$textonly.'&from=' . $to . '&dx=' . $dx . '"><button class="button4" id="morebutton">Earlier</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&ext='.$ext.'&textonly='.$textonly.'&from=' . ($from - $dx) . '&dx=' . $dx . '"><button class="button4" id="prevbutton">Newer</button></a> ';
+        echo '<a href="viewgifs.php?t=' . time() . '&listbydate=2&ext='.$ext.'&textonly='.$textonly.'&from=1&dx=' . $dx . '"><button class="button4" id="prevbutton">First</button></a> ';
         echo '<a href="viewgifs.php?t=' . time() . '&listconcepts=1&id=4&a=1&oldestfirst=1&sortbyage=1' . $dx . '"><button class="button4" id="prevbutton">Concepts</button></a> ';
         echo '<a href="menu.php"><button class="button3" id="homebutton">Home</button></a><p>';
         die("Thank you very much!<p></body></html>");
