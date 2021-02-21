@@ -84,20 +84,21 @@
         <button class="button button2" onclick="openFullscreen('canvas')">Fullscreen Canvas</button>
         <button class="button button4" onclick="openFullscreen('video')">Fullscreen Video</button>
         <script>
-
-
-function openFullscreen(x = 'video') {
-    var elem = document.getElementById(x);
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.mozRequestFullScreen) { /* Firefox */
-    elem.mozRequestFullScreen();
-  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { /* IE/Edge */
-    elem.msRequestFullscreen();
-  }
-}
+            function openFullscreen(x = 'video') {
+                var elem = document.getElementById(x);
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    /* Firefox */
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    /* Chrome, Safari & Opera */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    /* IE/Edge */
+                    elem.msRequestFullscreen();
+                }
+            }
             <?php
             // $updateInMilliseconds = (intval($_GET["update"] ?? 0 ) > 0 ? intval($_GET["update"] ?? 0) : 1000);
             $updateInMilliseconds = intval($_GET["update"] ?? 1000);
@@ -112,7 +113,7 @@ function openFullscreen(x = 'video') {
             var imgMaxHardLimit = 240;
             var gapBetweenPostsHardLowerLimit = 1000; // Millieconds
             var gapBetweenPostsHardUpperLimit = 3600000; // Millieconds
-        
+
 
 
             var battery;
@@ -203,7 +204,7 @@ function openFullscreen(x = 'video') {
             var droppedFrames = 0;
             var averageDroppedFrames = 0;
             var numberOfRequests = 0;
-            var numberOfDonotsends = 0; 
+            var numberOfDonotsends = 0;
             var numberOfTimeouts = 0;
             var numberOfHighPayloads = 0;
             var numberOfConnectErrors = 0;
@@ -291,7 +292,7 @@ function openFullscreen(x = 'video') {
 
             function updateClock() {
 
-                addLI("cycle", getTimeNow(true) + " (" + updateInMilliseconds + ") " + (pauseCapture ? "pause: "+pauseCapture : "rec"), 4);
+                addLI("cycle", getTimeNow(true) + " (" + updateInMilliseconds + ") " + (pauseCapture ? "pause: " + pauseCapture : "rec"), 4);
                 var now = new Date();
 
                 var elem = document.getElementById('clock_time');
@@ -442,7 +443,7 @@ function openFullscreen(x = 'video') {
                         thePostData = "";
                         countImages = 0;
                         imagesAdded = 0;
-                        numberOfDonotsends++; 
+                        numberOfDonotsends++;
 
                     } else {
 
@@ -464,9 +465,9 @@ function openFullscreen(x = 'video') {
                             "&jsonerr=" + totaljsonreturnerror +
                             "&jsoninvalid=" + totalinvalidjson +
                             "&requests=" + numberOfRequests +
-                            "&donotsends=" + numberOfDonotsends + 
+                            "&donotsends=" + numberOfDonotsends +
                             "&timeouts=" + numberOfTimeouts +
-                            "&highpayloads="+numberOfHighPayloads+
+                            "&highpayloads=" + numberOfHighPayloads +
                             "&errors=" + numberOfConnectErrors +
                             "&updms=" + updateInMilliseconds +
                             "&totalImgs=" + totalImagesSent +
@@ -482,11 +483,11 @@ function openFullscreen(x = 'video') {
                         var dataToPost = thePostData + statusInfo;
                         thePostData = "";
                         dtpl = dataToPost.length;
-                        if( dtpl > (maxpostsize - 1024) ) { // drop all images and send error
-                            dataToPost = statusInfo+"&payloadtoohigh="+dtpl+"&maxpostsize="+maxpostsize; 
-                            numberOfHighPayloads++; 
+                        if (dtpl > (maxpostsize - 1024)) { // drop all images and send error
+                            dataToPost = statusInfo + "&payloadtoohigh=" + dtpl + "&maxpostsize=" + maxpostsize;
+                            numberOfHighPayloads++;
                         }
-                        addLI("statusinfo", getTimeNow() + ": " + statusInfo + " actual length=" + dataToPost.length +" planned length=" + dtpl, 5);
+                        addLI("statusinfo", getTimeNow() + ": " + statusInfo + " actual length=" + dataToPost.length + " planned length=" + dtpl, 5);
 
                         ajax.open("POST", "index.php", true); // true == asynchronous request.
                         ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -518,10 +519,10 @@ function openFullscreen(x = 'video') {
 
                                 reloadnow = (parsed.reloadnow ? parsed.reloadnow : false);
 
-                                if(reloadnow == "yes") { 
-                                    
-                                    window.location.reload(); 
-                                    }
+                                if (reloadnow == "yes") {
+
+                                    window.location.reload();
+                                }
                                 buckets = (parsed.buckets ? parsed.buckets : false);
                                 pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);
 
@@ -531,7 +532,7 @@ function openFullscreen(x = 'video') {
                                 twidth = (parsed.twidth ? parsed.twidth : 640); // targeted image width
                                 theight = (parsed.theight ? parsed.theight : 480); // targeted image height 
 
-                                maxpostsize = (parsed.post_max_size? parsed.post_max_size : 8388608); 
+                                maxpostsize = (parsed.post_max_size ? parsed.post_max_size : 8388608);
 
                                 // document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
                                 // document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
@@ -627,15 +628,24 @@ function openFullscreen(x = 'video') {
                     document.getElementById('videoerror').innerHTML = 'An error has occurred: ' + e;
                 };
 
+                var inputmode = <?php echo "'" . ($_GET["inputmode"] ?? "cam") . "'"; ?> ;
                 // Put video listeners into place
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-                        video.srcObject = stream;
-                        video.play();
-                    }).catch(errBack);
+                if (inputmode == 'cam') {
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+                            video.srcObject = stream;
+                            video.play();
+                        }).catch(errBack);
+                    }
+                } else if (inputmode == 'screen') {
+
+                    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                        navigator.mediaDevices.getDisplayMedia(mediaConfig).then(function(stream) {
+                            video.srcObject = stream;
+                            video.play();
+                        }).catch(errBack);
+                    }
                 }
-
-
                 // Trigger photo take
                 //	document.getElementById('snap').addEventListener('click', function() {
                 //		saveImage();
@@ -643,49 +653,49 @@ function openFullscreen(x = 'video') {
             }, false);
         </script>
 
-        <p>
-            <b id="clock_time">@@:!!:##</b>
-            <p>
+    <p>
+        <b id="clock_time">@@:!!:##</b>
+    <p>
 
-                <ul id="ulinfo">
-                    <li>[cycle started]<ol id="cycle"> </ol>
-                    </li>
-                    <li>[video error]<ol id="videoerror"></ol>
-                    </li>
-                    <li>[timeout]<ol id="timeout"></ol>
-                    </li>
-                    <li>[connect issue]<ol id="ajaxerror"></ol>
-                    </li>
-                    <li>[connect?]<ol id="ajaxsuccess"></ol>
-                    </li>
-                    <li>[data received]<ol id="ajaxreceived"></ol>
-                    </li>
-                    <li>[battery]<ol id="battery"></ol>
-                    </li>
-                    <li>[skip]<ol id="skipped"></ol>
-                    </li>
-                    <li>[misc]<ol id="misc"></ol>
-                    </li>
-                    <li>[statusinfo]<ol id="statusinfo"></ol>
-                    </li>
-                    <li>[err]<ol id="err"></ol>
-                    </li>
-                </ul>
-                <hr>
-                <ol id="olinfo">
-                    <li id="batteryinfo">z,z,z,z,z</li>
-                    <li id="info1">info1</li>
-                    <li id="info2">info2</li>
-                    <li id="info3">info3</li>
-                    <li id="info4">info4</li>
-                    <li id="info5">info5</li>
-                    <li id="info6">info6</li>
-                    <li id="info7">info7</li>
-                    <li id="info8">info8</li>
-                    <li id="info9">info9</li>
+    <ul id="ulinfo">
+        <li>[cycle started]<ol id="cycle"> </ol>
+        </li>
+        <li>[video error]<ol id="videoerror"></ol>
+        </li>
+        <li>[timeout]<ol id="timeout"></ol>
+        </li>
+        <li>[connect issue]<ol id="ajaxerror"></ol>
+        </li>
+        <li>[connect?]<ol id="ajaxsuccess"></ol>
+        </li>
+        <li>[data received]<ol id="ajaxreceived"></ol>
+        </li>
+        <li>[battery]<ol id="battery"></ol>
+        </li>
+        <li>[skip]<ol id="skipped"></ol>
+        </li>
+        <li>[misc]<ol id="misc"></ol>
+        </li>
+        <li>[statusinfo]<ol id="statusinfo"></ol>
+        </li>
+        <li>[err]<ol id="err"></ol>
+        </li>
+    </ul>
+    <hr>
+    <ol id="olinfo">
+        <li id="batteryinfo">z,z,z,z,z</li>
+        <li id="info1">info1</li>
+        <li id="info2">info2</li>
+        <li id="info3">info3</li>
+        <li id="info4">info4</li>
+        <li id="info5">info5</li>
+        <li id="info6">info6</li>
+        <li id="info7">info7</li>
+        <li id="info8">info8</li>
+        <li id="info9">info9</li>
 
-                    <li id="ajaxresponse">abcdefg</li>
-                </ol>
+        <li id="ajaxresponse">abcdefg</li>
+    </ol>
 </body>
 
 </html>
