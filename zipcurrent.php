@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <h1>ZIP Current <?php echo ($_GET["delete"] ? "(and Delete)" : "") ?></h1>
+    <h1>ZIP Current <?php echo (isset($_GET["delete"]) ? "(and Delete)" : "") ?></h1>
     <?php
 
     error_reporting(-1);

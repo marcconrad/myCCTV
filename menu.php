@@ -163,7 +163,7 @@ include_once "./util.php";
             <br>
             <button class="button" onClick="goTo('viewlog.php?t='+Date.now()+'')">Cfai Log</button>
             <br>
-         
+
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showclarifai=1')">Manage</button> <br>
 
             <br>
@@ -191,6 +191,18 @@ include_once "./util.php";
                     <button class="button" onClick="goFromTo('settgts')">Set Targets</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1')">Start Cam</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1&resetuqt=1')">Start Cam!</button>
+
+                </div>
+            </div>
+            <div class="dropdownsub">
+                <button class="button">Caption &raquo;</button>
+                <div class="dropdownsub-content"> 
+                    <button class="button" onClick="setcaptioncolor('%23FFD700')">Yellow</button>
+                    <button class="button" onClick="setcaptioncolor('red')">Red</button>
+                    <button class="button" onClick="setcaptioncolor('green')">Green</button>
+                    <button class="button" onClick="setcaptioncolor('blue')">Blue</button>
+                   
+                    <button class="button" onClick="setcaptioncolor('white')">White</button>
 
                 </div>
             </div>
@@ -531,6 +543,15 @@ include_once "./util.php";
 
 
         var newsrc = null;
+        var captioncolor = "%23FFD700";
+
+        function setcaptioncolor(str) { 
+            captioncolor = str; 
+            if (newsrc != null) {
+                clearTimeout(gotofalse);
+                gotofalse = setTimeout('goFromTo()', 2);
+            }
+        }
 
         function goTo(str) {
             if (str === false) {
@@ -540,7 +561,9 @@ include_once "./util.php";
                 str = document.getElementById("mainframe").src;
             }
             console.log("(a)" + str);
-            str = str.replace(/howmany=\d+/g, "howmany=" + document.getElementById("howmany").value);
+            
+            // var captioncolor = "red";
+            str = str.replace(/howmany=\d+/g, "captioncolor=" + captioncolor + "&howmany=" + document.getElementById("howmany").value);
             str = str.replace(/id=\d+/g, "id=" + id);
 
             setTimeout(updateStatusEmoji, 10);
