@@ -1251,7 +1251,22 @@ if (isset($_GET["imgout"])) {
 
         die();
     }
+    if (isset($_GET["setautocatdelta"])) {
+        // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
+        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        autocat($myId, "initonly");
+        $currentgap = $autocat[$myId][8] ?? 300;
+       
+        $autocat[$myId][8] = intval($_GET["setautocatdelta"]);
+        write2config();
+        echo "<p> Changed from $currentgap seconds to ".$autocat[$myId][8]." seconds. <p> ";
+        echo "Thank You";
+        //  var_dump($autocat);
+        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
+        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
 
+        die();
+    }
 
 
 
@@ -1811,6 +1826,18 @@ if (isset($_GET["imgout"])) {
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>, ';
                 echo "\r\n";
             }
+            echo "<h2>Autocat Delta:</h2>";
+            echo "Use +/-".($autocat[$myId][8] ?? 300)." seconds for automatic gif creation.";
+            //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
+            echo '<form action="index.php">';
+            echo '<label for="setautocatdelta">Change delta: </label>';
+            echo '<input type="text" id="setautocatdelta" name="setautocatdelta">';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
+
+           
             echo "<p>";
             //  var_dump($clarifaicount);
             echo "<p>";
@@ -2269,8 +2296,10 @@ if (isset($_GET["imgout"])) {
 
         $myNeigtbours = array();
         $bnt = basename2timestamp($bn);
-        $fromTime = $bnt - 300; // 2 minutes
-        $toTime = $bnt + 300;
+
+        $deltaseconds =  $autocat[$myId][8] ?? 300; 
+        $fromTime = $bnt - $deltaseconds; // 2 minutes = 300
+        $toTime = $bnt + $deltaseconds;
         foreach (myTargets($myId) as $tgt) {
             $a = findImages($tgt, 12, true, $bn, false, $fromTime, $toTime);
             foreach ($a as $bna) {
