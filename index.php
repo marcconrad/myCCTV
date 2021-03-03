@@ -1818,9 +1818,12 @@ if (isset($_GET["imgout"])) {
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
+            echo "<em>Use the concept &quot;everything&quot; as a wildcard to alwyas do an animated gif. This overrides using the clarifai service.";
+            echo "<br>";
             echo "<p>";
 
             echo "Click on any of the concepts below to delete them.<br>";
+            
             $concepts = $autocat[$myId][5];
             foreach ($concepts as $c) {
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>, ';
@@ -1858,45 +1861,7 @@ if (isset($_GET["imgout"])) {
             die();
         }
 
-        /*
-        if (isset($_GET["history"])) {
-            $what = $_GET["history"];
-            if ($what == "add") {
-                $h = $history[$myId] ?? array();
-                $lg = $lastgallery[$myId] ?? array();
-                $history[$myId] = array_merge($h, $lg);
-                write2config();
-                var_dump($history[$myId]);
-            } else if ($what == "replace") {
-                $lg = $lastgallery[$myId] ?? array();
-                $history[$myId] = $lg;
-                write2config();
-            } else if ($what == "view") {
-                $notfound = 0;
-                $displaythis = array();
-                // var_dump($history[$myId] ); 
-                foreach ($history[$myId] ?? array() as $bn) {
-                    $f = glob("img/*?/" . substr($bn, 0, 25) . "*.jpg");
-                    // var_dump($f); 
-                    if (isset($f[0])) {
-                        $fbn = basename($f[0]);
-                        $displaythis[$fbn] = $fbn;
-                    } else {
-                        $notfound++;
-                    }
-                    // var_dump($displaythis);  
-                }
-                ksort($displaythis);
-                displayImages($displaythis);
-                echo "<p>$notfound images no longer exist.";
-            }
-
-            echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b><p>';
-            // unlink($lockfile);
-            write2config();
-            die();
-        }
-        */
+       
         if (isset($_GET["clarifaimaxcount"])) {
             if (!isset($clarifaicount)) {
                 $clarifaicount = array("0", time(), false);
@@ -2250,10 +2215,13 @@ if (isset($_GET["imgout"])) {
             }
         }
 
+        $concepts = array(); 
 
-
-        $concepts = clarifaiImage($bn, true);
-
+        if( array_search("everything", $concepts ) !== FALSE ) { 
+            $concepts[0] = "everything"; 
+        } else { 
+            $concepts = clarifaiImage($bn, true);
+        }
         if (!is_array($concepts)) {
             return "Clasrifai problem with $bnlink: " . $concepts;
         }
@@ -2298,7 +2266,7 @@ if (isset($_GET["imgout"])) {
         $bnt = basename2timestamp($bn);
 
         $deltaseconds =  $autocat[$myId][8] ?? 300; 
-        $fromTime = $bnt - $deltaseconds; // 2 minutes = 300
+        $fromTime = $bnt - $deltaseconds; // 5 minutes = 300
         $toTime = $bnt + $deltaseconds;
         foreach (myTargets($myId) as $tgt) {
             $a = findImages($tgt, 12, true, $bn, false, $fromTime, $toTime);
