@@ -2215,9 +2215,9 @@ if (isset($_GET["imgout"])) {
             }
         }
 
-        $concepts = array(); 
+        $concepts= array(); 
 
-        if( array_search("everything", $concepts ) !== FALSE ) { 
+        if( array_search("everything", $searchterms ) !== FALSE ) { 
             $concepts[0] = "everything"; 
         } else { 
             $concepts = clarifaiImage($bn, true);
