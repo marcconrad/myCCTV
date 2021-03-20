@@ -25,7 +25,7 @@ function addIndex($dirname, $doit = true)
 
 function addAllIndex($doit = true)
 {
-    $dirs = array("tmp", "img", "log", "zip");
+    $dirs = array("tmp", "img", "log", "zip", "loga");
     foreach ($dirs as $dir) {
         addIndex("./" . $dir, $doit);
         foreach (glob("./" . $dir . "/*", GLOB_ONLYDIR) as $f) {
@@ -49,6 +49,9 @@ if (!file_exists("tmp")) {
 
 if (!file_exists("log")) {
     mkdir("log", 0777, true);
+}
+if (!file_exists("loga")) {
+    mkdir("loga", 0777, true);
 }
 if (!file_exists("agifs")) {
     mkdir("agifs", 0777, true);
@@ -457,7 +460,38 @@ function return_bytes($val)
 
     return $val;
 }
+/**
+ * Logs any interaction with Clarifai service. 
+ */
 
+function received_log($myId, $mode, $log_msg)
+{
+    $logFileFolder = "loga/".$myId."_".$mode."/"; 
+    if (!file_exists($logFileFolder)) {
+        if( array_search($mode, array("timestamp", "full") ) !== false )  { 
+        mkdir($logFileFolder, 0777, true);
+       } else { 
+           return; // illegal log mode. 
+       }
+    }
+    $logFile = $logFileFolder ."__log.html"; 
+  
+    $myip = getenv("REMOTE_ADDR");
+    
+    $ipNo = "<a href=\"https://ip-api.com/" . $myip . "\">" . $myip . "</a>";
+    $t = localtimeCam($myId); 
+
+    $logtxt = gmdate("Ymd-His", $t) . ": " . $log_msg . " from " . $ipNo . "<br>\n";
+    file_put_contents($logFile, $logtxt, FILE_APPEND);
+
+    if (filesize($logFile) > 1234560) { // bytes
+        $archived = "__logArchived" . gmdate("YmdHis", $t) . ".html";
+        rename($logFile, $logFileFolder.$archived);
+        $fh = fopen($logFile, 'a') or die("can't open file: " . $logFile);
+        fwrite($fh, "<a href=\"$archived\">$archived</a><br>\n");
+        fclose($fh);
+    }
+}
 /**
  * Logs any interaction with Clarifai service. 
  */
@@ -1675,6 +1709,14 @@ if (isset($_GET["imgout"])) {
             echo '<div>';
             echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" . $fastmode[$myId] . ")" : "off") . "</b>";
             echo '</div>';
+            echo '<div>';
+            echo "Logmode is <b>".($logmode[$myId] ?? "off").".</b> Change to: "; 
+           // echo '<a href="index.php?time=' . time() . '&changelogto=full&id=' . $myId . '">full</a> ';
+            echo '<a href="index.php?time=' . time() . '&changelogto=timestamp&id=' . $myId . '">timestamp</a> ';
+            echo '<a href="index.php?time=' . time() . '&changelogto=off&id=' . $myId . '">off</a> ';
+            // echo '<a href="index.php?time=' . time() . '&changelogto=default&id=' . $myId . '">Default</a> ';
+
+            echo '</div>';
 
             $k = $stats[$myId] ?? array();
             echo "The Camera is live since: " . (isset($k["alivesince"]) ?  gmdate("M j, H:i:s",  $k["alivesince"]) : "(not recorded)") . ". ";
@@ -2002,6 +2044,15 @@ if (isset($_GET["imgout"])) {
             $stats[$myId] = NULL;
 
             echo "<h2>The Camera will reset the statistics. Thank you. </h2>";
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+            write2config();
+            sleep(1);
+        }
+        if (isset($_GET["changelogto"])) {
+            $s = $result = preg_replace("/[^a-zA-Z0-9]+/", "", $_GET["changelogto"]); 
+            $logmode[$myId] = $s;
+
+            echo "<p>Log mode set to ".$logmode[$myId]."<p>";
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
             write2config();
             sleep(1);
@@ -2491,7 +2542,7 @@ if (isset($_GET["imgout"])) {
 
         global $varfile_config;
 
-        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
+        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $logmode;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
@@ -2513,6 +2564,8 @@ if (isset($_GET["imgout"])) {
 
         $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
         $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
+
+        $content .= PHP_EOL . " \$logmode = " . var_export($logmode, true) . "; ";
 
         $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
         $content .= PHP_EOL . " \$servertargeteta = " . var_export($servertargeteta, true) . "; ";
@@ -3604,9 +3657,11 @@ if (isset($_GET["imgout"])) {
     function receiveImagesA($myId)
     {
         global $keephowmany, $imgsizeinfo;
-        global $errinfo;
+        global $errinfo, $logmode;
         $itotalThisUpload = 0;
         $icountThisUpload  = 0;
+        $mylogmode = $logmode[$myId] ?? "off"; 
+      
 
         if (!isset($imgsizeinfo[$myId])) {
             $imgsizeinfo[$myId] = array(localtimeCam($myId), 0, 0);
@@ -3631,8 +3686,10 @@ if (isset($_GET["imgout"])) {
         $imgMax = $_POST['n'] ?? 0; // $imgMax == 0: return gallery.
 
         $tgts = myTargets($myId);
+        $logtxt = $imgMax;
 
-        for ($i = 0; $i < $imgMax; $i++)  if (isset($_POST['imgData' . $i])) { // should always be true		     
+        for ($i = 0; $i < $imgMax; $i++)  if (isset($_POST['imgData' . $i])) { // should always be true		
+            
             $img = $_POST['imgData' . $i];
             $img = str_replace('data:image/jpeg;base64,', '', $img);
 
@@ -3659,6 +3716,7 @@ if (isset($_GET["imgout"])) {
             $ret = $bgavg;
 
             $GLOBALS["countImagesSaved"]++;
+         
             foreach ($tgts as $tgt) {
                 $imgfoldername = "img/" . $tgt . "/";
                 if (!file_exists($imgfoldername)) {
@@ -3673,6 +3731,9 @@ if (isset($_GET["imgout"])) {
 
                 $newfilename = $prefix . $nowdate . "v" . sprintf('%03d', $nowMillies) . "i" . sprintf('%04d', $i) . "c" . $count . "d" . round($imgValues[0], 3) . "d" . round($imgValues[1], 3) . "d" . round($imgValues[2], 3) . "d" . $jpginfo . "y" . $zoominfo . "yz" . $tgt . "z.jpg";
                 file_put_contents($imgfoldername . $newfilename, $fileData);
+                if($mylogmode === "full") { 
+                $logtxt .= ", ".$newfilename; 
+                }
             }
 
 
@@ -3695,7 +3756,9 @@ if (isset($_GET["imgout"])) {
 
             imagedestroy($imgout);
         }
-
+        if($mylogmode !== "off" ) { 
+            received_log($myId, $mylogmode, $logtxt); 
+        }
 
         return $ret;
     }
