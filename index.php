@@ -547,15 +547,27 @@ if (isset($_GET["imgout"])) {
 
     if ($im === false) {
         $im = imagecreatefromjpeg("./nopic.jpg");
+        $text = "(no picture)";
     }
 
     $textcolour = imagecolorallocate($im, 204, 204, 0);
     $textshadow = imagecolorallocate($im, 0, 0, 0);
 
+   
+    $imgheight = imagesy($im); 
+    $imgwidth = imagesx($im); 
+
+    
+    $fntsize = max(1, floor(min($imgwidth, 320) * 24 / 320)); 
+    $dy = floor( $fntsize * 14 / 24);  // was 14
+    $yy = max(2,$imgheight - $dy); // was 446
+
+    $dx = floor($fntsize * 9 / 24); // was 9
+    // Fontsize 24 = 320 width  x = actual width
 
     $font = dirname(__FILE__) . '/arial.ttf';
-    @imagettftext($im, 24, 0, 10, 446, $textshadow, $font, $text);
-    @imagettftext($im, 24, 0, 9, 445, $textcolour, $font, $text);
+    @imagettftext($im, $fntsize, 0, $dx + 1, $yy, $textshadow, $font, $text);
+    @imagettftext($im, $fntsize, 0, $dx, $yy-1, $textcolour, $font, $text);
 
     header('Content-Type: image/jpeg');
 
