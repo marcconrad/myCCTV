@@ -81,7 +81,8 @@ https://leaverou.github.io/css3patterns/
             echo "<p>$a has been un-archived for Camera $myId with result: $ret </p>";
         }
     }
-    echo "Working on it...\n"; 
+    echo "<p>Working on it...\n </p>"; 
+    echo " \r\n ";
    
     flush();
     
@@ -127,10 +128,12 @@ https://leaverou.github.io/css3patterns/
                 // $archiveThese[] = $key; 
                 $ret = zipDateId($key, $myId);
                 echo "<p>$key has been archived for Camera $myId with result: $ret </p>";
+                echo " \r\n ";
               
                 flush();
             } else { 
                 echo "<p>$key has not been archived for Camera $myId (too recent)</p>";
+                echo " \r\n ";
                
                 flush();
             }
