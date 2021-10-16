@@ -1329,12 +1329,15 @@ if (isset($_GET["imgout"])) {
 
         $sessiongetinfo[$myId] = $_SERVER;
 
-        if (isset($_GET["startcam"])) {
-            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&id=' . $myId . '">Start Cam ' . $myId . '</a></h1>';
+        if (isset($_GET["startcam"])) { 
+            
             echo '(will open in a new window)';
+            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&id=' . $myId . '">Start Cam ' . $myId . ' (Environment facing)</a></h1>';
+            echo '<h2>or</h2>';
+            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&facingmode=user&id=' . $myId . '">Start Cam ' . $myId . ' (User facing)</a></h1>';
+           
             echo '<h2>or</h2>';
             echo ' <h1><a target="_blank" href="cam.php?inputmode=screen&id=' . $myId . '">Start Screen Capture ' . $myId . '</a></h1>';
-            echo '(will open in a new window)';
             if (isset($_GET["resetuqt"])) {
                 $stats[$myId]["uqt"] = NULL;
 
