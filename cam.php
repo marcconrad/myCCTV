@@ -633,7 +633,8 @@
                     }
                 }
                 // Put event listeners into place
-                window.addEventListener("DOMContentLoaded", function() {
+                
+                var startvideo = function() {
                     // Grab elements, create settings, etc.
                     var video = document.getElementById('video');
 
@@ -653,6 +654,10 @@
                     var errBack = function(e) {
                         console.log('An error has occurred!', e)
                         document.getElementById('videoerror').innerHTML = 'An error has occurred: ' + e;
+
+                        <?php if(isset($_GET["videoonly"]) === true ) { echo 'setTimeout(startvideo, 30 * 1000);  '; } ?>
+                        
+                      
                     };
 
                     var inputmode = <?php echo "'" . ($_GET["inputmode"] ?? "cam") . "'"; ?>;
@@ -677,7 +682,8 @@
                     //	document.getElementById('snap').addEventListener('click', function() {
                     //		saveImage();
                     //	});
-                }, false);
+                }
+                window.addEventListener("DOMContentLoaded", startvideo, false); 
             </script>
 
         <p>
