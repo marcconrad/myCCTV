@@ -33,6 +33,7 @@
 <body>
     <h1>This is still very Beta</h1>
     <?php
+    include_once "./util.php";
     $reddot = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAD0lEQVQI1wEEAPv/AMwAAAJoAM1NBPeuAAAAAElFTkSuQmCC";
     // $ff = @file_get_contents("red1x1.png");
     // $bb = base64_encode($ff);
@@ -130,8 +131,9 @@
     // var_dump($timestamps2data); 
     $nn = sizeof($available_timestamps);
 
-    $timeuntil = time();
-    $timestart = time() - 60 * 60 * 24;
+    $timenow = localtimeCam($myId); 
+    $timeuntil = $timenow;
+    $timestart = $timenow - 60 * 60 * 24;
     echo '<table id="maintable">';
     $previous_data_info = "not yet available";
     $previous_datapoint = 0;
@@ -191,11 +193,11 @@
         //  echo '<tr height="-100px" class="tablerow" >'; 
         echo '<tr style="height:1px !important;">';
         echo '<td class="tabled" style="font-size: 1px;" >&nbsp;';
-        echo '<img height="1px" alt="hello alt" title="'.date(DATE_RFC2822, $i).'; ' .$datapoint.'; ' .$data_src_info.'" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
+        echo '<img height="1px" alt="hello alt" title="'.gmdate(DATE_RFC2822, $i).'; ' .$datapoint.'; ' .$data_src_info.'" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
         echo '</td><td><div class="outerdiv">'; 
         $zzz++; 
         if ($zzz % 20 == 2) {
-        echo '<div class="innerdiv">' . date(DATE_RFC2822, $i) . '</div>';
+        echo '<div class="innerdiv">' . gmdate(DATE_RFC2822, $i) . '</div>';
         }
         echo '</div>';
         echo '</td>';
