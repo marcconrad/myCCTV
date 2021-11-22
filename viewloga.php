@@ -115,7 +115,8 @@
     foreach ($t as $a) {
         $parts = explode(" ", $a);
         $b = substr($a, 0, 15);
-        $w = DateTime::createFromFormat("Ymd-His", $b);
+        $timezone = new DateTimeZone('UTC');
+        $w = DateTime::createFromFormat("Ymd-His", $b, $timezone );
 
         if ($w === false) {
             echo "<h2> false for " . $a . " </h2>";
