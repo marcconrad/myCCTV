@@ -69,7 +69,7 @@
     }
 
     
-$files2update =  array("setupinstall.php", "viewlog.php", "menu.php",
+$files2update =  array("setupinstall.php", "viewlog.php", "menu.php", "viewloga.php",
  "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", 
  "choosedate.php", "zipdelete.php", "setzoom.php", "archive.php", "zipcurrent.php", "arial.ttf", "viewgiphy.php","viewgiphy_h.php",
  "GIFEncoder.class.php", "viewgifs.php", "updatefromgit.php", "LICENSE", "bg1.jpg", "README.md"); 
