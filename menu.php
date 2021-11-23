@@ -208,11 +208,15 @@ include_once "./util.php";
             </div>
             <br>
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showstats=1&setupcontrolA=1')">Control</button>
+            <br>
+            <button class="button" onClick="goTo('viewloga.php?t='+Date.now()+'&hello=1')">Log (Beta)</button>
+           
             <div class="dropdownsub">
                 <button class="button">Version &raquo;</button>
                 <div class="dropdownsub-content">
                     <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Check for Update</button>
                 </div>
+             
             </div>
             <div class="dropdownsub">
                 <button class="button">Animate &raquo;</button>

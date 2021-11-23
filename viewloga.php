@@ -6,6 +6,10 @@
 <head>
     <title>Log File Analysis</title>
     <style>
+         body {
+         background-color: rgb(252, 235, 173);
+           
+        }
         td,
         tr,
         img {
@@ -31,8 +35,11 @@
 </head>
 
 <body>
-    <h1>This is still very Beta</h1>
+  
     <?php
+
+$myId = $_GET["id"] ?? 2;
+echo '<h1>Log of last 24 hours (beta). Cam: '.$myId.'</h1>';
     include_once "./util.php";
     $reddot = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAD0lEQVQI1wEEAPv/AMwAAAJoAM1NBPeuAAAAAElFTkSuQmCC";
     // $ff = @file_get_contents("red1x1.png");
@@ -107,7 +114,7 @@
         else
             return $val1;
     }
-    $myId = $_GET["id"] ?? 2;
+    
     $t = file("loga/" . $myId . "_timestamp/__log.html");
     // var_dump( $t ); 
     $available_timestamps = array();
