@@ -7,7 +7,7 @@
 <body>
 <h1>Hello</h1>
 <?php
-$myfiles = array("setupinstall.php", "updatefromgit.php","viewlog.php", "menu.php", "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", "choosedate.php", "zipdelete.php", "setzoom.php", "archive.php", "zipcurrent.php", "arial.ttf", "GIFEncoder.class.php", "viewgifs.php"); 
+$myfiles = array("setupinstall.php", "clock.php", "updatefromgit.php","viewlog.php", "menu.php", "info.php", "util.php", "cam.php", "index.php", "nopic.jpg", "devbackup.php", "choosedate.php", "zipdelete.php", "setzoom.php", "archive.php", "zipcurrent.php", "arial.ttf", "GIFEncoder.class.php", "viewgifs.php"); 
 $outputfile = "install.php"; 
 
 // echo basename(__FILE__);
