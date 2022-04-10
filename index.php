@@ -1,35 +1,3 @@
-<script>
-    var getAvailableCams = function(myid) {
-        //  console.log("Hello World Available Cams!");
-        // var elm = document.getElementById("usermedia"); 
-        // elm.innerHTML = "Available Cams!"; 
-        // from: https://stackoverflow.com/questions/18893787/how-can-i-get-a-list-of-video-cameras-attached-in-my-computer-using-javascript
-        navigator.mediaDevices.enumerateDevices().then(function(devices) {
-            for (var i = 0; i < devices.length; i++) {
-                var device = devices[i];
-                if (device.kind === 'videoinput') {
-                    /*
-                    var option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || 'camera ' + (i + 1);
-                    document.querySelector('select#videoSource').appendChild(option);
-*/
-                    var optionli = document.createElement('li');
-                    /*
-                    optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
-                    document.getElementById("videoSourceOl").appendChild(optionli);
-*/
-                    optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + (i + 1)) + "</a>";
-                    var vs = document.getElementById("videoSourceOl"); 
-                   // vs.appendChild(optionli);
-                    vs.insertBefore(optionli, vs.firstChild); 
-
-                }
-            };
-        });
-
-    }
-</script>
 <?php
 $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
@@ -707,7 +675,7 @@ if (isset($_GET["imgout"])) {
             opacity: 1;
         }
 
-        #videosourcediv{ 
+        #videosourcediv {
             color: green;
             font-size: xx-large;
         }
@@ -718,9 +686,39 @@ if (isset($_GET["imgout"])) {
         echo "body { background-color: $bgcolor; }";
         ?>
     </style>
-
-
     <script>
+        var getAvailableCams = function(myid) {
+            //  console.log("Hello World Available Cams!");
+            // var elm = document.getElementById("usermedia"); 
+            // elm.innerHTML = "Available Cams!"; 
+            // from: https://stackoverflow.com/questions/18893787/how-can-i-get-a-list-of-video-cameras-attached-in-my-computer-using-javascript
+            navigator.mediaDevices.enumerateDevices().then(function(devices) {
+                for (var i = 0; i < devices.length; i++) {
+                    var device = devices[i];
+                    //  console.log(device); 
+                    if (device.kind === 'videoinput') {
+                        /*
+                    var option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || 'camera ' + (i + 1);
+                    document.querySelector('select#videoSource').appendChild(option);
+*/
+                        var optionli = document.createElement('li');
+                        /*
+                    optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
+                    document.getElementById("videoSourceOl").appendChild(optionli);
+*/
+                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + (i + 1)) + "</a>";
+                        var vs = document.getElementById("videoSourceOl");
+                        // vs.appendChild(optionli);
+                        vs.insertBefore(optionli, vs.firstChild);
+
+                    }
+                };
+            });
+
+        }
+
         function getURL() {
             alert("The URL of this page is: " + window.location.href);
         }
@@ -1377,7 +1375,7 @@ if (isset($_GET["imgout"])) {
             }
 
             echo ' <div id="videosourcediv"><ol id="videoSourceOl">';
-           
+
             echo '<li><a target="_blank" href="cam.php?inputmode=cam&id=' . $myId . '">Environment facing</a></li>';
             echo '<li><a target="_blank" href="cam.php?inputmode=cam&facingmode=user&id=' . $myId . '">User facing</a></li>';
             echo '<li><a target="_blank" href="cam.php?inputmode=screen&id=' . $myId . '">Screen Capture</a></li>';
