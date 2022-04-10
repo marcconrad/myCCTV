@@ -38,8 +38,10 @@
         .button5 {
             background-color: #ac8348;
         }
-<?php if(isset($_GET["videoonly"]) === false ) { echo ' /* '; } ?>
-        .canhide {
+
+        <?php if (isset($_GET["videoonly"]) === false) {
+            echo ' /* ';
+        } ?>.canhide {
             display: none;
         }
 
@@ -52,17 +54,18 @@
             right: 0;
             text-align: center;
             width: 99%;
-            height: 99%; 
+            height: 99%;
             z-index: 10;
         }
-        <?php if(isset($_GET["videoonly"]) === false ) { 
-            echo ' */ '; 
+
+        <?php if (isset($_GET["videoonly"]) === false) {
+            echo ' */ ';
             echo "\r\n ";
-            echo ".video { width: 100px; height: 100px; }"; 
-        }    
-    
-    
-        
+            echo ".video { width: 100px; height: 100px; }";
+        }
+
+
+
         ?>
         /* Blue */
     </style>
@@ -633,7 +636,7 @@
                     }
                 }
                 // Put event listeners into place
-                
+
                 var startvideo = function() {
                     // Grab elements, create settings, etc.
                     var video = document.getElementById('video');
@@ -646,18 +649,27 @@
                             height: {
                                 ideal: 2160
                             }, // use maxmimal available resolution
-
-                            facingMode: <?php echo '"' . ($_GET["facingmode"] ?? 'environment') . '"'; ?>
+                            <?php
+                            if (isset($_GET["deviceid"])) {
+                                echo "deviceId: '" . $_GET["deviceid"] . "' ";
+                            } else {
+                                echo "facingMode: '" . ($_GET["facingmode"] ?? 'environment') . "' ";
+                            }
+                            ?>
                         }
+
+
                     }
 
                     var errBack = function(e) {
                         console.log('An error has occurred!', e)
                         document.getElementById('videoerror').innerHTML = 'An error has occurred: ' + e;
 
-                        <?php if(isset($_GET["videoonly"]) === true ) { echo 'setTimeout(startvideo, 30 * 1000);  '; } ?>
-                        
-                      
+                        <?php if (isset($_GET["videoonly"]) === true) {
+                            echo 'setTimeout(startvideo, 30 * 1000);  ';
+                        } ?>
+
+
                     };
 
                     var inputmode = <?php echo "'" . ($_GET["inputmode"] ?? "cam") . "'"; ?>;
@@ -683,7 +695,7 @@
                     //		saveImage();
                     //	});
                 }
-                window.addEventListener("DOMContentLoaded", startvideo, false); 
+                window.addEventListener("DOMContentLoaded", startvideo, false);
             </script>
 
         <p>

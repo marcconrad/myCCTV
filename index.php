@@ -1,3 +1,33 @@
+<script>
+var getAvailableCams = function(myid) { 
+   //  console.log("Hello World Available Cams!");
+    // var elm = document.getElementById("usermedia"); 
+    // elm.innerHTML = "Available Cams!"; 
+    // from: https://stackoverflow.com/questions/18893787/how-can-i-get-a-list-of-video-cameras-attached-in-my-computer-using-javascript
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            for(var i = 0; i < devices.length; i ++){
+                var device = devices[i];
+                if (device.kind === 'videoinput') {
+    /*
+                    var option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || 'camera ' + (i + 1);
+                    document.querySelector('select#videoSource').appendChild(option);
+*/
+                    var optionli = document.createElement('li');
+                    /*
+                    optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
+                    document.getElementById("videoSourceOl").appendChild(optionli);
+*/
+                    optionli.innerHTML = "<h1><a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid="+device.deviceId+"&id="+myid+ "\">"+ (device.label || 'Camera ' + (i + 1))+"</a></h1>";
+                    document.getElementById("videoSourceOl").appendChild(optionli);
+            
+                }
+            };
+        });
+
+}
+</script>
 <?php
 $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
@@ -1331,10 +1361,14 @@ if (isset($_GET["imgout"])) {
 
         if (isset($_GET["startcam"])) { 
             
-            echo '(will open in a new window)';
-            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&id=' . $myId . '">Start Cam ' . $myId . ' (Environment facing)</a></h1>';
+            echo '<h2>Start Cam '.$myId. '</h2><div><em>(All cameras will open in a new window)</em></div>';
+
+            echo ' <div><ol id="videoSourceOl"></ol></div>';
+            echo ' <script> getAvailableCams('.$myId.') </script>';
+            echo '<h2>or</h2>';   
+            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&id=' . $myId . '">(Environment facing)</a></h1>';
             echo '<h2>or</h2>';
-            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&facingmode=user&id=' . $myId . '">Start Cam ' . $myId . ' (User facing)</a></h1>';
+            echo ' <h1><a target="_blank" href="cam.php?inputmode=cam&facingmode=user&id=' . $myId . '">(User facing)</a></h1>';
            
             echo '<h2>or</h2>';
             echo ' <h1><a target="_blank" href="cam.php?inputmode=screen&id=' . $myId . '">Start Screen Capture ' . $myId . '</a></h1>';
@@ -1345,6 +1379,10 @@ if (isset($_GET["imgout"])) {
             } else {
                 echo '<p><b>This Camera may not operate if there is already another camera reporting to this channel.</b><p>';
             }
+
+            // echo '<div id="usermedia" onclick="getAvailableCams('.$myId.')" >Hello World</div>';
+            // echo ' <div><select id="videoSource"></select></div>';
+       
             echo "</body></html>";
             write2config();
 
