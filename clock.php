@@ -74,8 +74,8 @@
 
             if (tIst > wSoll) {
                 fontsizecount--;
-            } else if (tIst < wSoll - 20) {
-               fontsizecount += 100;
+            } else if (tIst < wSoll - 30) {
+               fontsizecount++;
             }
 
 
@@ -129,7 +129,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -62%);
             z-index: 10;
             font-size: 400px;
             font-weight: bold;
