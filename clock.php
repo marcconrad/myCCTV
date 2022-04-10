@@ -66,10 +66,7 @@
             // var wVideo = 0.9 * video.offsetWidth; 
 
             var wSoll = Math.floor(0.9 * window.innerWidth);
-            console.log(wSoll);
-
             var tIst = elem.offsetWidth;
-            console.log(tIst);
 
 
             if (tIst > wSoll) {
@@ -143,7 +140,7 @@
 
 <body>
     <div id="thecamdiv">
-        <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=cam&facingmode=user&id=<?php echo ($_GET["id"] ?? 3); ?>&videoonly=yes" frameborder="0"></iframe>
+        <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=<?php echo ($_GET["facingmode"] ?? "cam"); ?>&facingmode=user&id=<?php echo ($_GET["id"] ?? 3); ?>&videoonly=yes" frameborder="0"></iframe>
     </div>
     <div id="time">tbc</div>
 

@@ -191,17 +191,18 @@ include_once "./util.php";
                     <button class="button" onClick="goFromTo('settgts')">Set Targets</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1')">Start Cam</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1&resetuqt=1')">Start Cam!</button>
+                    <button class="button" onClick="goTo('clock.php?t='+Date.now()+'&startcam=1', true)">Clock Cam</button>
 
                 </div>
             </div>
             <div class="dropdownsub">
                 <button class="button">Caption &raquo;</button>
-                <div class="dropdownsub-content"> 
+                <div class="dropdownsub-content">
                     <button class="button" onClick="setcaptioncolor('%23FFD700')">Yellow</button>
                     <button class="button" onClick="setcaptioncolor('red')">Red</button>
                     <button class="button" onClick="setcaptioncolor('green')">Green</button>
                     <button class="button" onClick="setcaptioncolor('blue')">Blue</button>
-                   
+
                     <button class="button" onClick="setcaptioncolor('white')">White</button>
 
                 </div>
@@ -210,13 +211,13 @@ include_once "./util.php";
             <button class="button" onClick="goTo('index.php?t='+Date.now()+'&showstats=1&setupcontrolA=1')">Control</button>
             <br>
             <button class="button" onClick="goTo('viewloga.php?t='+Date.now()+'&hello=1')">Log (Beta)</button>
-           
+
             <div class="dropdownsub">
                 <button class="button">Version &raquo;</button>
                 <div class="dropdownsub-content">
                     <button class="button" onClick="goTo('updatefromgit.php?t='+Date.now()+'&frommenu=1')">Check for Update</button>
                 </div>
-             
+
             </div>
             <div class="dropdownsub">
                 <button class="button">Animate &raquo;</button>
@@ -549,15 +550,15 @@ include_once "./util.php";
         var newsrc = null;
         var captioncolor = "%23FFD700";
 
-        function setcaptioncolor(str) { 
-            captioncolor = str; 
+        function setcaptioncolor(str) {
+            captioncolor = str;
             if (newsrc != null) {
                 clearTimeout(gotofalse);
                 gotofalse = setTimeout('goFromTo()', 2);
             }
         }
 
-        function goTo(str) {
+        function goTo(str, toplevel = false) {
             if (str === false) {
                 str = newsrc;
             }
@@ -565,7 +566,7 @@ include_once "./util.php";
                 str = document.getElementById("mainframe").src;
             }
             console.log("(a)" + str);
-            
+
             // var captioncolor = "red";
             str = str.replace(/howmany=\d+/g, "captioncolor=" + captioncolor + "&howmany=" + document.getElementById("howmany").value);
             str = str.replace(/id=\d+/g, "id=" + id);
@@ -585,7 +586,12 @@ include_once "./util.php";
 
                 newsrc = httpx + "://" + window.location.host + "" + dir + "/" + str + '&id=' + id + '&a=1' + includeFL + "&" + getDirection() + "=1&" + getSort() + "=1";
                 console.log("(b)" + newsrc);
-                document.getElementById("mainframe").src = newsrc;
+
+                if (toplevel) {
+                    document.location.href = newsrc;
+                } else {
+                    document.getElementById("mainframe").src = newsrc;
+                }
             }
             console.log("fr=" + document.getElementById("mainframe").src);
         }
