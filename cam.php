@@ -112,7 +112,18 @@
             <button class="button button5" onclick="hideSomething('olinfo')">Show/Hide Debug Info</button>
             <button class="button button2" onclick="openFullscreen('canvas')">Fullscreen Canvas</button>
             <button class="button button4" onclick="openFullscreen('video')">Fullscreen Video</button>
+
+    </P>
+    <p>
+    <button class="button button5" onclick="interrupt(300)">Interrupt 5 mins</button>
+    <button class="button button3" onclick="interrupt(3600)">Interrupt 60 mins</button>
+    </p>
             <script>
+
+                function interrupt(secondsUntilReturn) { 
+                    var queryString = <?php echo '"'.urlencode($_SERVER['QUERY_STRING']).'"'; ?>;
+                    document.location.href = "interruptcam.php?interruptdelay="+secondsUntilReturn+"&returnto="+queryString;
+                }
                 function openFullscreen(x = 'video') {
                     var elem = document.getElementById(x);
                     if (elem.requestFullscreen) {
@@ -551,6 +562,10 @@
                                     if (reloadnow == "yes") {
 
                                         window.location.reload();
+                                    }
+                                   var  interruptDelay = (parsed.interrupt ? parsed.interrupt : 0); 
+                                    if( interruptDelay > 0 && interruptDelay <= 6 * 3600 ) { // max six hours
+                                        setTimeout(interrupt, 1000, interruptDelay); 
                                     }
                                     buckets = (parsed.buckets ? parsed.buckets : false);
                                     pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);

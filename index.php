@@ -386,6 +386,18 @@ if (count($_POST) > 0) {
     echo ', "fastmode" : ' . ($fastmode[$myId] ?? 0);
 
     /**
+     * Request an interrupt for xxx seconds. 0 Seconds = no interrupt requested.
+     */
+
+    $inter = $interrupt[$myId] ?? 0; 
+    if( $inter > 0 ) { 
+        echo ', "interrupt" : ' . ($interrupt[$myId] ?? 0);
+        $interrupt[$myId] = -$inter; 
+    }
+
+    
+
+    /**
      * Sets the jpg compression used on the camera. 
      * Todo: make image size configurable; at the moment this is fixed to 640 x 480, therefore: if you need higher resolution: good luck. There is 
      * probably not too much hard coding in there. 
@@ -1804,7 +1816,14 @@ if (isset($_GET["imgout"])) {
             $togp = ($toggleCapture[$myId] ?? 0);
             echo 'Status: <b>' . ($togp == 0 ? "capturing" : ($togp == 1 ? "request toggle" : "paused")) . '</b>. ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
-
+            
+            echo "<br> \r\n";
+            echo 'Interrupt: Status: <b>'.($interrupt[$myId] ?? -99).'</b>. '; 
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=300">5 Minutes</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=3600">1 Hour</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=18000">5 Hours</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">No Interrupt</a>';
+           
             echo "<br> \r\n";
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
             echo ' Zoom Center at (x,y) = (' . round(100 * ($zoomX[$myId] ?? 0.5), 1);
@@ -2195,7 +2214,26 @@ if (isset($_GET["imgout"])) {
             echo '<h1>Camera Start / Pause requested</h1><p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             write2config();
             sleep(1);
-        } else {
+        } else if (isset($_GET["requestInterrupt"])) {
+           // $interrupt[$myId] = $_GET["requestInterrupt"];
+           
+
+            if (($interrupt[$myId] ?? NULL) != intval($_GET["requestInterrupt"])) {
+                $interrupt[$myId] = intval($_GET["requestInterrupt"]);
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(C)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&requestInterrupt=" . $_GET["requestInterrupt"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script>";
+            } else {
+                echo '<h1>Interruption Requested</h1>'; 
+                echo 'for '.$interrupt[$myId]." Seconds"; 
+                echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
+            }
+          
+            write2config();
+            sleep(1);
+            
+        }  else {
             echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
@@ -2597,7 +2635,7 @@ if (isset($_GET["imgout"])) {
 
         global $varfile_config;
 
-        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $logmode;
+        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $logmode, $interrupt;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
@@ -2612,6 +2650,8 @@ if (isset($_GET["imgout"])) {
 
         $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
         $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
+
+      
 
         $content .= PHP_EOL . " \$zoom = " . var_export($zoom, true) . "; ";
         $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";
@@ -2668,7 +2708,7 @@ if (isset($_GET["imgout"])) {
         }
         global $varfile, $varfile_global, $varfile_cam;
 
-        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo;
+        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $interrupt;
         global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
         global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
         global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
@@ -2703,6 +2743,7 @@ if (isset($_GET["imgout"])) {
             $content .= PHP_EOL . " \$reloadnow = " . var_export($reloadnow, true) . "; ";
 
             // These variables are written by both client and server. 
+            $content .= PHP_EOL . " \$interrupt = " . var_export($interrupt, true) . "; ";
             $content .= PHP_EOL . " \$fastmode = " . var_export($fastmode, true) . "; ";
             $content .= PHP_EOL . " \$targeteta = " . var_export($targeteta, true) . "; ";
             $content .= PHP_EOL . " \$stats = " . var_export($stats, true) . "; ";
