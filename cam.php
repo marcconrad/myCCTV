@@ -197,6 +197,9 @@
                     } else {
                         remaining = '---';
                     }
+                    if(battery.level < 0.2) { 
+                        setTimeout(interrupt, 30000, 3600); 
+                    }
                     batteryinfo = battery.level + "," + battery.charging + "," + battery.chargingTime + "," + battery.dischargingTime + "," + getTimeNow();
                     addLI("battery", getTimeNow() + ": Battery=" + batteryinfo, 2);
                     // document.getElementById('batteryinfo').innerHTML=res; 
