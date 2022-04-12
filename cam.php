@@ -122,7 +122,8 @@
 
                 function interrupt(secondsUntilReturn) { 
                     var queryString = <?php echo '"'.urlencode($_SERVER['QUERY_STRING']).'"'; ?>;
-                    document.location.href = "interruptcam.php?interruptdelay="+secondsUntilReturn+"&returnto="+queryString;
+                    <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
+                    document.location.href = "interruptcam.php?id="+myId+"&interruptdelay="+secondsUntilReturn+"&returnto="+queryString;
                 }
                 function openFullscreen(x = 'video') {
                     var elem = document.getElementById(x);

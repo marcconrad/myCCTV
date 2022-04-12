@@ -124,6 +124,11 @@ if (!isset($imagedimensions[$myIdx])) {
     write2config();
     write2configS();
 }
+
+if (isset($_GET["checkinterrupt"])) {
+    echo $interrupt[$myIdx];
+    die();
+}
 $twidth =  $imagedimensions[$myIdx]["w"];
 $theight = $imagedimensions[$myIdx]["h"];
 
@@ -389,13 +394,15 @@ if (count($_POST) > 0) {
      * Request an interrupt for xxx seconds. 0 Seconds = no interrupt requested.
      */
 
-    $inter = $interrupt[$myId] ?? 0; 
-    if( $inter > 0 ) { 
+    $inter = $interrupt[$myId] ?? 0;
+    if ($inter > 0) {
         echo ', "interrupt" : ' . ($interrupt[$myId] ?? 0);
-        $interrupt[$myId] = -$inter; 
+        $interrupt[$myId] = -$inter;
+    } else if ($inter == -1) {
+        $interrupt[$myId] = -3;
     }
 
-    
+
 
     /**
      * Sets the jpg compression used on the camera. 
@@ -1816,14 +1823,15 @@ if (isset($_GET["imgout"])) {
             $togp = ($toggleCapture[$myId] ?? 0);
             echo 'Status: <b>' . ($togp == 0 ? "capturing" : ($togp == 1 ? "request toggle" : "paused")) . '</b>. ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
-            
+
             echo "<br> \r\n";
-            echo 'Interrupt: Status: <b>'.($interrupt[$myId] ?? -99).'</b>. '; 
+            echo 'Interrupt: Status: <b>' . ($interrupt[$myId] ?? -99) . '</b>. ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=300">5 Minutes</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=3600">1 Hour</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=18000">5 Hours</a>; ';
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">No Interrupt</a>';
-           
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-2">No Interrupt</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">Return now</a>';
+
             echo "<br> \r\n";
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
             echo ' Zoom Center at (x,y) = (' . round(100 * ($zoomX[$myId] ?? 0.5), 1);
@@ -2215,25 +2223,25 @@ if (isset($_GET["imgout"])) {
             write2config();
             sleep(1);
         } else if (isset($_GET["requestInterrupt"])) {
-           // $interrupt[$myId] = $_GET["requestInterrupt"];
-           
+            // $interrupt[$myId] = $_GET["requestInterrupt"];
+            $stats[$myId]["uqt"] = NULL;
 
             if (($interrupt[$myId] ?? NULL) != intval($_GET["requestInterrupt"])) {
                 $interrupt[$myId] = intval($_GET["requestInterrupt"]);
+
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(C)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&requestInterrupt=" . $_GET["requestInterrupt"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script>";
             } else {
-                echo '<h1>Interruption Requested</h1>'; 
-                echo 'for '.$interrupt[$myId]." Seconds"; 
+                echo '<h1>Interruption Requested</h1>';
+                echo 'for ' . $interrupt[$myId] . " Seconds";
                 echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             }
-          
+
             write2config();
             sleep(1);
-            
-        }  else {
+        } else {
             echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
@@ -2651,7 +2659,7 @@ if (isset($_GET["imgout"])) {
         $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
         $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
 
-      
+
 
         $content .= PHP_EOL . " \$zoom = " . var_export($zoom, true) . "; ";
         $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";

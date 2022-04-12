@@ -7,11 +7,9 @@
 
     <script>
         var phpdelay = <?php echo '"' . ($_GET["interruptdelay"] ?? -1) . '"'; ?>;
+        var phpId = <?php echo '"' . ($_GET["id"] ?? -1) . '"'; ?>;
+        var phpReturnTo = <?php echo '"' . ($_GET["returnto"] ?? "invalid") . '"';  ?>;
 
-        var phpReturnTo = <?php 
-        echo '"'.$_GET["returnto"].'"'; 
-        
-        ?>;
         var timestarted = 0;
         var maxseconds = 72;
         var addZero = i => {
@@ -20,59 +18,48 @@
         var pi = [0, 1, 2];
 
         var changeBackground = function() {
-            document.body.style.background = "black"; 
-            return; 
-            /*
-            Number.prototype.hex = function() {
-                var s = this.toString(16);
-                while (s.length < 2) {
-                    s = "0" + s;
-                }
-                return s;
-            }
-            var now = new Date();
-            var hours = now.getHours();
-            var minutes = now.getMinutes();
-            var seconds = now.getSeconds();
-            if (hours % 2 == 1) {
-                minutes = 59 - minutes;
-            }
-            if (minutes % 2 == 1) {
-                seconds = 59 - seconds;
-            }
-            if (hours == seconds && Math.random() - 0.5 > 0) {
-                var tmp = pi[0];
-                pi[0] = pi[2];
-                pi[2] = tmp;
-            } else if (minutes == seconds && Math.random() - 0.5 > 0) {
-                var tmp = pi[1];
-                pi[1] = pi[2];
-                pi[2] = tmp;
-            }
-            var rgb = Array();
-            rgb[pi[0]] = hours;
-            rgb[pi[1]] = minutes;
-            rgb[pi[2]] = seconds;
+            document.body.style.background = "black";
+        }
 
-            var color = '#' + rgb[0].hex() + rgb[1].hex() + rgb[2].hex();
-            document.body.style.background = color;
-            */
+        var checkIfContinue = function() {
+            document.getElementById("checkreturn").innerHTML = "Check for early return...";
+            fetch("index.php?id="+phpId+"&checkinterrupt=1")
+                .then(response => {
+                    document.getElementById("checkreturn").innerHTML = "OK.";
+                    // console.log(response);
+                    response.text().then(
+                        data => {
+                            console.log(data);
+                            if(parseInt(data) == -1) { 
+                                startnow(); 
+                            } else { 
+                               
+                            }
+                        });
+
+                    // console.log(phpId);
+                })
+
+                .catch(error => {
+                    // console.log(error)
+                });
+            return;
         }
 
         var loadNewPage = function() {
             // console.log( phpReturnTo.startWith('interrupt=true&')); 
-            if( !phpReturnTo.startsWith('interrupt=true&' )) { 
-                phpReturnTo = 'interrupt=true&'+phpReturnTo; // tell the camera that it was called from interrupt. But only first time
+            if (!phpReturnTo.startsWith('interrupt=true&')) {
+                phpReturnTo = 'interrupt=true&' + phpReturnTo; // tell the camera that it was called from interrupt. But only first time
             }
-           document.location.href = "cam.php?"+phpReturnTo;
+            document.location.href = "cam.php?" + phpReturnTo;
         }
         var count = function() {
 
-            var returnTo = phpReturnTo; 
-            var rt = document.getElementById("returnto"); 
-            rt.innerHTML = returnTo; 
+            var returnTo = phpReturnTo;
+            var rt = document.getElementById("returnto");
+            rt.innerHTML = returnTo;
 
-            
+
             var now = new Date();
             var hours = addZero(now.getHours());
             var minutes = addZero(now.getMinutes());
@@ -117,6 +104,7 @@
             }
             console.log("Function started. timestarted=" + timestarted);
             setInterval(count, 900);
+            setInterval(checkIfContinue, 180 * 1000);
         }
         window.addEventListener("DOMContentLoaded", startinterrupt, false);
     </script>
@@ -128,12 +116,16 @@
         h3 {
             color: white;
         }
+        h2 {
+            color: green;
+        }
     </style>
 </head>
 
 <body>
     <h1>Interruption - Normality will resume in <span id="countdown">tbc</span> seconds.</h1>
     <h1>Time now: <span id="time">tbc</span></h1>
+    <h2><span id="checkreturn">[wait]</span></h2>
     <input id="startnow" type="button" value="Start Now" onclick="startnow()" />
 
     <div> Return with parameters: <span id="returnto">tbc</span> </div>
