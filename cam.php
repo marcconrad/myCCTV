@@ -674,11 +674,11 @@
                             } else {
                                 echo "facingMode: '" . ($_GET["facingmode"] ?? 'environment') . "' ";
                             }
-                            ?>
-                        }
+                            ?> 
+                        } /** not an error */
 
 
-                    }
+                    };
 
                     var errBack = function(e) {
                         console.log('An error has occurred!', e)

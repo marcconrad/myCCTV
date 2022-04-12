@@ -127,6 +127,9 @@ if (!isset($imagedimensions[$myIdx])) {
 
 if (isset($_GET["checkinterrupt"])) {
     echo $interrupt[$myIdx];
+    $t = time(); 
+    $w = gmdate("Ymd-His"); 
+    @file_put_contents("vars/interrupt".$myIdx.".txt", $t."; ".$w); 
     die();
 }
 $twidth =  $imagedimensions[$myIdx]["w"];
@@ -1500,47 +1503,7 @@ if (isset($_GET["imgout"])) {
             }
             die();
         }
-        /*
-        if (isset($_GET["thetargeteta"])) {
-            if(!isset($targeteta[$myId])) { 
-                $targeteta[$myId] = array(87, 0, 0);
-            }
-            if (($targeteta[$myId][2] ?? 17) !== $_GET["thetargeteta"]) {
-                if (strpos($_GET["thetargeteta"], "auto") !== false) {
-                    $targeteta[$myId] = array(99, $_GET["thetargeteta"], $_GET["thetargeteta"]);
-                } else {
-                    $targeteta[$myId] = array(intval($_GET["thetargeteta"], 0), false, $_GET["thetargeteta"]);
-                }
-               
-                echo "Please wait...      (".($_GET["cc"] ?? 0).")";
-                echo " <script> ";
-                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&thetargeteta=" . $_GET["thetargeteta"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
-                echo " </script> </body></html>";
-                write2config();
-            } else {
-                echo "<h2>Target eta now set to " . $targeteta[$myId][2] . " seconds</h2>";
-                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-                echo " <script> ";
-                echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
-                echo " </script> </body></html>";
-            }
-            die();
-        }
-        
-        if (isset($_GET["thetargeteta"])) {
-            if (strpos($_GET["thetargeteta"], "auto") !== false) {
-                $targeteta[$myId] = array(99, $_GET["thetargeteta"], 0);
-            } else {
-                $targeteta[$myId] = array(intval($_GET["thetargeteta"], 0), false);
-            }
-            write2config();
-            echo "Thank You";
-            echo "<p>";
-            echo '<button class="button closebtn" onclick="hidebodies()" >⛔</button>';
-            sleep(1);
-            die();
-        }
-        */
+  
         if (isset($_GET["setjpgcompression"])) {
             echo '<h2>Please enter the JPG compression in percent (0-100)</h2>';
             echo '<form action="index.php">';
