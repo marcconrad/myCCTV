@@ -279,6 +279,8 @@ if (count($_POST) > 0) {
     echo ', "zoom"  : ' . ($zoom[$myId] ?? 1);
     echo ', "zoomX" : ' . ($zoomX[$myId] ?? 0.5);
     echo ', "zoomY" : ' . ($zoomY[$myId] ?? 0.5);
+    
+    echo ', "bgcol" : "' . ($camconfig["bgcol".$myId] ?? "blue"). '"';
 
     echo ', "reloadnow" :  "' . ($reloadnow[$myId] ?? 'no') . '"';
 
@@ -1808,6 +1810,14 @@ if (isset($_GET["imgout"])) {
 
 
             echo "<br>   \r\n";
+           
+            echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&camconfig=1" >Confiure Camera</a>.';
+
+
+
+
+            echo "<br>   \r\n";
+
 
             global $performance;
 
@@ -1837,6 +1847,55 @@ if (isset($_GET["imgout"])) {
             }
             write2config();
             echo '</body></html>';
+            die();
+        }
+        if (isset($_GET["camconfig"])) { // this is called form interruptcam.php
+
+            echo '<h1>Cam Config</h1>';
+
+            echo '<h2>Background Color</h2>'; 
+
+            // preg_match("^# ( [A-Fa-f0-9] {6}| [A-Fa-f0-9] {3})$", 
+
+            if(isset($_GET["bgcol"])) { 
+                $p =  preg_match("/^(([a-z]*)|(#[\da-f]*))$/", $_GET["bgcol"] );
+                // var_dump($p); 
+
+                if($p === 1 ) { 
+                if (($camconfig["bgcol".$myId] ?? "null") != $_GET["bgcol"]) {
+                    $camconfig["bgcol".$myId] = $_GET["bgcol"]; 
+                    echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                    echo " <script> ";
+                    echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?camconfig=8&cc=" . (($_GET["cc"] ?? 0) + 1) . "&bgcol=" . urlencode($_GET["bgcol"]) . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                    echo " </script> </body></html>";
+                    write2configS();
+                    die(); 
+                }
+            } else { 
+                echo "<h3>Not a valid color entered. Found: ".$_GET["bgcol"]."</h3>"; 
+            }
+               
+             
+            }
+            echo '<p>'; 
+            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=black">black</a>; '; 
+            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=blue">blue</a>; '; 
+            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=white">white</a>; '; 
+            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=yellow">yellow</a>; '; 
+            echo '<p>'; 
+
+            echo '<form action="index.php">';
+
+            $bgc = $camconfig["bgcol".$myId] ?? "white"; 
+            echo '<label for="setbgcol">Change Color to:</label><br>';
+            echo '<input type="text" id="bgcol" name="bgcol" value="'.$bgc.'" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="hidden" id="camconfig" name="camconfig" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+
+           
+
             die();
         }
         if (isset($_GET["showinterrupt"])) { // this is called form interruptcam.php
@@ -2679,17 +2738,19 @@ if (isset($_GET["imgout"])) {
             echo '<em class="bottom-left-yellow">' . $str . '</em>';
         }
     }
+    /**
+     * Saves these variables that are not changed by the camera. 
+     */
     function write2configS()
     {
-
         global $varfile_config;
 
-        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $logmode, $interrupt;
-        global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
-        global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
-        global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
+        global $focusX, $focusY, $zoom, $zoomX, $logmode;
+        global $zoomY, $mingapbeforeposts;
+        global $fastmode, $maximagesperpost,  $keephowmany, $history, $lastgallery;
+        global $targets,  $sessiongetinfo, $jpgcompression;
         global $servertargeteta;
-        global $imagedimensions, $reloadnow;
+        global $imagedimensions, $camconfig; 
 
 
         $savefile = $varfile_config;
@@ -2723,6 +2784,8 @@ if (isset($_GET["imgout"])) {
         $content .= PHP_EOL . " \$maximagesperpost = " . var_export($maximagesperpost, true) . "; ";
         $content .= PHP_EOL . " \$keephowmany = " . var_export($keephowmany, true) . "; ";
 
+        $content .= PHP_EOL . " \$camconfig = " . var_export($camconfig, true) . "; ";
+
 
 
         $content .= PHP_EOL . " \$history = " . var_export($history, true) . "; ";
@@ -2736,7 +2799,9 @@ if (isset($_GET["imgout"])) {
 
         file_put_contents($savefile, $content);
     }
-
+/**
+ * Saves variables that are changed by both camera and UI.
+ */
     function write2config($cam_agnostic = false, $leave_locked = false)
     {
         global $iowntheconfigfile, $lockfile, $varfile_config;
@@ -2755,14 +2820,14 @@ if (isset($_GET["imgout"])) {
             touch($lockfile);
             $iowntheconfigfile = true;
         }
-        global $varfile, $varfile_global, $varfile_cam;
+        global $varfile, $varfile_global;
 
-        global $focusX, $focusY, $zoom, $zoomX, $batteryinfo, $interrupt;
-        global $zoomY, $timezoneoffset, $toggleCapture, $mingapbeforeposts, $update;
-        global $fastmode, $maximagesperpost, $imagesperpost, $keephowmany, $stats, $resetstats, $history, $lastgallery;
-        global $videoinfo, $targets, $clarifaicount, $performance, $sessiongetinfo, $sessionpostinfo, $targeteta, $imgsizeinfo, $jpgcompression;
+        global $batteryinfo, $interrupt;
+        global $timezoneoffset, $toggleCapture;
+        global $fastmode, $imagesperpost,  $stats, $resetstats;
+        global $videoinfo, $clarifaicount, $performance, $sessionpostinfo, $targeteta, $imgsizeinfo;
         global $systempassword, $autocat;
-        global $imagedimensions, $reloadnow;;
+        global $reloadnow;;
 
 
         $savefile = null;
