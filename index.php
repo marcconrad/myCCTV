@@ -127,9 +127,9 @@ if (!isset($imagedimensions[$myIdx])) {
 
 if (isset($_GET["checkinterrupt"])) {
     echo $interrupt[$myIdx];
-    $t = time(); 
-    $w = gmdate("Ymd-His"); 
-    @file_put_contents("vars/interrupt".$myIdx.".txt", $t."; ".$w); 
+    $t = time();
+    $w = gmdate("Ymd-His");
+    @file_put_contents("vars/interrupt" . $myIdx . ".txt", $t . "; " . $w);
     die();
 }
 $twidth =  $imagedimensions[$myIdx]["w"];
@@ -394,7 +394,7 @@ if (count($_POST) > 0) {
     echo ', "fastmode" : ' . ($fastmode[$myId] ?? 0);
 
     /**
-     * Request an interrupt for xxx seconds. 0 Seconds = no interrupt requested.
+     * Request an interrupt for xxx seconds. Negative values: no interrupt requested.
      */
 
     $inter = $interrupt[$myId] ?? 0;
@@ -402,8 +402,9 @@ if (count($_POST) > 0) {
         echo ', "interrupt" : ' . ($interrupt[$myId] ?? 0);
         $interrupt[$myId] = -$inter;
     } else if ($inter == -1) {
-        $interrupt[$myId] = -3;
+        $interrupt[$myId] = -2;
     }
+    echo ', "intifbatlow" : ' . ($interrupt["bat".$myId] ?? 20);
 
 
 
@@ -1503,7 +1504,7 @@ if (isset($_GET["imgout"])) {
             }
             die();
         }
-  
+
         if (isset($_GET["setjpgcompression"])) {
             echo '<h2>Please enter the JPG compression in percent (0-100)</h2>';
             echo '<form action="index.php">';
@@ -1788,12 +1789,13 @@ if (isset($_GET["imgout"])) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&toggleCapture=1">Request Toggle</a>';
 
             echo "<br> \r\n";
-            echo 'Interrupt: Status: <b>' . ($interrupt[$myId] ?? -99) . '</b>. ';
+            echo 'Interrupt: Status: <b>' . ($interrupt[$myId] ?? -3) . '</b>. ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=300">5 Minutes</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=3600">1 Hour</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=18000">5 Hours</a>; ';
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-2">No Interrupt</a>; ';
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">Return now</a>';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-4">No Interrupt</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">Return now</a>. ';
+            echo '<a href="index.php?showinterrupt=1&time=' . time() . '&id=' . $myId . '" >Manage</a>';
 
             echo "<br> \r\n";
             echo 'Zoom =  ' . ($zoom[$myId] ?? 1) . 'x; ';
@@ -1836,7 +1838,65 @@ if (isset($_GET["imgout"])) {
             echo '</body></html>';
             die();
         }
+        if (isset($_GET["showinterrupt"])) { // this is called form interruptcam.php
 
+            $t = @file_get_contents("vars/interrupt" . $myId . ".txt");
+            if ($t === false) {
+                echo "No previous interrupt.";
+            } else {
+                $w = explode(";", $t);
+                echo "Last call from interrupt: ";
+                echo gmdate("Y-m-d H:i:s", localtimeCam($myId, $w[0]) );
+                echo "<p>"; 
+            }
+
+            $st = $interrupt[$myId] ?? 0; 
+            echo "Status ="; 
+            echo $st; 
+            echo ": ";
+            if($st > 0 ) { 
+                echo "An interrupt has been requested for $st seconds."; 
+            } else if($st == -1) { 
+                echo "A request was made to return from the interrupt now."; 
+            } else if ($st == -2) { 
+                echo "There was an interrupt; but the camera returned prematurely.";
+            }  else if ($st == -4) { 
+                echo "There was an interrupt request; but then the request was cancelled.";
+            }
+            else if ($st == 0 ) { 
+                echo "There never was an interrupt"; 
+            }
+            else if( $st < 0 ) { 
+                echo "An interrupt of ".(0 - $st)." seconds was executed."; 
+            }
+            echo "<p>";
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-4">No Interrupt</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">Return now</a>. ';
+            echo "<p>";
+            echo '<form action="index.php">';
+            echo '<label for="requestInterrupt">Interrupt for:</label><br>';
+            echo '<input type="text" id="requestInterrupt" name="requestInterrupt" value="3600" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+
+            echo "<p>";
+            echo '<form action="index.php">';
+            echo '<label for="requestBatInterrupt">Interrupt if Battery Level is lower than:</label><br>';
+            echo '<input type="text" id="requestBatInterrupt" name="requestBatInterrupt" value="'.($interrupt["bat".$myId] ?? 20).'" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo '<br>'; 
+            echo 'This can be used if the battery drains faster that the mobile is charged.'; 
+
+            echo "<p>";
+            var_dump($interrupt);
+            echo "\r\n";
+            echo '</body></html>';
+
+            die();
+        }
         if (isset($_GET["showclarifai"])) {
             // var_dump($clarifaicount);
             if (isset($_GET["resetclarifai"])) {
@@ -2185,7 +2245,7 @@ if (isset($_GET["imgout"])) {
             echo '<h1>Camera Start / Pause requested</h1><p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             write2config();
             sleep(1);
-        } else if (isset($_GET["requestInterrupt"])) {
+        }  else if (isset($_GET["requestInterrupt"])) {
             // $interrupt[$myId] = $_GET["requestInterrupt"];
             $stats[$myId]["uqt"] = NULL;
 
@@ -2204,12 +2264,29 @@ if (isset($_GET["imgout"])) {
 
             write2config();
             sleep(1);
+        } else if (isset($_GET["requestBatInterrupt"])) {
+            if (($interrupt["bat".$myId] ?? NULL) != intval($_GET["requestBatInterrupt"])) {
+                $interrupt["bat".$myId] = intval($_GET["requestBatInterrupt"]);
+
+                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo " <script> ";
+                echo "setTimeout(function(){ console.log('(C)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&requestBatInterrupt=" . $_GET["requestBatInterrupt"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                echo " </script>";
+            } else {
+                echo '<h1>Battery level set to request Interruption set to</h1>';
+                echo '<h2>' . $interrupt["bat".$myId] . " percent.</h2>";
+                echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
+            }
+
+            write2config();
+            sleep(1);
         } else {
             echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
-        }
+        } 
         echo '</body>   </html>';
         @unlink($lockfile);
+    
     } else {
         error_reporting(-1);
         echo "<h1>Welcome to myCCTV!</h1><em>Choose a camera below</em><p>";

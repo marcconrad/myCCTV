@@ -123,7 +123,8 @@
 </head>
 
 <body>
-    <h1>Interruption - Normality will resume in <span id="countdown">tbc</span> seconds.</h1>
+    <h1>Interruption (<?php echo ($_GET["reason"] ?? "?"); ?>) </h1>
+    <h1> Normality will resume in <span id="countdown">tbc</span> seconds.</h1>
     <h1>Time now: <span id="time">tbc</span></h1>
     <h2><span id="checkreturn">[wait]</span></h2>
     <input id="startnow" type="button" value="Start Now" onclick="startnow()" />

@@ -115,15 +115,15 @@
 
     </P>
     <p>
-    <button class="button button5" onclick="interrupt(300)">Interrupt 5 mins</button>
-    <button class="button button3" onclick="interrupt(3600)">Interrupt 60 mins</button>
+    <button class="button button5" onclick="interrupt(300, 'from cam - 5')">Interrupt 5 mins</button>
+    <button class="button button3" onclick="interrupt(3600, 'from cam - 60')">Interrupt 60 mins</button>
     </p>
             <script>
 
-                function interrupt(secondsUntilReturn) { 
+                function interrupt(secondsUntilReturn, why) { 
                     var queryString = <?php echo '"'.urlencode($_SERVER['QUERY_STRING']).'"'; ?>;
                     <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
-                    document.location.href = "interruptcam.php?id="+myId+"&interruptdelay="+secondsUntilReturn+"&returnto="+queryString;
+                    document.location.href = "interruptcam.php?reason="+why+"&id="+myId+"&interruptdelay="+secondsUntilReturn+"&returnto="+queryString;
                 }
                 function openFullscreen(x = 'video') {
                     var elem = document.getElementById(x);
@@ -155,7 +155,7 @@
                 var gapBetweenPostsHardLowerLimit = 1000; // Millieconds
                 var gapBetweenPostsHardUpperLimit = 3600000; // Millieconds
 
-
+                var interruptWhenBatteryLow = 20; // in percent
 
                 var battery;
                 var batteryinfo = "w,w,w,w,0";
@@ -197,8 +197,8 @@
                     } else {
                         remaining = '---';
                     }
-                    if(battery.level < 0.2) { 
-                        setTimeout(interrupt, 30000, 3600); 
+                    if(100 * battery.level < interruptWhenBatteryLow) { 
+                        setTimeout(interrupt, 30000, 3600, "low battery"); 
                     }
                     batteryinfo = battery.level + "," + battery.charging + "," + battery.chargingTime + "," + battery.dischargingTime + "," + getTimeNow();
                     addLI("battery", getTimeNow() + ": Battery=" + batteryinfo, 2);
@@ -569,8 +569,9 @@
                                     }
                                    var  interruptDelay = (parsed.interrupt ? parsed.interrupt : 0); 
                                     if( interruptDelay > 0 && interruptDelay <= 6 * 3600 ) { // max six hours
-                                        setTimeout(interrupt, 1000, interruptDelay); 
+                                        setTimeout(interrupt, 1000, interruptDelay, "request; "+interruptDelay); 
                                     }
+                                    interruptWhenBatteryLow = (parsed.intifbatlow ? parsed.intifbatlow : 20); 
                                     buckets = (parsed.buckets ? parsed.buckets : false);
                                     pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);
 
