@@ -58,7 +58,12 @@
 
     //   echo '<img height="1pt" width="100pt" src="' . $reddot . '" />';
     // echo "\r\n";
-
+   
+    function human_filesize($bytes, $decimals = 2) {
+      $sz = 'BKMGTP';
+      $factor = floor((strlen($bytes) - 1) / 3);
+      return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+    }
     function findClosest($arr, $n, $target)
     {
         // Corner cases
@@ -131,7 +136,10 @@
             return false;
         }
         global $myId;
+        global $totalbytes; 
+        $totalbytes += filesize(($inFile)); 
         $t = file($inFile);
+        
         $previousLog = "none";
         foreach ($t as $a) {
             $parts = explode(" ", $a);
@@ -161,6 +169,9 @@
         }
         return array($available_timestamps, $timestamps2data, $previousLog);
     }
+
+    $totalbytes = 0; 
+
     $tt = getTimestampsFromFile("loga/" . $myId . "_timestamp/__log.html");
     if ($tt === false) {
         echo "<h1>No log data available<h1></body></html>";
@@ -286,6 +297,7 @@
         $previous_datapoint = $datapoint;
     }
     echo '</table>';
+    echo "<h3>Total data checked = ".human_filesize($totalbytes).".</h3>"; 
     ?>
 </body>
 

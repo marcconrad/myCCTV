@@ -31,9 +31,9 @@
             echo "Error: unexpected fgets() fail\n";
         }
 
-        $size = substr($size, 0, strpos($size, "\t"));
+       //  $size = substr($size, 0, strpos($size, "\t"));
         pclose($handle);
-        echo 'Directory: ' . $f . ' => Size: ' . $size;
+        // echo 'Directory: ' . $f . ' => Size: ' . $size;
 
         ?>
         /*
