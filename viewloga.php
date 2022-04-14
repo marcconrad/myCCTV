@@ -34,6 +34,12 @@
             overflow: visible;
             font-size: 20px;
         }
+        .theblackdot { 
+            filter : grayscale(1); 
+        }
+        .thegreendot { 
+            filter: hue-rotate(-60deg);
+        }
     </style>
 </head>
 
@@ -236,6 +242,7 @@
             $higher = false;
         }
 
+        $dotclass = "d";
         if ($higher === false && $lower === false) {
             $data_src_info = "no data";
             $datapoint = 0;
@@ -243,10 +250,12 @@
             $data_src_info = "lower only";
             $x = $timestamps2data[$lower];
             $datapoint = round($x[1]);
+            $dotclass = "theblackdot"; 
         } else if ($lower === false) {
             $data_src_info = "higher only";
             $x = $timestamps2data[$higher];
             $datapoint = round($x[1]);
+            $dotclass = "thegreendot"; 
         } else {
             $data_src_info = "ok";
             $q1 = $timestamps2data[$lower];
@@ -259,13 +268,14 @@
 
         $xx = abs($datapoint - $previous_datapoint);
 
+       
 
         //  if ($previous_data_info != $data_src_info) {
         // echo "<h5>";
         //  echo '<tr height="-100px" class="tablerow" >'; 
         echo '<tr style="height:1px !important;">';
         echo '<td class="tabled" style="font-size: 1px;" >&nbsp;';
-        echo '<img height="1px" alt="hello alt" title="' . gmdate(DATE_RFC2822, $i) . '; ' . $datapoint . '; ' . $data_src_info . '" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
+        echo '<img class="'.$dotclass.'" height="1px" alt="hello alt" title="' . gmdate(DATE_RFC2822, $i) . '; ' . $datapoint . '; ' . $data_src_info . '" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
         echo '</td><td><div class="outerdiv">';
         $zzz++;
         if ($zzz % 20 == 2) {
