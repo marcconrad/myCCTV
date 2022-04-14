@@ -6,10 +6,11 @@
 <head>
     <title>Log File Analysis</title>
     <style>
-         body {
-         background-color: rgb(252, 235, 173);
-           
+        body {
+            background-color: rgb(252, 235, 173);
+
         }
+
         td,
         tr,
         img {
@@ -22,10 +23,12 @@
         table {
             border-collapse: collapse;
         }
-        .outerdiv { 
-            height: 1px; 
-            overflow: visible; 
+
+        .outerdiv {
+            height: 1px;
+            overflow: visible;
         }
+
         .innerdiv {
             height: 150px;
             overflow: visible;
@@ -35,18 +38,25 @@
 </head>
 
 <body>
-  
+
     <?php
 
-$myId = $_GET["id"] ?? 2;
-echo '<h1>Log of last 24 hours (beta). Cam: '.$myId.'</h1>';
+    $myId = $_GET["id"] ?? 2;
+    $daysback = $_GET["daysback"] ?? 1; 
+
+    echo '<h1>Log of Cam: ' . $myId . '. Days back = '.$daysback.'</h1>';
+    echo '<a href="viewloga.php?id='.$myId.'&daysback=1">1 day</a>; ';
+    echo '<a href="viewloga.php?id='.$myId.'&daysback=7">7 days</a>; ';
+    echo '<a href="viewloga.php?id='.$myId.'&daysback=31">31 days</a>; ';
+    echo '<a href="viewloga.php?id='.$myId.'&daysback=366">366 days</a>; ';
+    echo '<a href="viewloga.php?id='.$myId.'&daysback=4000">4000 days</a>; ';
     include_once "./util.php";
     $reddot = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAD0lEQVQI1wEEAPv/AMwAAAJoAM1NBPeuAAAAAElFTkSuQmCC";
     // $ff = @file_get_contents("red1x1.png");
     // $bb = base64_encode($ff);
     // $shareicon = '<img height="11em" src="data:image/png;base64,' . $reddot . '" alt="Share this" />';
 
-  //   echo '<img height="1pt" width="100pt" src="' . $reddot . '" />';
+    //   echo '<img height="1pt" width="100pt" src="' . $reddot . '" />';
     // echo "\r\n";
 
     function findClosest($arr, $n, $target)
@@ -114,45 +124,88 @@ echo '<h1>Log of last 24 hours (beta). Cam: '.$myId.'</h1>';
         else
             return $val1;
     }
-    
-    $t = file("loga/" . $myId . "_timestamp/__log.html");
-    // var_dump( $t ); 
-    $available_timestamps = array();
-    $timestamps2data = array();
-    foreach ($t as $a) {
-        $parts = explode(" ", $a);
-        $b = substr($a, 0, 15);
-        $timezone = new DateTimeZone('UTC');
-        $w = DateTime::createFromFormat("Ymd-His", $b, $timezone );
 
-        if ($w === false) {
-            echo "<h2> false for " . $a . " </h2>";
-        } else {
-            $v = $w->getTimestamp();
-
-            $timestamps2data[$v] = $parts;
-            $available_timestamps[] = $v;
+    function getTimestampsFromFile($inFile)
+    {
+        if (file_exists($inFile) === false) {
+            return false;
         }
+        global $myId;
+        $t = file($inFile);
+        $previousLog = "none";
+        foreach ($t as $a) {
+            $parts = explode(" ", $a);
+            $b = substr($a, 0, 15);
+            $timezone = new DateTimeZone('UTC');
+            $w = DateTime::createFromFormat("Ymd-His", $b, $timezone);
+
+            if ($w === false) {
+                // echo "<h2> false for " . $a . " </h2>";
+                // retrieve previous file. 
+                $aParts = explode('"', $a);
+                // var_dump($aParts);
+                $p = $aParts[1] ?? "does not exist";
+              //  echo $p;
+                $previousLog = "loga/" . $myId . "_timestamp/" . $p;
+                if (file_exists($previousLog)) {
+                   // echo "<br>Previous log found: " . $previousLog;
+                } else {
+                    echo "<h2>Invalid line found in logfile ".$inFile.": " . $a."</h2>";
+                }
+                // var_dump( $t ); 
+            } else {
+                $v = $w->getTimestamp();
+                $timestamps2data[$v] = $parts;
+                $available_timestamps[] = $v;
+            }
+        }
+        return array($available_timestamps, $timestamps2data, $previousLog);
     }
+    $tt = getTimestampsFromFile("loga/" . $myId . "_timestamp/__log.html");
+    if ($tt === false) {
+        echo "<h1>No log data available<h1></body></html>";
+        die();
+    }
+    $available_timestamps = $tt[0];
+    $timestamps2data = $tt[1];
+    $previousLogFile = $tt[2];
+
 
     // var_dump($available_timestamps); 
     // var_dump($timestamps2data); 
     $nn = sizeof($available_timestamps);
 
-    $timenow = localtimeCam($myId); 
+    $ndays = $daysback;
+    $timenow = localtimeCam($myId);
     $timeuntil = $timenow;
-    $timestart = $timenow - 60 * 60 * 24;
+    $timestart = $timenow - $ndays * 60 * 60 * 24;
     echo '<table id="maintable">';
     $previous_data_info = "not yet available";
     $previous_datapoint = 0;
 
-    $gap = 10;
-    $gapthreshold = 40;
-    $zzz = 0; 
+    $gap = 10 * $ndays;
+    $gapthreshold = 40 * $ndays;
+    $zzz = 0;
     for ($i = $timeuntil; $i > $timestart; $i = $i - $gap) {
 
 
         $w = findClosest($available_timestamps, $nn, $i);
+
+        if ($w[0] == -1) {
+
+            $tt = getTimestampsFromFile($previousLogFile);
+
+            if ($tt === false) {
+                echo "<tr><td> End of available data.</td></tr>";
+                $i = $timestart; // to end the loop.
+                break;
+            } else {
+                $available_timestamps = $tt[0];
+                $timestamps2data = $tt[1];
+                $previousLogFile = $tt[2];
+                $w = findClosest($available_timestamps, $nn, $i);
+            }
+        }
         /*
     echo "<h2>" . $i . " = " . date(DATE_RFC2822, $i) . "</h2>";
     
@@ -201,17 +254,17 @@ echo '<h1>Log of last 24 hours (beta). Cam: '.$myId.'</h1>';
         //  echo '<tr height="-100px" class="tablerow" >'; 
         echo '<tr style="height:1px !important;">';
         echo '<td class="tabled" style="font-size: 1px;" >&nbsp;';
-        echo '<img height="1px" alt="hello alt" title="'.gmdate(DATE_RFC2822, $i).'; ' .$datapoint.'; ' .$data_src_info.'" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
-        echo '</td><td><div class="outerdiv">'; 
-        $zzz++; 
+        echo '<img height="1px" alt="hello alt" title="' . gmdate(DATE_RFC2822, $i) . '; ' . $datapoint . '; ' . $data_src_info . '" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
+        echo '</td><td><div class="outerdiv">';
+        $zzz++;
         if ($zzz % 20 == 2) {
-        echo '<div class="innerdiv">' . gmdate(DATE_RFC2822, $i) . '</div>';
+            echo '<div class="innerdiv">' . gmdate(DATE_RFC2822, $i) . '</div>';
         }
         echo '</div>';
         echo '</td>';
-        echo '</td><td><div class="outerdiv">'; 
+        echo '</td><td><div class="outerdiv">';
         if ($zzz % 20 == 2) {
-        echo '<div class="innerdiv">&nbsp; &nbsp; ' . $datapoint . '</div>';
+            echo '<div class="innerdiv">&nbsp; &nbsp; ' . $datapoint . '</div>';
         }
         echo '</div>';
         echo '</td>';
