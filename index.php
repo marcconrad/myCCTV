@@ -280,7 +280,7 @@ if (count($_POST) > 0) {
     echo ', "zoomX" : ' . ($zoomX[$myId] ?? 0.5);
     echo ', "zoomY" : ' . ($zoomY[$myId] ?? 0.5);
     
-    echo ', "bgcol" : "' . ($camconfig["bgcol".$myId] ?? "white"). '"';
+    echo ', "bgcol" : "' . ($camconfig["bgcol".$myId] ?? "lightyellow"). '"';
 
     echo ', "reloadnow" :  "' . ($reloadnow[$myId] ?? 'no') . '"';
 
