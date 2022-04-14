@@ -501,10 +501,11 @@ function received_log($myId, $mode, $log_msg)
 
     $myip = getenv("REMOTE_ADDR");
 
-    $ipNo = "<a href=\"https://ip-api.com/" . $myip . "\">" . $myip . "</a>";
+   // $ipNo = "<a href=\"https://ip-api.com/" . $myip . "\">" . $myip . "</a>";
+    $ipNo = $myip; 
     $t = localtimeCam($myId);
 
-    $logtxt = gmdate("Ymd-His", $t) . ": " . $log_msg . " from " . $ipNo . "<br>\n";
+    $logtxt = gmdate("Ymd-His", $t) . ": " . $log_msg . " " . $ipNo . "<br>\n";
     file_put_contents($logFile, $logtxt, FILE_APPEND);
 
     if (filesize($logFile) > 1234560) { // bytes
