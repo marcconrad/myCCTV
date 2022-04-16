@@ -719,6 +719,7 @@ if (isset($_GET["imgout"])) {
             // elm.innerHTML = "Available Cams!"; 
             // from: https://stackoverflow.com/questions/18893787/how-can-i-get-a-list-of-video-cameras-attached-in-my-computer-using-javascript
             navigator.mediaDevices.enumerateDevices().then(function(devices) {
+                var jj = 1; 
                 for (var i = 0; i < devices.length; i++) {
                     var device = devices[i];
                     //  console.log(device); 
@@ -734,7 +735,8 @@ if (isset($_GET["imgout"])) {
                     optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
                     document.getElementById("videoSourceOl").appendChild(optionli);
 */
-                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + (i + 1)) + "</a>";
+                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>";
+                        jj++; 
                         var vs = document.getElementById("videoSourceOl");
                         // vs.appendChild(optionli);
                         vs.insertBefore(optionli, vs.firstChild);
