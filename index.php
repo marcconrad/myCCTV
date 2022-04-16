@@ -390,7 +390,7 @@ if (count($_POST) > 0) {
      * images are requested.
      */
 
-    if ($fastmode[$myId] > 0) {
+    if (($fastmode[$myId] ?? 0) > 0) {
         $fastmode[$myId]--;
     }
     echo ', "fastmode" : ' . ($fastmode[$myId] ?? 0);
