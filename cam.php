@@ -155,7 +155,7 @@
             var gapBetweenPostsHardLowerLimit = 1000; // Millieconds
             var gapBetweenPostsHardUpperLimit = 3600000; // Millieconds
 
-            var interruptWhenBatteryLow = 20; // in percent
+            var interruptWhenBatteryLow = 0; // in percent. Initial value = 0. Only interrupt when first request is received. This account for battery level = 0. 
 
             var battery;
             var batteryinfo = "w,w,w,w,0";

@@ -2336,7 +2336,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script>";
             } else {
                 echo '<h1>Battery level set to request Interruption set to</h1>';
-                echo '<h2>' . $interrupt["bat".$myId] . " percent.</h2>";
+                echo '<h2>' . ( $interrupt["bat".$myId] ?? "no data"). " percent.</h2>";
                 echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             }
 
