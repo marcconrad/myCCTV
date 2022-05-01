@@ -1944,7 +1944,7 @@ if (isset($_GET["imgout"])) {
 
             echo "<p>";
             echo '<form action="index.php">';
-            echo '<label for="requestBatInterrupt">Interrupt if Battery Level is lower than:</label><br>';
+            echo '<label for="requestBatInterrupt">Interrupt if Battery Level is lower than (beta):</label><br>';
             echo '<input type="text" id="requestBatInterrupt" name="requestBatInterrupt" value="'.($interrupt["bat".$myId] ?? 20).'" >';
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
@@ -2311,7 +2311,7 @@ if (isset($_GET["imgout"])) {
             // $interrupt[$myId] = $_GET["requestInterrupt"];
             $stats[$myId]["uqt"] = NULL;
 
-            if (($interrupt[$myId] ?? NULL) != intval($_GET["requestInterrupt"])) {
+            if (($interrupt[$myId] ?? false) !== intval($_GET["requestInterrupt"])) {
                 $interrupt[$myId] = intval($_GET["requestInterrupt"]);
 
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
@@ -2327,7 +2327,7 @@ if (isset($_GET["imgout"])) {
             write2config();
             sleep(1);
         } else if (isset($_GET["requestBatInterrupt"])) {
-            if (($interrupt["bat".$myId] ?? NULL) != intval($_GET["requestBatInterrupt"])) {
+            if (($interrupt["bat".$myId] ?? false) !== intval($_GET["requestBatInterrupt"])) {
                 $interrupt["bat".$myId] = intval($_GET["requestBatInterrupt"]);
 
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
