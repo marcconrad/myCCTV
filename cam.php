@@ -571,7 +571,7 @@
                                 if (interruptDelay > 0 && interruptDelay <= 6 * 3600) { // max six hours
                                     setTimeout(interrupt, 1000, interruptDelay, "request; " + interruptDelay);
                                 }
-                                interruptWhenBatteryLow = (parsed.intifbatlow ? parsed.intifbatlow : 20);
+                                interruptWhenBatteryLow = (parsed.intifbatlow ? parsed.intifbatlow : 0);
 
                                 var backgroundColor = (parsed.bgcol ? parsed.bgcol : "white"); 
                                 document.body.style.background = backgroundColor;
