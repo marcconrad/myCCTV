@@ -34,10 +34,12 @@
             overflow: visible;
             font-size: 20px;
         }
-        .theblackdot { 
-            filter : grayscale(1); 
+
+        .theblackdot {
+            filter: grayscale(1);
         }
-        .thegreendot { 
+
+        .thegreendot {
             filter: hue-rotate(-60deg);
         }
     </style>
@@ -48,14 +50,14 @@
     <?php
 
     $myId = $_GET["id"] ?? 2;
-    $daysback = $_GET["daysback"] ?? 1; 
+    $daysback = $_GET["daysback"] ?? 1;
 
-    echo '<h1>Log of Cam: ' . $myId . '. Days back = '.$daysback.'</h1>';
-    echo '<a href="viewloga.php?id='.$myId.'&daysback=1">1 day</a>; ';
-    echo '<a href="viewloga.php?id='.$myId.'&daysback=7">7 days</a>; ';
-    echo '<a href="viewloga.php?id='.$myId.'&daysback=31">31 days</a>; ';
-    echo '<a href="viewloga.php?id='.$myId.'&daysback=366">366 days</a>; ';
-    echo '<a href="viewloga.php?id='.$myId.'&daysback=4000">4000 days</a>; ';
+    echo '<h1>Log of Cam: ' . $myId . '. Days back = ' . $daysback . '</h1>';
+    echo '<a href="viewloga.php?id=' . $myId . '&daysback=1">1 day</a>; ';
+    echo '<a href="viewloga.php?id=' . $myId . '&daysback=7">7 days</a>; ';
+    echo '<a href="viewloga.php?id=' . $myId . '&daysback=31">31 days</a>; ';
+    echo '<a href="viewloga.php?id=' . $myId . '&daysback=366">366 days</a>; ';
+    echo '<a href="viewloga.php?id=' . $myId . '&daysback=4000">4000 days</a>; ';
     include_once "./util.php";
     $reddot = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAD0lEQVQI1wEEAPv/AMwAAAJoAM1NBPeuAAAAAElFTkSuQmCC";
     // $ff = @file_get_contents("red1x1.png");
@@ -64,11 +66,12 @@
 
     //   echo '<img height="1pt" width="100pt" src="' . $reddot . '" />';
     // echo "\r\n";
-   
-    function human_filesize($bytes, $decimals = 2) {
-      $sz = 'BKMGTP';
-      $factor = floor((strlen($bytes) - 1) / 3);
-      return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+
+    function human_filesize($bytes, $decimals = 2)
+    {
+        $sz = 'BKMGTP';
+        $factor = floor((strlen($bytes) - 1) / 3);
+        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
     }
     function findClosest($arr, $n, $target)
     {
@@ -142,10 +145,10 @@
             return false;
         }
         global $myId;
-        global $totalbytes; 
-        $totalbytes += filesize(($inFile)); 
+        global $totalbytes;
+        $totalbytes += filesize(($inFile));
         $t = file($inFile);
-        
+
         $previousLog = "none";
         foreach ($t as $a) {
             $parts = explode(" ", $a);
@@ -159,24 +162,25 @@
                 $aParts = explode('"', $a);
                 // var_dump($aParts);
                 $p = $aParts[1] ?? "does not exist";
-              //  echo $p;
+                //  echo $p;
                 $previousLog = "loga/" . $myId . "_timestamp/" . $p;
                 if (file_exists($previousLog)) {
-                   // echo "<br>Previous log found: " . $previousLog;
+                    // echo "<br>Previous log found: " . $previousLog;
                 } else {
-                    echo "<h2>Invalid line found in logfile ".$inFile.": " . $a."</h2>";
+                    echo "<h2>Invalid line found in logfile " . $inFile . ": " . $a . "</h2>";
                 }
                 // var_dump( $t ); 
             } else {
                 $v = $w->getTimestamp();
                 $timestamps2data[$v] = $parts;
                 $available_timestamps[] = $v;
+                
             }
         }
         return array($available_timestamps, $timestamps2data, $previousLog);
     }
 
-    $totalbytes = 0; 
+    $totalbytes = 0;
 
     $tt = getTimestampsFromFile("loga/" . $myId . "_timestamp/__log.html");
     if ($tt === false) {
@@ -196,6 +200,9 @@
     $timenow = localtimeCam($myId);
     $timeuntil = $timenow;
     $timestart = $timenow - $ndays * 60 * 60 * 24;
+
+   // $timeuntil = $timenow - ($ndays - 1) * 60 * 60 * 24;
+    // $timestart = $timenow - $ndays * 60 * 60 * 24;
     echo '<table id="maintable">';
     $previous_data_info = "not yet available";
     $previous_datapoint = 0;
@@ -203,15 +210,18 @@
     $gap = 10 * $ndays;
     $gapthreshold = 40 * $ndays;
     $zzz = 0;
+   $lognow = false; // true; 
+
     for ($i = $timeuntil; $i > $timestart; $i = $i - $gap) {
 
-
+       // echo "<h2> $i </h2>"; 
         $w = findClosest($available_timestamps, $nn, $i);
-
+  if($lognow)  var_dump(array($w, $i, $nn)); 
         if ($w[0] == -1) {
-
+           // $lognow = true; 
             $tt = getTimestampsFromFile($previousLogFile);
-
+          //  var_dump($tt); 
+        
             if ($tt === false) {
                 echo "<tr><td> End of available data.</td></tr>";
                 $i = $timestart; // to end the loop.
@@ -221,6 +231,7 @@
                 $timestamps2data = $tt[1];
                 $previousLogFile = $tt[2];
                 $w = findClosest($available_timestamps, $nn, $i);
+               if($lognow)  var_dump(array($w, $i, $nn, $available_timestamps)); 
             }
         }
         /*
@@ -234,14 +245,16 @@
         $data_src_info = "ok";
         $datapoint = 0;
         $lower = $available_timestamps[$w[0]] ?? 0;
-        if ($i - $lower > $gapthreshold) {
+        if (abs($i - $lower) > $gapthreshold) {
+          
             $lower = false;
         }
         $higher = $available_timestamps[$w[1]] ?? PHP_INT_MAX;
-        if ($higher - $i > $gapthreshold) {
+        if($lognow) { var_dump(array($i,$lower, $higher, $gapthreshold, $higher - $i)); }
+        if (abs($higher - $i) > $gapthreshold) {
             $higher = false;
         }
-
+       if($lognow) { var_dump(array($i,$lower, $higher, $gapthreshold)); }
         $dotclass = "d";
         if ($higher === false && $lower === false) {
             $data_src_info = "no data";
@@ -250,12 +263,15 @@
             $data_src_info = "lower only";
             $x = $timestamps2data[$lower];
             $datapoint = round($x[1]);
-            $dotclass = "theblackdot"; 
+       
+            $dotclass = "theblackdot";
         } else if ($lower === false) {
             $data_src_info = "higher only";
             $x = $timestamps2data[$higher];
             $datapoint = round($x[1]);
-            $dotclass = "thegreendot"; 
+            $dotclass = "thegreendot";
+            if( $lognow ) var_dump(array($x, $i, $datapoint, $higher));
+         
         } else {
             $data_src_info = "ok";
             $q1 = $timestamps2data[$lower];
@@ -268,14 +284,14 @@
 
         $xx = abs($datapoint - $previous_datapoint);
 
-       
+
 
         //  if ($previous_data_info != $data_src_info) {
         // echo "<h5>";
         //  echo '<tr height="-100px" class="tablerow" >'; 
         echo '<tr style="height:1px !important;">';
         echo '<td class="tabled" style="font-size: 1px;" >&nbsp;';
-        echo '<img class="'.$dotclass.'" height="1px" alt="hello alt" title="' . gmdate(DATE_RFC2822, $i) . '; ' . $datapoint . '; ' . $data_src_info . '" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
+        echo '<img class="' . $dotclass . '" height="1px" alt="hello alt" title="' . gmdate(DATE_RFC2822, $i) . '; ' . $datapoint.': '.$gapthreshold . '; ' . $data_src_info . '" width="' . (3 * $datapoint) . 'px" src="' . $reddot . '" />';
         echo '</td><td><div class="outerdiv">';
         $zzz++;
         if ($zzz % 20 == 2) {
@@ -307,7 +323,7 @@
         $previous_datapoint = $datapoint;
     }
     echo '</table>';
-    echo "<h3>Total data checked = ".human_filesize($totalbytes).".</h3>"; 
+    echo "<h3>Total data checked = " . human_filesize($totalbytes) . ".</h3>";
     ?>
 </body>
 

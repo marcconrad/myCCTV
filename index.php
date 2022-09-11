@@ -1376,6 +1376,39 @@ if (isset($_GET["imgout"])) {
 
         die();
     }
+    if (isset($_GET["autocatstart"])) {
+        // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
+        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        autocat($myId, "initonly");
+        $currentminutes = $autocat[$myId]['s'] ?? 30;
+
+        $autocat[$myId]['s'] = intval($_GET["autocatstart"]);
+        write2config();
+        echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['s'] . " minutes. <p> ";
+        echo "Thank You";
+        //  var_dump($autocat);
+        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
+        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+
+        die();
+    }
+
+    if (isset($_GET["autocatduration"])) {
+        // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
+        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        autocat($myId, "initonly");
+        $currentminutes = $autocat[$myId]['d'] ?? 60;
+
+        $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
+        write2config();
+        echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
+        echo "Thank You";
+        //  var_dump($autocat);
+        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
+        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+
+        die();
+    }
 
 
 
@@ -1999,6 +2032,24 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<p>";
+            if (isset($autocat[$myId]) === FALSE) { 
+                $autocat[$myId] = array(); 
+            }
+            echo '<form action="index.php">';
+            echo '<label for="autocatstart">Change minutes of passed time for autocat to start searching for best image:</label><br>';
+            echo '<input type="text" id="autocatstart" name="autocatstart" value="' . ($autocat[$myId]['s'] ?? 30) . '" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
+
+            echo '<form action="index.php">';
+            echo '<label for="autocatstart">Change duration of passed time for autocat to search for best image (minutes):</label><br>';
+            echo '<input type="text" id="autocatduration" name="autocatduration" value="' . ($autocat[$myId]['d'] ?? 60) . '" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
 
             echo '<a href="viewlog.php">View Log</a>';
             if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
@@ -2406,7 +2457,7 @@ if (isset($_GET["imgout"])) {
 
         $defaultsearchterms = array("cat", "bird",  "squirrel", "rodent", "mammal", "animal", "dog", "wildlife", "lifestyle");
 
-        if (!isset($autocat)) {
+        if (!isset($autocat)) { 
             $autocat = array();
         }
         if (!isset($autocat[$myId])) {
@@ -2431,7 +2482,9 @@ if (isset($_GET["imgout"])) {
             return "Function called with parameter initonly.";
         }
 
-        $bn = findBestImageA($myId, 60, 30); // From 30+60 minutes ago to 30 minutes ago
+        $howlongminutes = $autocat[$myId]["d"] ?? 60; 
+        $whenstartminutes = $autocat[$myId]["s"] ?? 30; 
+        $bn = findBestImageA($myId, $howlongminutes, $whenstartminutes ); // From 30+60 minutes ago to 30 minutes ago
 
         if ($bn === FALSE) {
             return "No best images was found.";
