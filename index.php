@@ -563,7 +563,8 @@ if (isset($_GET["imgout"])) {
     $myId = $_GET["id"] ?? 1;
     $minutes = $_GET["minutes"] ?? 20;
     $minutesfrom = $_GET["minutesfrom"] ?? 5;
-    $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom);;
+    $bucket = $_GET["bucket"] ?? FALSE; 
+    $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom, $bucket);;
     $fullpath = bn2file($bn);
     if ($fullpath !== FALSE) {
         $im = @imagecreatefromjpeg($fullpath);
