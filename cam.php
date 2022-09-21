@@ -143,6 +143,8 @@
             }
             if (phpDeviceId === "not set") {
                 getDeviceIdByName(phpCamname);
+            } else { 
+                isVideoReady = true; 
             }
 
 
