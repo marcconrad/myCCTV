@@ -99,6 +99,18 @@
                 iframeBody.style.overflowX = 'hidden';
             }
         }
+        var setIframeSize2 = function(iframe = null) {
+            if (iframe === null) {
+                iframe = document.getElementById("thecam2");
+            }
+            var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+            var iframeBody;
+            if (iframeDocument) {
+                iframeBody = iframeDocument.querySelector('body');
+                iframeBody.style.overflowY = 'hidden';
+                iframeBody.style.overflowX = 'hidden';
+            }
+        }
 
         var startUp = function() {
             setInterval(count, 20);
@@ -122,6 +134,21 @@
 
         }
 
+        #thecam2 {
+            width: 30%;
+            height: 30%;
+            position: absolute;
+            top: 0%;
+            /* position the top  edge of the element at the middle of the parent */
+            left: 0%;
+            /* position the left edge of the element at the middle of the parent */
+
+          
+            z-index: 2;
+            opacity: 0.5;
+
+        }
+
         #time {
             position: absolute;
             top: 50%;
@@ -140,8 +167,23 @@
 
 <body>
     <div id="thecamdiv">
-        <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=<?php echo ($_GET["facingmode"] ?? "cam"); ?>&facingmode=user&id=<?php echo ($_GET["id"] ?? 3); ?>&videoonly=yes" frameborder="0"></iframe>
-    </div>
+        <?php 
+// legacy: 
+        if(isset($_GET["name"]) === false ) {
+            echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode='.($_GET["facingmode"] ?? "cam").'&facingmode=user&id='.($_GET["id"] ?? 3)
+            .'&videoonly=yes" frameborder="0"></iframe>';
+        } else { 
+            echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=cam&name='.($_GET["name"]).'&id='.($_GET["id"] ?? 3)
+            .'&videoonly=yes" frameborder="0"></iframe>';
+
+            if(isset($_GET["name2"]) ) { 
+                echo ' <iframe onload="setIframeSize2()" id="thecam2" src="cam.php?inputmode=cam&name='.($_GET["name2"]).'&id='.($_GET["id2"] ?? 4)
+                .'&videoonly=yes" frameborder="0"></iframe>';
+            } 
+     
+        }
+        ?>
+           </div>
     <div id="time">tbc</div>
 
 </body>

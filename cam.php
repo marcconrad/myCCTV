@@ -119,6 +119,38 @@
             <button class="button button3" onclick="interrupt(3600, 'from cam - 60')">Interrupt 60 mins</button>
         </p>
         <script>
+            var phpDeviceId = <?php echo "'" . ($_GET["deviceid"] ?? "not set") . "'"; ?>;
+            var phpCamname = <?php echo "'" . ($_GET["name"] ?? "not set") . "'"; ?>;
+            var isVideoReady = false; 
+
+
+            var getDeviceIdByName = function(thename) {
+                console.log(thename);
+                navigator.mediaDevices.enumerateDevices().then(function(devices) {
+
+                    for (var i = 0; i < devices.length; i++) {
+                        var device = devices[i];
+                        console.log(device);
+                        if (device.kind === 'videoinput') {
+                            if (device.label.includes(thename)) {
+                                phpDeviceId = device.deviceId;
+                            }
+                        }
+                    }
+                    isVideoReady = true; 
+                });
+
+            }
+            if (phpDeviceId === "not set") {
+                getDeviceIdByName(phpCamname);
+            }
+
+
+            function getDeviceId() {
+                return phpDeviceId; 
+            }
+
+
             function interrupt(secondsUntilReturn, why) {
                 var queryString = <?php echo '"' . urlencode($_SERVER['QUERY_STRING']) . '"'; ?>;
                 <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
@@ -573,9 +605,9 @@
                                 }
                                 interruptWhenBatteryLow = (parsed.intifbatlow ? parsed.intifbatlow : 0);
 
-                                var backgroundColor = (parsed.bgcol ? parsed.bgcol : "white"); 
+                                var backgroundColor = (parsed.bgcol ? parsed.bgcol : "white");
                                 document.body.style.background = backgroundColor;
-                                
+
                                 buckets = (parsed.buckets ? parsed.buckets : false);
                                 pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);
 
@@ -663,6 +695,12 @@
 
             var startvideo = function() {
                 // Grab elements, create settings, etc.
+
+                if(isVideoReady === false ) { 
+                    setTimeout(startvideo, 100); 
+                    return; 
+                }
+
                 var video = document.getElementById('video');
 
                 var mediaConfig = {
@@ -674,8 +712,8 @@
                             ideal: 2160
                         }, // use maxmimal available resolution
                         <?php
-                        if (isset($_GET["deviceid"])) {
-                            echo "deviceId: '" . $_GET["deviceid"] . "' ";
+                        if (isset($_GET["deviceid"]) || isset($_GET["name"])) {
+                            echo "deviceId: getDeviceId()";
                         } else {
                             echo "facingMode: '" . ($_GET["facingmode"] ?? 'environment') . "' ";
                         }
