@@ -279,8 +279,10 @@ if (count($_POST) > 0) {
     echo ', "zoom"  : ' . ($zoom[$myId] ?? 1);
     echo ', "zoomX" : ' . ($zoomX[$myId] ?? 0.5);
     echo ', "zoomY" : ' . ($zoomY[$myId] ?? 0.5);
-    
-    echo ', "bgcol" : "' . ($camconfig["bgcol".$myId] ?? "lightyellow"). '"';
+
+    echo ', "bgcol" : "' . ($camconfig["bgcol" . $myId] ?? "lightyellow") . '"';
+
+    echo ', "id" : ' . ($camconfig["newid".$myId] ?? $myId);
 
     echo ', "reloadnow" :  "' . ($reloadnow[$myId] ?? 'no') . '"';
 
@@ -315,6 +317,8 @@ if (count($_POST) > 0) {
             write2config(true, true);
         }
     }
+
+
 
 
     /**
@@ -406,7 +410,7 @@ if (count($_POST) > 0) {
     } else if ($inter == -1) {
         $interrupt[$myId] = -2;
     }
-    echo ', "intifbatlow" : ' . ($interrupt["bat".$myId] ?? 20);
+    echo ', "intifbatlow" : ' . ($interrupt["bat" . $myId] ?? 20);
 
 
 
@@ -503,8 +507,8 @@ function received_log($myId, $mode, $log_msg)
 
     $myip = getenv("REMOTE_ADDR");
 
-   // $ipNo = "<a href=\"https://ip-api.com/" . $myip . "\">" . $myip . "</a>";
-    $ipNo = $myip; 
+    // $ipNo = "<a href=\"https://ip-api.com/" . $myip . "\">" . $myip . "</a>";
+    $ipNo = $myip;
     $t = localtimeCam($myId);
 
     $logtxt = gmdate("Ymd-His", $t) . ": " . $log_msg . " " . $ipNo . "<br>\n";
@@ -563,7 +567,7 @@ if (isset($_GET["imgout"])) {
     $myId = $_GET["id"] ?? 1;
     $minutes = $_GET["minutes"] ?? 20;
     $minutesfrom = $_GET["minutesfrom"] ?? 5;
-    $bucket = $_GET["bucket"] ?? FALSE; 
+    $bucket = $_GET["bucket"] ?? FALSE;
     $bn = $_GET["b"] ?? findBestImageA($myId, $minutes, $minutesfrom, $bucket);;
     $fullpath = bn2file($bn);
     if ($fullpath !== FALSE) {
@@ -720,7 +724,7 @@ if (isset($_GET["imgout"])) {
             // elm.innerHTML = "Available Cams!"; 
             // from: https://stackoverflow.com/questions/18893787/how-can-i-get-a-list-of-video-cameras-attached-in-my-computer-using-javascript
             navigator.mediaDevices.enumerateDevices().then(function(devices) {
-                var jj = 1; 
+                var jj = 1;
                 for (var i = 0; i < devices.length; i++) {
                     var device = devices[i];
                     //  console.log(device); 
@@ -737,7 +741,7 @@ if (isset($_GET["imgout"])) {
                     document.getElementById("videoSourceOl").appendChild(optionli);
 */
                         optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>";
-                        jj++; 
+                        jj++;
                         var vs = document.getElementById("videoSourceOl");
                         // vs.appendChild(optionli);
                         vs.insertBefore(optionli, vs.firstChild);
@@ -1846,7 +1850,7 @@ if (isset($_GET["imgout"])) {
 
 
             echo "<br>   \r\n";
-           
+
             echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&camconfig=1" >Confiure Camera</a>.';
 
 
@@ -1889,48 +1893,70 @@ if (isset($_GET["imgout"])) {
 
             echo '<h1>Cam Config</h1>';
 
-            echo '<h2>Background Color</h2>'; 
+            echo '<h2>Background Color</h2>';
 
             // preg_match("^# ( [A-Fa-f0-9] {6}| [A-Fa-f0-9] {3})$", 
 
-            if(isset($_GET["bgcol"])) { 
-                $p =  preg_match("/^(([a-z]*)|(#[\da-f]*))$/", $_GET["bgcol"] );
+            if (isset($_GET["bgcol"])) {
+                $p =  preg_match("/^(([a-z]*)|(#[\da-f]*))$/", $_GET["bgcol"]);
                 // var_dump($p); 
 
-                if($p === 1 ) { 
-                if (($camconfig["bgcol".$myId] ?? "null") != $_GET["bgcol"]) {
-                    $camconfig["bgcol".$myId] = $_GET["bgcol"]; 
+                if ($p === 1) {
+                    if (($camconfig["bgcol" . $myId] ?? "null") != $_GET["bgcol"]) {
+                        $camconfig["bgcol" . $myId] = $_GET["bgcol"];
+                        echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                        echo " <script> ";
+                        echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?camconfig=8&cc=" . (($_GET["cc"] ?? 0) + 1) . "&bgcol=" . urlencode($_GET["bgcol"]) . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                        echo " </script> </body></html>";
+                        write2configS();
+                        die();
+                    }
+                } else {
+                    echo "<h3>Not a valid color entered. Found: " . $_GET["bgcol"] . "</h3>";
+                }
+            }
+
+            if (isset($_GET["newid"])) {
+                if (($camconfig["newid" . $myId] ?? "null") != $_GET["newid"]) {
+                    $camconfig["newid" . $myId] = $_GET["newid"];
                     echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                     echo " <script> ";
-                    echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?camconfig=8&cc=" . (($_GET["cc"] ?? 0) + 1) . "&bgcol=" . urlencode($_GET["bgcol"]) . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+                    echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?camconfig=8&cc=" . (($_GET["cc"] ?? 0) + 1) . "&newid=" . urlencode($_GET["newid"]) . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                     echo " </script> </body></html>";
                     write2configS();
                     die(); 
                 }
-            } else { 
-                echo "<h3>Not a valid color entered. Found: ".$_GET["bgcol"]."</h3>"; 
             }
-               
-             
-            }
-            echo '<p>'; 
-            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=black">black</a>; '; 
-            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=blue">blue</a>; '; 
-            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=white">white</a>; '; 
-            echo '<a href="index.php?id='.$myId.'&camconfig=8&bgcol=yellow">yellow</a>; '; 
-            echo '<p>'; 
+
+            echo '<p>';
+            echo '<a href="index.php?id=' . $myId . '&camconfig=8&bgcol=black">black</a>; ';
+            echo '<a href="index.php?id=' . $myId . '&camconfig=8&bgcol=blue">blue</a>; ';
+            echo '<a href="index.php?id=' . $myId . '&camconfig=8&bgcol=white">white</a>; ';
+            echo '<a href="index.php?id=' . $myId . '&camconfig=8&bgcol=yellow">yellow</a>; ';
+            echo '<p>';
 
             echo '<form action="index.php">';
 
-            $bgc = $camconfig["bgcol".$myId] ?? "white"; 
+            $bgc = $camconfig["bgcol" . $myId] ?? "white";
             echo '<label for="setbgcol">Change Color to:</label><br>';
-            echo '<input type="text" id="bgcol" name="bgcol" value="'.$bgc.'" >';
+            echo '<input type="text" id="bgcol" name="bgcol" value="' . $bgc . '" >';
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="hidden" id="camconfig" name="camconfig" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
 
-           
+            echo '<h2>Reassign Cam ID (handle with care)</h2>'; 
+            echo '<p>Note that interrupt returns to the old ID first.</p>'; 
+            echo 'This ID is '.$myId.'.'; 
+            echo " New ID is set to ".($camconfig["newid" . $myId] ?? "not set")."."; 
+
+            echo '<p>';
+            for($jjj = 1; $jjj < 13; $jjj++) { 
+            echo '<a href="index.php?id=' . $myId . '&camconfig=id&newid='.$jjj.'">'.$jjj.'</a>; ';
+          
+            }
+            echo '<a href="index.php?id=' . $myId . '&camconfig=id&newid=-99">X</a>; ';
+            echo '<p>';
 
             die();
         }
@@ -1942,28 +1968,26 @@ if (isset($_GET["imgout"])) {
             } else {
                 $w = explode(";", $t);
                 echo "Last call from interrupt: ";
-                echo gmdate("Y-m-d H:i:s", localtimeCam($myId, $w[0]) );
-                echo "<p>"; 
+                echo gmdate("Y-m-d H:i:s", localtimeCam($myId, $w[0]));
+                echo "<p>";
             }
 
-            $st = $interrupt[$myId] ?? 0; 
-            echo "Status ="; 
-            echo $st; 
+            $st = $interrupt[$myId] ?? 0;
+            echo "Status =";
+            echo $st;
             echo ": ";
-            if($st > 0 ) { 
-                echo "An interrupt has been requested for $st seconds."; 
-            } else if($st == -1) { 
-                echo "A request was made to return from the interrupt now."; 
-            } else if ($st == -2) { 
+            if ($st > 0) {
+                echo "An interrupt has been requested for $st seconds.";
+            } else if ($st == -1) {
+                echo "A request was made to return from the interrupt now.";
+            } else if ($st == -2) {
                 echo "There was an interrupt; but the camera returned prematurely.";
-            }  else if ($st == -4) { 
+            } else if ($st == -4) {
                 echo "There was an interrupt request; but then the request was cancelled.";
-            }
-            else if ($st == 0 ) { 
-                echo "There never was an interrupt"; 
-            }
-            else if( $st < 0 ) { 
-                echo "An interrupt of ".(0 - $st)." seconds was executed."; 
+            } else if ($st == 0) {
+                echo "There never was an interrupt";
+            } else if ($st < 0) {
+                echo "An interrupt of " . (0 - $st) . " seconds was executed.";
             }
             echo "<p>";
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-4">No Interrupt</a>; ';
@@ -1979,12 +2003,12 @@ if (isset($_GET["imgout"])) {
             echo "<p>";
             echo '<form action="index.php">';
             echo '<label for="requestBatInterrupt">Interrupt if Battery Level is lower than (beta):</label><br>';
-            echo '<input type="text" id="requestBatInterrupt" name="requestBatInterrupt" value="'.($interrupt["bat".$myId] ?? 20).'" >';
+            echo '<input type="text" id="requestBatInterrupt" name="requestBatInterrupt" value="' . ($interrupt["bat" . $myId] ?? 20) . '" >';
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
-            echo '<br>'; 
-            echo 'This can be used if the battery drains faster that the mobile is charged.'; 
+            echo '<br>';
+            echo 'This can be used if the battery drains faster that the mobile is charged.';
 
             echo "<p>";
             var_dump($interrupt);
@@ -2033,8 +2057,8 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<p>";
-            if (isset($autocat[$myId]) === FALSE) { 
-                $autocat[$myId] = array(); 
+            if (isset($autocat[$myId]) === FALSE) {
+                $autocat[$myId] = array();
             }
             echo '<form action="index.php">';
             echo '<label for="autocatstart">Change minutes of passed time for autocat to start searching for best image:</label><br>';
@@ -2359,7 +2383,7 @@ if (isset($_GET["imgout"])) {
             echo '<h1>Camera Start / Pause requested</h1><p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             write2config();
             sleep(1);
-        }  else if (isset($_GET["requestInterrupt"])) {
+        } else if (isset($_GET["requestInterrupt"])) {
             // $interrupt[$myId] = $_GET["requestInterrupt"];
             $stats[$myId]["uqt"] = NULL;
 
@@ -2379,8 +2403,8 @@ if (isset($_GET["imgout"])) {
             write2config();
             sleep(1);
         } else if (isset($_GET["requestBatInterrupt"])) {
-            if (($interrupt["bat".$myId] ?? false) !== intval($_GET["requestBatInterrupt"])) {
-                $interrupt["bat".$myId] = intval($_GET["requestBatInterrupt"]);
+            if (($interrupt["bat" . $myId] ?? false) !== intval($_GET["requestBatInterrupt"])) {
+                $interrupt["bat" . $myId] = intval($_GET["requestBatInterrupt"]);
 
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -2388,7 +2412,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script>";
             } else {
                 echo '<h1>Battery level set to request Interruption set to</h1>';
-                echo '<h2>' . ( $interrupt["bat".$myId] ?? "no data"). " percent.</h2>";
+                echo '<h2>' . ($interrupt["bat" . $myId] ?? "no data") . " percent.</h2>";
                 echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             }
 
@@ -2397,10 +2421,9 @@ if (isset($_GET["imgout"])) {
         } else {
             echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
-        } 
+        }
         echo '</body>   </html>';
         @unlink($lockfile);
-    
     } else {
         error_reporting(-1);
         echo "<h1>Welcome to myCCTV!</h1><em>Choose a camera below</em><p>";
@@ -2458,7 +2481,7 @@ if (isset($_GET["imgout"])) {
 
         $defaultsearchterms = array("cat", "bird",  "squirrel", "rodent", "mammal", "animal", "dog", "wildlife", "lifestyle");
 
-        if (!isset($autocat)) { 
+        if (!isset($autocat)) {
             $autocat = array();
         }
         if (!isset($autocat[$myId])) {
@@ -2483,9 +2506,9 @@ if (isset($_GET["imgout"])) {
             return "Function called with parameter initonly.";
         }
 
-        $howlongminutes = $autocat[$myId]["d"] ?? 60; 
-        $whenstartminutes = $autocat[$myId]["s"] ?? 30; 
-        $bn = findBestImageA($myId, $howlongminutes, $whenstartminutes ); // From 30+60 minutes ago to 30 minutes ago
+        $howlongminutes = $autocat[$myId]["d"] ?? 60;
+        $whenstartminutes = $autocat[$myId]["s"] ?? 30;
+        $bn = findBestImageA($myId, $howlongminutes, $whenstartminutes); // From 30+60 minutes ago to 30 minutes ago
 
         if ($bn === FALSE) {
             return "No best images was found.";
@@ -2806,7 +2829,7 @@ if (isset($_GET["imgout"])) {
         global $fastmode, $maximagesperpost,  $keephowmany, $history, $lastgallery;
         global $targets,  $sessiongetinfo, $jpgcompression;
         global $servertargeteta;
-        global $imagedimensions, $camconfig; 
+        global $imagedimensions, $camconfig;
 
 
         $savefile = $varfile_config;
@@ -2855,9 +2878,9 @@ if (isset($_GET["imgout"])) {
 
         file_put_contents($savefile, $content);
     }
-/**
- * Saves variables that are changed by both camera and UI.
- */
+    /**
+     * Saves variables that are changed by both camera and UI.
+     */
     function write2config($cam_agnostic = false, $leave_locked = false)
     {
         global $iowntheconfigfile, $lockfile, $varfile_config;

@@ -76,9 +76,11 @@
 <body>
     <div class="canhide">
         <p>
-            <a target="_blank" href="index.php?mode=home">Home</a>,
+            <a target="_blank" href="index.php?mode=home">Home</a> 
             <?php
-            echo "<h1>Camera " . intval($_GET["id"] ?? 0) . "</h1>";
+            echo '(Root ID: '.$_GET["id"].')';
+            
+            echo '<h1 id="camid" >Camera ...</h1>';
             ?>
         </p>
         <!--
@@ -119,6 +121,19 @@
             <button class="button button3" onclick="interrupt(3600, 'from cam - 60')">Interrupt 60 mins</button>
         </p>
         <script>
+
+            <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
+
+            var setId = function(newId = myId) { 
+                var idint = parseInt(newId); 
+                if( idint > 0 && idint < 13 ) { 
+                document.getElementById("camid").innerHTML = "Camera "+newId; 
+                myId = idint; 
+                } 
+            }
+
+            setTimeout(setId, 1000); 
+
             var phpDeviceId = <?php echo "'" . ($_GET["deviceid"] ?? "not set") . "'"; ?>;
             var phpCamname = <?php echo "'" . ($_GET["name"] ?? "not set") . "'"; ?>;
             var isVideoReady = false; 
@@ -155,7 +170,7 @@
 
             function interrupt(secondsUntilReturn, why) {
                 var queryString = <?php echo '"' . urlencode($_SERVER['QUERY_STRING']) . '"'; ?>;
-                <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
+                <?php echo "var NOTmyId=" . intval($_GET["id"] ?? 0); ?>;
                 document.location.href = "interruptcam.php?reason=" + why + "&id=" + myId + "&interruptdelay=" + secondsUntilReturn + "&returnto=" + queryString;
             }
 
@@ -262,6 +277,7 @@
             }
 
             var myInterval = setInterval(updateClock, updateInMilliseconds);
+          
 
             var pauseCapture = false;
             var tempCount = 2;
@@ -532,7 +548,7 @@
                             ajax = new ActiveXObject("Microsoft.XMLHTTP");
                         }
                         var tzo = (new Date()).getTimezoneOffset(); // sending this allows the server to know what timezone the client is. 
-                        <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
+                        <?php echo "var NOTTOOmyId=" . intval($_GET["id"] ?? 0); ?>;
 
                         // var bat = document.getElementById('batteryinfo').innerHTML; 
                         var info = "re" + numberOfRequests + ";up" + updateInMilliseconds + ";to" + numberOfTimeouts + ";er" + numberOfConnectErrors + ";";
@@ -609,6 +625,9 @@
 
                                 var backgroundColor = (parsed.bgcol ? parsed.bgcol : "white");
                                 document.body.style.background = backgroundColor;
+
+                                var newId = (parsed.id ? parsed.id : 0);
+                                setId(newId); 
 
                                 buckets = (parsed.buckets ? parsed.buckets : false);
                                 pauseCapture = (parsed.pauseCapture ? parsed.pauseCapture : false);
