@@ -83,13 +83,14 @@ if ($myVarfileId < 0 || $myVarfileId > 20) {
 $varfile_config = "./vars/server_config" . $myVarfileId . ".php"; // variables that are not changed by the camera go here. 
 $varfile = "./vars/cam" . $myVarfileId . ".php";
 $varfile_global = "./vars/allcams.php";
+$varfile_config_bup = "./vars/server_config" . $myVarfileId . "_bup.php"; // backup file
 
 
-if (!file_exists($varfile)) {
+if (file_exists($varfile) === false) {
     write2config();
 }
 
-if (!file_exists($varfile_global)) {
+if (file_exists($varfile_global) === false) {
     write2config(true);
 }
 
@@ -100,8 +101,17 @@ if (file_exists($lockfile) === false) {
 include_once $varfile_global;
 include_once $varfile;
 
-if (!file_exists($varfile_config)) {
-    write2configS();
+if (file_exists($varfile_config) === false) {
+    if (file_exists($varfile_config_bup)) {
+        copy($varfile_config_bup, $varfile_config);
+        $errinfo["buprestore"] = gmdate("Y-m-d H:i:s") . " - Restored config from bup = " . $myVarfileId;
+        write2config(true);
+
+    } else {
+        write2configS();
+    }
+} else {
+    copy($varfile_config, $varfile_config_bup);
 }
 
 include_once $varfile_config;
@@ -282,7 +292,7 @@ if (count($_POST) > 0) {
 
     echo ', "bgcol" : "' . ($camconfig["bgcol" . $myId] ?? "lightyellow") . '"';
 
-    echo ', "id" : ' . ($camconfig["newid".$myId] ?? $myId);
+    echo ', "id" : ' . ($camconfig["newid" . $myId] ?? $myId);
 
     echo ', "reloadnow" :  "' . ($reloadnow[$myId] ?? 'no') . '"';
 
@@ -1012,28 +1022,6 @@ if (isset($_GET["imgout"])) {
         }
 
 
-        /*
-                // From: https://www.simple.gy/blog/range-slider-two-handles/
-                async function updateValue() {
-                    var out = document.getElementById("outrange");
-                    var range = document.getElementById("myrange").value;
-                    var date = new Date(range * 1000);
-                    out.innerHTML = date.toISOString();
-                }
-        */
-        /*
-                async function setupReload() {
-                    var d = document.getElementById("reload");
-
-                    if (d == null) {
-                        return;
-                    }
-
-                    d.href = window.location.href;
-                    d.innerHTML = "Reload";
-
-                }
-        */
         function hideinfo(str = null, what = 'toggle') {
             var d = document.getElementById(str);
 
@@ -1416,17 +1404,13 @@ if (isset($_GET["imgout"])) {
     }
 
 
-
-    ?>
-
-    <?php
     $oldestbn = null;
     $newestbn = null;
 
     if (isset($_GET["id"]) && !isset($_GET["home"])) {
         error_reporting(-1);
 
-        $myId = intval($_GET["id"]);
+        $myId = intval($_GET["id"] ?? 0);
 
         $sessiongetinfo[$myId] = $_SERVER;
 
@@ -1924,7 +1908,7 @@ if (isset($_GET["imgout"])) {
                     echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?camconfig=8&cc=" . (($_GET["cc"] ?? 0) + 1) . "&newid=" . urlencode($_GET["newid"]) . "&t=" . time() . "&id=" . $myId . "' }, 600);";
                     echo " </script> </body></html>";
                     write2configS();
-                    die(); 
+                    die();
                 }
             }
 
@@ -1945,15 +1929,14 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
 
-            echo '<h2>Reassign Cam ID (handle with care)</h2>'; 
-            echo '<p>Note that interrupt returns to the old ID first.</p>'; 
-            echo 'This ID is '.$myId.'.'; 
-            echo " New ID is set to ".($camconfig["newid" . $myId] ?? "not set")."."; 
+            echo '<h2>Reassign Cam ID (handle with care)</h2>';
+            echo '<p>Note that interrupt returns to the old ID first.</p>';
+            echo 'This ID is ' . $myId . '.';
+            echo " New ID is set to " . ($camconfig["newid" . $myId] ?? "not set") . ".";
 
             echo '<p>';
-            for($jjj = 1; $jjj < 13; $jjj++) { 
-            echo '<a href="index.php?id=' . $myId . '&camconfig=id&newid='.$jjj.'">'.$jjj.'</a>; ';
-          
+            for ($jjj = 1; $jjj < 13; $jjj++) {
+                echo '<a href="index.php?id=' . $myId . '&camconfig=id&newid=' . $jjj . '">' . $jjj . '</a>; ';
             }
             echo '<a href="index.php?id=' . $myId . '&camconfig=id&newid=-99">X</a>; ';
             echo '<p>';
@@ -2223,13 +2206,6 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
             }
             die();
-            /*
-            $maximagesperpost[$myId] = intval($_GET["setmaximages"]);
-            echo "<h2>The Camera will send a maximum of " . $maximagesperpost[$myId] . " images with each post.</h2>";
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-            write2configS();
-            die();
-            */
         }
         if (isset($_GET["keephowmany"])) {
             if ($keephowmany[$myId] != intval($_GET["keephowmany"])) {
@@ -2247,13 +2223,6 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
             }
             die();
-            /*
-            $keephowmany[$myId] = intval($_GET["keephowmany"]);
-            echo "<h2>The System will keep at least " . $keephowmany[$myId] . " images on the server for each bucket.</h2>";
-            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
-            write2configS();
-            die();
-            */
         }
         if (isset($_GET["setautocat"])) {
 
@@ -2944,28 +2913,7 @@ if (isset($_GET["imgout"])) {
             $content .= PHP_EOL . " \$resetstats = " . var_export($resetstats, true) . "; ";
             $content .= PHP_EOL . " \$autocat = " . var_export($autocat, true) . "; ";
 
-            // Later: remove everything below here: 
-            /*
-            $content .= PHP_EOL . " \$imagedimensions = " . var_export($imagedimensions, true) . "; ";
-            $content .= PHP_EOL . " \$focusX = " . var_export($focusX, true) . "; ";
-            $content .= PHP_EOL . " \$focusY = " . var_export($focusY, true) . "; ";
-            $content .= PHP_EOL . " \$targets = " . var_export($targets, true) . "; ";
-       
-            $content .= PHP_EOL . " \$sessiongetinfo = " . var_export($sessiongetinfo, true) . "; ";
-            $content .= PHP_EOL . " \$jpgcompression = " . var_export($jpgcompression, true) . "; ";
 
-            $content .= PHP_EOL . " \$mingapbeforeposts = " . var_export($mingapbeforeposts, true) . "; ";
-            $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
-            $content .= PHP_EOL . " \$maximagesperpost = " . var_export($maximagesperpost, true) . "; ";
-            $content .= PHP_EOL . " \$keephowmany = " . var_export($keephowmany, true) . "; ";
-
-            $content .= PHP_EOL . " \$zoom = " . var_export($zoom, true) . "; ";
-            $content .= PHP_EOL . " \$zoomX = " . var_export($zoomX, true) . "; ";
-            $content .= PHP_EOL . " \$zoomY = " . var_export($zoomY, true) . "; ";
-      
-            $content .= PHP_EOL . " \$history = " . var_export($history, true) . "; ";
-            $content .= PHP_EOL . " \$lastgallery = " . var_export($lastgallery, true) . "; ";
-             */
             $savefile = $varfile;
         }
 
