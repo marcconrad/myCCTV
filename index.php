@@ -277,7 +277,8 @@ if (count($_POST) > 0) {
         "nNot200" => ($_POST["nNot200"] ?? false),
         "jsonerr" => ($_POST["jsonerr"] ?? false),
         "jsoninvalid" => ($_POST["jsoninvalid"] ?? false),
-        "totalImgsSaved" => ($_POST["totalImgsSaved"] ?? false)
+        "totalImgsSaved" => ($_POST["totalImgsSaved"] ?? false),
+        "bgnc" => ($_POST["bgnc"] ?? -13)
     );
 
 
@@ -350,6 +351,8 @@ if (count($_POST) > 0) {
     $countImagesSaved = 0;
     $lastbgnoise = receiveImagesA($myId);
     echo ', "imsaved" : ' . $countImagesSaved;
+    echo ', "lastbgnoise" : ' . $lastbgnoise;
+
     foreach (myTargets($myId) as $j) {
 
         cleanFiles($j);
@@ -1809,6 +1812,9 @@ if (isset($_GET["imgout"])) {
             echo "" . round(60 * $imgsackpersecond, 2) . " imgs / minute since cam was started.";
             echo "<br> \r\n";
             echo "" . round(60 * $imgsreceivedpersecond, 2) . " imgs / minute since stats reset on server.";
+
+            echo "<br> \r\n";
+            echo "" . $k["bgnc"]. " repeats (same image send over different requests?).";
 
             echo "<br> \r\n";
             $togp = ($toggleCapture[$myId] ?? 0);

@@ -310,6 +310,10 @@
             var totaljsonreturnerror = 0;
             var totalinvalidjson = 0;
 
+            var lastbgnoiserec = -1; 
+            var lastbgnoisecount = 0; 
+
+
             var donotsend = false;
 
             var lastConnect = Date.now();
@@ -561,6 +565,7 @@
                             "&requests=" + numberOfRequests +
                             "&donotsends=" + numberOfDonotsends +
                             "&timeouts=" + numberOfTimeouts +
+                            "&bgnc=" + lastbgnoisecount +
                             "&highpayloads=" + numberOfHighPayloads +
                             "&errors=" + numberOfConnectErrors +
                             "&updms=" + updateInMilliseconds +
@@ -650,6 +655,15 @@
 
                                 //  newUpdateInMilliseconds = ( parsed.update ? parsed.update : updateInMilliseconds);
                                 speedupfactor = (parsed.speedupfactor ? parsed.speedupfactor : 1);
+
+                                var bgnc = (parsed.lastbgnoise ? parsed.lastbgnoise : -77); 
+
+                                if( bgnc == lastbgnoiserec) { 
+                                    lastbgnoisecount++; 
+                                } else { 
+                                    lastbgnoiserec = bgnc; 
+                                    lastbgnoisecount = 0; 
+                                }
                                 if (parsed.fastmode && parsed.fastmode > 0) {
                                     speedupfactor = 10;
                                 }
