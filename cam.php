@@ -53,12 +53,13 @@
             left: 0;
             right: 0;
             text-align: center;
-            width: 99%;
-            height: 99%;
+            width: <?php echo ($_GET["w"] ?? "99")."%"; ?>;
+            height: <?php echo ($_GET["h"] ?? "99")."%"; ?>;
             z-index: 10;
         }
 
-        <?php if (isset($_GET["videoonly"]) === false) {
+        <?php 
+        if (isset($_GET["videoonly"]) === false) {
             echo ' */ ';
             echo "\r\n ";
             echo ".video { width: 100px; height: 100px; }";

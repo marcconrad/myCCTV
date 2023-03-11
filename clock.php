@@ -113,7 +113,11 @@
         }
 
         var startUp = function() {
-            setInterval(count, 20);
+            <?php 
+            if(($_GET["noclock"] ?? "no") !== "yes" ) { 
+            echo "setInterval(count, 20);";
+            }
+            ?>
 
         }
         window.addEventListener("DOMContentLoaded", startUp, false);
@@ -173,7 +177,7 @@
             echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode='.($_GET["facingmode"] ?? "cam").'&facingmode=user&id='.($_GET["id"] ?? 3)
             .'&videoonly=yes" frameborder="0"></iframe>';
         } else { 
-            echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=cam&name='.($_GET["name"]).'&id='.($_GET["id"] ?? 3)
+            echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=cam&name='.($_GET["name"]).'&h='.($_GET["h"] ?? 99).'&w='.($_GET["w"] ?? 99).'&id='.($_GET["id"] ?? 3)
             .'&videoonly=yes" frameborder="0"></iframe>';
 
             if(isset($_GET["name2"]) ) { 
