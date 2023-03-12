@@ -1814,7 +1814,7 @@ if (isset($_GET["imgout"])) {
             echo "" . round(60 * $imgsreceivedpersecond, 2) . " imgs / minute since stats reset on server.";
 
             echo "<br> \r\n";
-            echo "" . $k["bgnc"]. " repeats (same image send over different requests?).";
+            echo "" . ( $k["bgnc"] ?? "x"). " repeats (same image send over different requests?).";
 
             echo "<br> \r\n";
             $togp = ($toggleCapture[$myId] ?? 0);

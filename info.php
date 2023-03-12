@@ -1,8 +1,27 @@
     <?php
+    $myVarfileId = intval($_GET["id"] ?? 99);
+    if ($myVarfileId < 0 || $myVarfileId > 20) {
+        $myVarfileId = 99;
+    }
+
+    $varfile = "./vars/cam" . $myVarfileId . ".php";
+
+    @include_once $varfile;
+    
+
     include "util.php";
     if (isset($_GET["statusemoji"]) && isset($_GET["id"])) {
         $x = getLastInfo($_GET["id"]);
-        echo '{ "emoji"  : "' . $x["emoji"] .  '" }';
+        $wx = $x["emoji"]; 
+        if( $wx == "👍" ) {
+            $k = $stats[$_GET["id"]] ?? array();
+            $repeats = ( $k["bgnc"] ?? "x"); 
+            if($repeats > 5 ) { 
+                $wx = "✋"; 
+            }
+        } 
+        // echo '{ "emoji"  : "' . $x["emoji"] .  '" }';
+        echo '{ "emoji"  : "' . $wx .  '" }';
 
         die();
     }
@@ -31,7 +50,7 @@
             echo "Error: unexpected fgets() fail\n";
         }
 
-       //  $size = substr($size, 0, strpos($size, "\t"));
+        //  $size = substr($size, 0, strpos($size, "\t"));
         pclose($handle);
         // echo 'Directory: ' . $f . ' => Size: ' . $size;
 
@@ -49,24 +68,25 @@
 
             if(isset($_GET["unziptest"])) {
             $out = unzipDateId("20200616", "4");
-            echo "<p>out=";
-                var_dump($out);
-                }
-                ?>
-                <p>Thank you</p>
-            </p>
-            <p>
-                <a href="info.php?ziptest=1">Zip folder</a>
-            </p>
-            <p>
-                <a href="info.php?unziptest=1">Unzip folder</a>
-            </p>
-            <p>
+            echo "
+        <p>out=";
+            var_dump($out);
+            }
+            ?>
+        <p>Thank you</p>
+        </p>
+        <p>
+            <a href="info.php?ziptest=1">Zip folder</a>
+        </p>
+        <p>
+            <a href="info.php?unziptest=1">Unzip folder</a>
+        </p>
+        <p>
 
-               
-            </p>
-            <p>
-                */
+
+        </p>
+        <p>
+            */
     </body>
 
     </html>
