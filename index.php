@@ -1436,6 +1436,7 @@ if (isset($_GET["imgout"])) {
             $autocat[$myId]['mode'] = "auto";
         } else {
             $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
+            $autocat[$myId]['mode'] = "manual";
         }
         write2config();
         echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
