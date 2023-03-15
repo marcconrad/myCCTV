@@ -339,7 +339,7 @@ if (count($_POST) > 0) {
         $res = autocat($myId);
         echo ', "autocat" : "running"';
         if (strpos($res, "Previous request too recently") === FALSE) {
-            autocat_log($myId . "; " . $res);
+            autocat_log($myId, $res);
         }
     } else {
         echo ', "autocat" : "not enabled"';
@@ -538,13 +538,14 @@ function received_log($myId, $mode, $log_msg)
  * Logs any interaction with Clarifai service. 
  */
 
-function autocat_log($log_msg)
+function autocat_log($myId, $log_msg)
 {
     $logFile = "log/__log.html";
     $myip = getenv("REMOTE_ADDR");
     $ipNo = "<a href=\"http://ip-api.com/" . $myip . "\">" . $myip . "</a>";
 
     global $clarifaicount;
+    global $autocat;
 
     $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount[3] / $ctd, 0);
@@ -559,7 +560,20 @@ function autocat_log($log_msg)
     }
 
 
-    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "<br>\n";
+    $howlongminutes = $autocat[$myId]["d"] ?? 60;
+    $autocatadjust = $autocat[$myId]["mode"] ?? "not set";
+    if ($autocatadjust === "auto") {
+        $t1 = $targetclarifaipermonth * 0.95;
+        if ($clarifaipermonth > $t1) {
+            $autocat[$myId]["d"] = min(1440, $howlongminutes + 1);
+        } else {
+            $autocat[$myId]["d"] = max($howlongminutes  - 1, 10);
+        }
+        // Assume there is a write2config() elsewhere
+    }
+
+
+    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "<br>\n";
     file_put_contents($logFile, $logtxt, FILE_APPEND);
 
     if (filesize($logFile) > 123456) { // bytes
@@ -1418,7 +1432,11 @@ if (isset($_GET["imgout"])) {
         autocat($myId, "initonly");
         $currentminutes = $autocat[$myId]['d'] ?? 60;
 
-        $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
+        if ($_GET["autocatduration"] === "auto") {
+            $autocat[$myId]['mode'] = "auto";
+        } else {
+            $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
+        }
         write2config();
         echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
         echo "Thank You";
@@ -1735,7 +1753,6 @@ if (isset($_GET["imgout"])) {
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-            
             } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
             }
@@ -2093,10 +2110,21 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<p>";
+            $du_mode = ($autocat[$myId]['mode'] ?? "manual");
+            $du_d = ($autocat[$myId]['d'] ?? 60);
+
+            if ($du_mode == "auto") {
+                $du_txt = "auto";
+            } else {
+                $du_txt = $du_d;
+            }
 
             echo '<form action="index.php">';
-            echo '<label for="autocatstart">Change duration of passed time for autocat to search for best image (minutes):</label><br>';
-            echo '<input type="text" id="autocatduration" name="autocatduration" value="' . ($autocat[$myId]['d'] ?? 60) . '" >';
+            echo '<label for="autocatstart">Change duration of passed time for autocat to search for best image (minutes). Use "auto" for automatic adjustment.</label><br>';
+            echo '<input type="text" id="autocatduration" name="autocatduration" value="' . $du_txt . '" >';
+            if ($du_mode === "auto") {
+                echo " (" . $du_d . ") ";
+            }
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
