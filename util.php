@@ -5,6 +5,27 @@ if(file_exists($varfile_global) ) {
     include_once $varfile_global;
 }
 
+function isRepeat($myId)
+{
+
+    $h = glob("./img/" . $myId . "??/");
+   
+    foreach ($h as $x) {
+        $w = glob($x . "/*.jpg");
+       
+        $c = count($w);
+        if ($c > 1) {
+            $f0 = explode("c", $w[$c-1], 2)[1];
+            $f1 = explode("c", $w[$c-2], 2)[1];
+       
+            if ($f0 === $f1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function isLocalhost() { 
     return $_SERVER['SERVER_NAME'] === "localhost"; 
 }
@@ -103,6 +124,11 @@ function getLastInfo($i)
         $emoticon = "?";
         if ($tdiff < 120) {
             $emoticon = "👍";
+            if(isRepeat(($i)) ) { 
+                $emoticon = "♊"; 
+            } else { 
+                $emoticon = "👍";
+            }
         } else if ($tdiff < 300) { // 5 minutes
             $emoticon = "😕";
         } else if ($tdiff < 60 * 60) { // 1 hours

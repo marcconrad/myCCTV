@@ -1825,6 +1825,9 @@ if (isset($_GET["imgout"])) {
             echo '</div>';
 
             $k = $stats[$myId] ?? array();
+           
+            echo "" . ($k["bgnc"] ?? "x") . " repeats (same image send over different requests?).";
+            echo "<br> \r\n";
             echo "The Camera is live since: " . (isset($k["alivesince"]) ?  gmdate("M j, H:i:s",  $k["alivesince"]) : "(not recorded)") . ". ";
             echo "Since then " . ($k["requests"] ?? "?") . " requests were made of which";
             echo " " . ($k["n200"] ?? "?") . " where successful (status 200).";
@@ -1851,8 +1854,7 @@ if (isset($_GET["imgout"])) {
             echo "<br> \r\n";
             echo "" . round(60 * $imgsreceivedpersecond, 2) . " imgs / minute since stats reset on server.";
 
-            echo "<br> \r\n";
-            echo "" . ($k["bgnc"] ?? "x") . " repeats (same image send over different requests?).";
+         
 
             echo "<br> \r\n";
             $togp = ($toggleCapture[$myId] ?? 0);

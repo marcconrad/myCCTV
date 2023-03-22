@@ -7,23 +7,32 @@
     $varfile = "./vars/cam" . $myVarfileId . ".php";
 
     @include_once $varfile;
-    
+
 
     include "util.php";
     if (isset($_GET["statusemoji"]) && isset($_GET["id"])) {
         $x = getLastInfo($_GET["id"]);
-        $wx = $x["emoji"]; 
-        if( $wx == "👍" ) {
+        $wx = $x["emoji"];
+        if ($wx == "👍") {
             $k = $stats[$_GET["id"]] ?? array();
-            $repeats = ( $k["bgnc"] ?? "x"); 
-            if($repeats > 5 ) { 
-                $wx = "✋"; 
+            $repeats = ($k["bgnc"] ?? "x");
+            if ($repeats > 5) {
+                $wx = "✋";
             }
-        } 
+        }
         // echo '{ "emoji"  : "' . $x["emoji"] .  '" }';
         echo '{ "emoji"  : "' . $wx .  '" }';
 
         die();
+    }
+
+   
+
+    if (isset($_GET["repeats"]) && isset($_GET["id"])) {
+        $myId  = $_GET["id"];
+        $d = isRepeat($myId); 
+        echo "<h3>The Result is: " . $d. "</h3>";
+        var_dump($d); 
     }
 
     ?>
