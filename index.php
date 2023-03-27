@@ -352,13 +352,19 @@ if (count($_POST) > 0) {
     echo ', "imsaved" : ' . $countImagesSaved;
     echo ', "lastbgnoise" : ' . $lastbgnoise;
 
+    $distancezerocount = 0; 
+
     foreach (myTargets($myId) as $j) {
 
         cleanFiles($j);
     }
+
+    echo ',"d0" : '.$distancezerocount;
+   
     /**
      * Tell the camera every how many seconds it should send something to the server (default 60, onces a minute) 
      */
+
     echo ', "mingap" : ' . ($mingapbeforeposts[$myId] ?? 60);
 
     /**
@@ -3541,8 +3547,10 @@ if (isset($_GET["imgout"])) {
         return ($bn0 == "nopic.jpg" ? 'na' : floatval(explode('d', $bn0)[1]));
     }
 
+   
     function distance($bn0, $bn1)
     {
+        global $distancezerocount; 
         $a0 = explode('d', $bn0);
         $a1 = explode('d', $bn1);
 
@@ -3554,7 +3562,11 @@ if (isset($_GET["imgout"])) {
             return $a0[1];
         }
 
-        return abs($a0[1] - $a1[1]);
+        $dd = abs($a0[1] - $a1[1]);
+        if( $dd == 0 ) { 
+            $distancezerocount++; 
+        }
+        return $dd; 
     }
 
 
@@ -3563,6 +3575,7 @@ if (isset($_GET["imgout"])) {
     function cleanFiles($tgt, $yyyymmdd = FALSE)
     {
         global $keephowmany;
+        global $distancezerocount; 
 
         $i = 0;
         $basenames = array();
@@ -3572,6 +3585,7 @@ if (isset($_GET["imgout"])) {
         $srcfiles =  glob($imgfoldername . "aa*z.???");
         $n = count($srcfiles);
         echo ',"clean' . $tgt . '" : "';
+        
         echo "Enter Clean: n=$n cleanUpConst=" . $cleanUpConst . "; ";
 
         if ($n < $cleanUpConst * 1.3) {
@@ -3638,6 +3652,7 @@ if (isset($_GET["imgout"])) {
             }
         }
         echo '..' . $r . ' files removed."';
+      
     }
     // END cleanFiles
 
