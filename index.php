@@ -573,7 +573,7 @@ function autocat_log($myId, $log_msg)
         if ($clarifaipermonth > $t1) {
             $autocat[$myId]["d"] = min(1440, $howlongminutes + 1);
         } else {
-            $autocat[$myId]["d"] = max($howlongminutes  - 1, 10);
+            $autocat[$myId]["d"] = max($howlongminutes  - 1, 15); // make this greater than the 782 second gap between calls.
         }
         // Assume there is a write2config() elsewhere
     }
