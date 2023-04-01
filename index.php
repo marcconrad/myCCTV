@@ -578,8 +578,9 @@ function autocat_log($myId, $log_msg)
         // Assume there is a write2config() elsewhere
     }
 
+    $howlongnew = $autocat[$myId]["d"] ?? 60;
 
-    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "<br>\n";
+    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "; ".$howlongnew."<br>\n";
     file_put_contents($logFile, $logtxt, FILE_APPEND);
 
     if (filesize($logFile) > 123456) { // bytes
