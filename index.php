@@ -2625,7 +2625,7 @@ if (isset($_GET["imgout"])) {
         }
 
         if ($theconcept === FALSE) {
-            return "The  image $bnlink did not contain one of the searchterms " . implode(",",  $autocat[$myId]["searchterms"]) . " but only: " . implode(", ", $concepts);
+            return "The  image $bnlink did not contain one of the searchterms " . implode(",",  $searchterms) . " but only: " . implode(", ", $concepts);
         }
 
 
