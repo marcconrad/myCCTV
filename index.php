@@ -555,13 +555,15 @@ function autocat_log($myId, $log_msg)
 
     $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount["count"] / $ctd, 0);
-    $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth;
+    $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth ."; ".($clarifaicount["callgap"] ?? "y");
     $targetclarifaipermonth = ($clarifaicount["target"] ?? 700);
     if ($clarifaipermonth > $targetclarifaipermonth ) {
+        $clarifaicount["callgap"] = min( 60 * 60, ($clarifaicount["callgap"] ?? 783) + 10); // gap max one hour 
         $clarifaicount[720] += 60;
         write2config(true);
     } else if ($clarifaipermonth < $targetclarifaipermonth ) {
         $clarifaicount[720] = max($clarifaicount[720] - 60, 0);
+        $clarifaicount["callgap"] = max( 60 * 5, ($clarifaicount["callgap"] ?? 783) - 10); // gap min every 5 minutes
         write2config(true);
     }
 
@@ -569,11 +571,12 @@ function autocat_log($myId, $log_msg)
     $howlongminutes = $autocat[$myId]["d"] ?? 60;
     $autocatadjust = $autocat[$myId]["mode"] ?? "not set";
     if ($autocatadjust === "auto") {
-        $t1 = $targetclarifaipermonth * 0.95;
+        $t1 = $targetclarifaipermonth;
+        $gapbetweencalls = 1 + floor(($clarifaicount["callgap"] ?? 783) / 60.0); 
         if ($clarifaipermonth > $t1) {
             $autocat[$myId]["d"] = min(1440, $howlongminutes + 1);
         } else {
-            $autocat[$myId]["d"] = max($howlongminutes  - 1, 15); // make this greater than the 782 second gap between calls.
+            $autocat[$myId]["d"] = max($howlongminutes  - 1, $gapbetweencalls); // make this greater than the callgap second gap between calls.
         }
         // Assume there is a write2config() elsewhere
     }
@@ -2088,16 +2091,18 @@ if (isset($_GET["imgout"])) {
 
             echo "<br>"; 
 
-            echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
-            echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
-            echo "Current count is " . ($clarifaicount[0] ?? "x") . ". ";
-            echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . "s;";
+            echo "Target is " . ($clarifaicount["target"] ?? 700) . " per month.<br> ";
+            echo "Clarifai call may be suspended if count=" . ($clarifaicount["max"] ?? 25) . ". ";
+            echo "Current count=" . ($clarifaicount[0] ?? "x") . ". ";
+            echo "Count down every " . ($clarifaicount[720] ?? 720) . "s;<br>";
 
-            $t720 =  ($clarifaicount[720] ?? 720); 
+
+
+            $t720 =  ($clarifaicount["callgap"] ?? 783); 
             $m720 = floor( $t720 / 60.0); 
             $s720 = $t720 - (60 * $m720); 
             
-            echo " means one Clarifai call every $m720 mins"; 
+            echo "Clarifai is called every $m720 mins"; 
             if($s720 != 0)  { echo " and $s720 sec";  }
             echo ". <br>"; 
 
@@ -2555,6 +2560,7 @@ if (isset($_GET["imgout"])) {
     function autocat($myId, $test = FALSE)
     {
         global $autocat;
+        global $clarifaicount; 
 
         $outputfolder = "agifs/";
 
@@ -2573,8 +2579,10 @@ if (isset($_GET["imgout"])) {
         }
         $searchterms = $autocat[$myId][5];
 
+        $mingapbetweencalls = $clarifaicount["callgap"] ?? 783; 
+
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
-        if (($autocat[$myId][1] ?? false) !== false && $tdiff < 782 && $test === false) {
+        if (($autocat[$myId][1] ?? false) !== false && $tdiff < $mingapbetweencalls && $test === false) {
             return "Previous request too recently: $tdiff seconds ago";
         } else if ($test !== "initonly") {
             $autocat[$myId][4] = localtimeCam($myId);
@@ -2773,7 +2781,7 @@ if (isset($_GET["imgout"])) {
             $clarifaicount = array("0", time(), false);
         }
 
-        $clarifaikey = ($clarifaicount[2] ?? false);
+        // $clarifaikey = ($clarifaicount[2] ?? false);
 
 
         $files = glob("img/*/" . substr($bn, 0, 24) . "*.jpg");
