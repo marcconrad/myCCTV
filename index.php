@@ -553,14 +553,14 @@ function autocat_log($myId, $log_msg)
     global $clarifaicount;
     global $autocat;
 
-    $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
-    $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount[3] / $ctd, 0);
+    $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
+    $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount["count"] / $ctd, 0);
     $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth;
     $targetclarifaipermonth = ($clarifaicount["target"] ?? 700);
-    if ($clarifaipermonth > $targetclarifaipermonth * 1.01) {
+    if ($clarifaipermonth > $targetclarifaipermonth ) {
         $clarifaicount[720] += 60;
         write2config(true);
-    } else if ($clarifaipermonth < $targetclarifaipermonth * 0.99) {
+    } else if ($clarifaipermonth < $targetclarifaipermonth ) {
         $clarifaicount[720] = max($clarifaicount[720] - 60, 0);
         write2config(true);
     }
@@ -1755,8 +1755,8 @@ if (isset($_GET["imgout"])) {
 
             if (true || isset($clarifaicount[2])) {
                 echo '<br>';
-                $c3 = $clarifaicount[3] ?? 0;
-                $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
+                $c3 = $clarifaicount["count"] ?? 0;
+                $c4 =  $clarifaicount["time"] ?? localtimeCam($myId);
                 echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
                 $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
@@ -2069,10 +2069,29 @@ if (isset($_GET["imgout"])) {
 
             $c3 = $clarifaicount[3] ?? 0;
             $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
-            echo "$c3  Clarifai since " . gmdate("M j H:i", $c4); // . " Current: <b>" . $clarifaicount[0] . "</b>";
+            echo "Global: $c3  Clarifai since " . gmdate("M j H:i", $c4); // . " Current: <b>" . $clarifaicount[0] . "</b>";
             $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
+
             echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+            /*
+            echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
+            echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
+            echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . ";";
+            */
+
+            echo "<br>"; 
+
+            $d3 = $clarifaicount["count"] ?? 0;
+            $d4 =  $clarifaicount["time"] ?? localtimeCam($myId);
+            echo "Local: $d3  Clarifai since " . gmdate("M j H:i", $d4); 
+            $dtd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
+            $dclarifaipermonth = round(60.0 * 60 * 24 * 30 * $d3 / $dtd, 0);
+
+            echo " means <b> $dclarifaipermonth </b> Clarifai per 30 days. ";
+
+            echo "<br>"; 
+
             echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
             echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
             echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . ";";
@@ -2151,12 +2170,14 @@ if (isset($_GET["imgout"])) {
             }
 
             echo "\r\n";
+            /*
             if (isset($clarifaicount[2])) {
                 echo '<br>Legacy. Will not work after March 2023! Enter new data above for new Clarifai authentication system.';
                 echo ' Current Clarifai key is: ' . $clarifaicount[2] . '. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Change Clarifai Key</a>';
             } else {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
             }
+            */
             echo '<br><a href="index.php?t=' . time() . '&id=' . $myId . '&resetclarifai=1&showclarifai=1">Reset and delete all Clarifai data.</a>';
 
             autocat($myId, "initonly"); // Initialise autocat variable. 
@@ -2240,6 +2261,8 @@ if (isset($_GET["imgout"])) {
             }
             if (($clarifaicount["target"] ?? NULL) != intval($_GET["clarifaimonthtarget"])) {
                 $clarifaicount["target"] = intval($_GET["clarifaimonthtarget"]);
+                $clarifaicount["count"] = 0; 
+                $clarifaicount["time"] = time(); 
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&clarifaimonthtarget=" . $_GET["clarifaimonthtarget"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -2763,14 +2786,14 @@ if (isset($_GET["imgout"])) {
         $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
 
         if ($clarifai_app_key === "not set") {
-            return clarifaiImage_legacy($bn, $silent);
+            return "no app key set!"; 
         }
 
         if ($clarifai_app_id === "not set") {
-            return clarifaiImage_legacy($bn, $silent);
+            return "no app id set!"; 
         }
         if ($clarifai_user_id === "not set") {
-            return clarifaiImage_legacy($bn, $silent);
+            return "no user id set!"; 
         }
         $clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
 
@@ -2832,115 +2855,14 @@ if (isset($_GET["imgout"])) {
         $clarifaicount[3] = ($clarifaicount[3] ?? 0) + 1;
         $clarifaicount[4] = ($clarifaicount[4] ?? time());
 
+        $clarifaicount["count"] = ($clarifaicount["count"] ?? 0) + 1;
+        $clarifaicount["time"] = ($clarifaicount["time"] ?? time());
+
         write2config(true, true);
 
         return $ret;
     }
 
-    function clarifaiImage_legacy($bn, $silent = FALSE)
-    {
-        global $clarifaicount;
-        if (!isset($clarifaicount)) {
-            $clarifaicount = array("0", time(), false);
-        }
-
-        $files = glob("img/*/" . substr($bn, 0, 24) . "*.jpg");
-        if (count($files) < 1) {
-            // echo "<h2>Sorry, the file ".$bn." can not be found. </h2>"; 
-            // echo '<p><b><a href="index.php?time='.time().'">Home</a></b><p>'; 
-            return "file cannot be found";
-        }
-
-        $maxclarifaicount = ($clarifaicount["max"] ?? 25); // magic clarifai constant = 50
-        if ($clarifaicount[0] > $maxclarifaicount) {
-            return "request over quota: Counter =  " . $clarifaicount[0] . ".";
-        } // Request over quota 
-
-
-
-        $clarifaikey = ($clarifaicount[2] ?? false);
-        if ($clarifaikey === false) {
-            return "key not valid";
-        } // no valid key
-        /*
-        $x = "tmp/x" . time() . ".jpg";
-        copy($files[0], $x);
-        $imgurl = 'https://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/' . $x;
-        
-        if($_SERVER['SERVER_NAME'] == "localhost") { 
-            return "The service cannot be used from localhost. Consider to use a service such as ngrok.com"; 
-            // todo: https://docs.clarifai.com/api-guide/predict/images
-        }
-        
-
-        if ($silent === FALSE) {
-            echo "<h2> imgurl=$imgurl </h2>";
-            echo "<p><img src=\"$imgurl\" >";
-        }
-*/
-        $ch = curl_init();
-
-        // set URL and other appropriate options
-        curl_setopt($ch, CURLOPT_VERBOSE, '1');
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_URL, "https://api.clarifai.com/v2/models/aaa03c23b3724a16a56b629203edc62c/outputs");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // curl_exec returns the value
-
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-
-        $headers = array(
-            'Content-Type: application/json',
-            "Authorization: Key " . $clarifaikey
-        );
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        //  $fields = '{"inputs":[{"data":{"image":{"url":"' . $imgurl . '"}}}]}'; // input required by Clarifai
-        // if($_SERVER['SERVER_NAME'] == "localhost") { 
-        $t = file_get_contents($files[0]);
-        $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
-        // }
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-
-        // grab URL and pass it to the browser 
-        $result = curl_exec($ch);
-
-        if ($silent === FALSE) {
-            echo '<h2>Result=' . $result . '</h2>';
-        }
-
-        $mydata = json_decode($result, true);
-
-        if ($silent === FALSE) {
-            echo "<p> mydata=";
-            var_dump($mydata);
-        }
-
-
-        $max = 0;
-
-        if (isset($mydata["outputs"][0])) {
-            $concepts = $mydata["outputs"][0]["data"]["concepts"];
-            $max = sizeof($concepts);
-        }
-        $ret = array();
-        for ($i = 0; $i < $max; $i++) {
-            $value = $concepts[$i];
-            $ret[] = $value["name"];
-        }
-        $clarifaicount[0]  = $clarifaicount[0]  + 1;
-        $clarifaicount[1] = time();
-        $clarifaicount[2] = $clarifaikey;
-        $clarifaicount[3] = ($clarifaicount[3] ?? 0) + 1;
-        $clarifaicount[4] = ($clarifaicount[4] ?? time());
-
-        write2config(true, true);
-
-        return $ret;
-        // var_dump($conceptlist); 
-
-    }
 
     function myTargets($myId, $includedefunct = false)
     {
