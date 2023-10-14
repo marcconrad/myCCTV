@@ -2091,7 +2091,15 @@ if (isset($_GET["imgout"])) {
             echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
             echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
             echo "Current count is " . ($clarifaicount[0] ?? "x") . ". ";
-            echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . ";";
+            echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . "s;";
+
+            $t720 =  ($clarifaicount[720] ?? 720); 
+            $m720 = floor( $t720 / 60.0); 
+            $s720 = $t720 - (60 * $m720); 
+            
+            echo " means one Clarifai call every $m720 mins"; 
+            if($s720 != 0)  { echo " and $s720 sec";  }
+            echo ". <br>"; 
 
 
 
