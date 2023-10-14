@@ -1758,7 +1758,7 @@ if (isset($_GET["imgout"])) {
                 $c3 = $clarifaicount["count"] ?? 0;
                 $c4 =  $clarifaicount["time"] ?? localtimeCam($myId);
                 echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
-                $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
+                $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
             } else {
@@ -2069,7 +2069,7 @@ if (isset($_GET["imgout"])) {
 
             $c3 = $clarifaicount[3] ?? 0;
             $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
-            echo "Global: $c3  Clarifai since " . gmdate("M j H:i", $c4); // . " Current: <b>" . $clarifaicount[0] . "</b>";
+            echo "Global: $c3  Clarifai since " . gmdate("M j H:i", $c4); // . " <b>(" . $clarifaicount[0] . ")</b>";
             $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
 
