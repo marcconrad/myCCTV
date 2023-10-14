@@ -1757,7 +1757,7 @@ if (isset($_GET["imgout"])) {
                 echo '<br>';
                 $c3 = $clarifaicount["count"] ?? 0;
                 $c4 =  $clarifaicount["time"] ?? localtimeCam($myId);
-                echo "$c3  Clarifai since " . gmdate("M j H:i", $c4) . " Current: <b>" . $clarifaicount[0] . "</b>";
+                echo "$c3  Clarifai since " . gmdate("M j H:i", $c4);
                 $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
                 $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
                 echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
@@ -2074,11 +2074,7 @@ if (isset($_GET["imgout"])) {
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
 
             echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-            /*
-            echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
-            echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
-            echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . ";";
-            */
+          
 
             echo "<br>"; 
 
@@ -2094,6 +2090,7 @@ if (isset($_GET["imgout"])) {
 
             echo "Target is " . ($clarifaicount["target"] ?? 700) . ". ";
             echo "Max count is " . ($clarifaicount["max"] ?? 25) . ". ";
+            echo "Current count is " . ($clarifaicount[0] ?? "x") . ". ";
             echo "Clarifaigap is " . ($clarifaicount[720] ?? 720) . ";";
 
 
