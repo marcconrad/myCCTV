@@ -2092,18 +2092,24 @@ if (isset($_GET["imgout"])) {
             echo "<br>"; 
 
             echo "Target is " . ($clarifaicount["target"] ?? 700) . " per month.<br> ";
-            echo "Clarifai call may be suspended if count=" . ($clarifaicount["max"] ?? 25) . ". ";
-            echo "Current count=" . ($clarifaicount[0] ?? "x") . ". ";
-            echo "Count down every " . ($clarifaicount[720] ?? 720) . "s;<br>";
+            echo "Clarifai call is suspended if count > " . ($clarifaicount["max"] ?? 25) . ". ";
+            echo "Current count: " . ($clarifaicount[0] ?? 0) . ". ";
 
-
-
-            $t720 =  ($clarifaicount["callgap"] ?? 783); 
+            $t720 =  ($clarifaicount[720] ?? 720); 
             $m720 = floor( $t720 / 60.0); 
             $s720 = $t720 - (60 * $m720); 
             
-            echo "Clarifai is called every $m720 mins"; 
+            echo "Countdown every $m720 mins"; 
             if($s720 != 0)  { echo " and $s720 sec";  }
+            echo ". <br>"; 
+
+
+            $tgap =  ($clarifaicount["callgap"] ?? 783); 
+            $mgap = floor( $tgap / 60.0); 
+            $sgap = $tgap - (60 * $mgap); 
+            
+            echo "Clarifai is called every $mgap mins"; 
+            if($sgap != 0)  { echo " and $sgap sec";  }
             echo ". <br>"; 
 
 
@@ -2199,7 +2205,7 @@ if (isset($_GET["imgout"])) {
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
-            echo "<em>Use the concept &quot;everything&quot; as a wildcard to alwyas do an animated gif. This overrides using the clarifai service.";
+            echo "<em>Use the concept &quot;everything&quot; as a wildcard to always do an animated gif. This overrides using the clarifai service.";
             echo "<br>";
             echo "<p>";
 
