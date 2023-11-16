@@ -191,7 +191,7 @@ include_once "./util.php";
                     <button class="button" onClick="goFromTo('settgts')">Set Targets</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1')">Start Cam</button>
                     <button class="button" onClick="goTo('index.php?t='+Date.now()+'&startcam=1&resetuqt=1')">Start Cam!</button>
-                    <button class="button" onClick="goTo('clock.php?t='+Date.now()+'&startcam=1', true)">Clock Cam</button>
+                    <!-- <button class="button" onClick="goTo('clock.php?t='+Date.now()+'&startcam=1', true)">Clock Cam</button>-->
 
                 </div>
             </div>

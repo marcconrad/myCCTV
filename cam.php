@@ -624,7 +624,8 @@
                                     window.location.reload();
                                 }
                                 var interruptDelay = (parsed.interrupt ? parsed.interrupt : 0);
-                                if (interruptDelay > 0 && interruptDelay <= 6 * 3600) { // max six hours
+                               //  if (interruptDelay > 0 && interruptDelay <= 6 * 3600) { // max six hours
+                                if (interruptDelay > 0 ) { // no limit to interrupt
                                     setTimeout(interrupt, 1000, interruptDelay, "request; " + interruptDelay);
                                 }
                                 interruptWhenBatteryLow = (parsed.intifbatlow ? parsed.intifbatlow : 0);

@@ -172,8 +172,12 @@
 <body>
     <div id="thecamdiv">
         <?php 
-// legacy: 
-        if(isset($_GET["name"]) === false ) {
+        if( isset($_GET["deviceid"])) { 
+            echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode=cam&deviceid='.($_GET["deviceid"]).'&h='.($_GET["h"] ?? 99).'&w='.($_GET["w"] ?? 99).'&id='.($_GET["id"] ?? 3)
+            .'&videoonly=yes" frameborder="0"></iframe>';
+        }
+
+        else if(isset($_GET["name"]) === false ) { // legacy
             echo ' <iframe onload="setIframeSize()" id="thecam" src="cam.php?inputmode='.($_GET["facingmode"] ?? "cam").'&facingmode=user&id='.($_GET["id"] ?? 3)
             .'&videoonly=yes" frameborder="0"></iframe>';
         } else { 

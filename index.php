@@ -780,7 +780,9 @@ if (isset($_GET["imgout"])) {
                     optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
                     document.getElementById("videoSourceOl").appendChild(optionli);
 */
-                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>";
+                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>  "
+                         + "<a class=\"camchoice\" target=\"_blank\" href=\"clock.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + ((device.label || 'Camera ' + jj )+ ' (clock)') + "</a>";
+                       
                         jj++;
                         var vs = document.getElementById("videoSourceOl");
                         // vs.appendChild(optionli);
@@ -1876,6 +1878,7 @@ if (isset($_GET["imgout"])) {
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=300">5 Minutes</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=3600">1 Hour</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=18000">5 Hours</a>; ';
+            echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=25920000">300 days</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-4">No Interrupt</a>; ';
             echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&nogallery=1&nomenu=1&requestInterrupt=-1">Return now</a>. ';
             echo '<a href="index.php?showinterrupt=1&time=' . time() . '&id=' . $myId . '" >Manage</a>';
