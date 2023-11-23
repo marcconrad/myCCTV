@@ -6,6 +6,43 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <title>Cam and Clock</title>
     <script>
+       function toggleFullscreen(elem) {
+            elem = elem || document.documentElement;
+
+            if (!document.fullscreenElement && !document.mozFullScreenElement &&
+                !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+        var opnew = 0.3;
+
+        var btnVisible = function() {
+            opnew = 0.99;
+            var btn = document.getElementById('config');
+            btn.style.opacity = opnew;
+        }
+        document.addEventListener('mousemove', btnVisible, true);
+
+
+
         var addZero = i => {
             return (i < 10 ? "0" + i : i);
         }
@@ -50,6 +87,8 @@
 
         var fontsizecount = 400;
 
+        var clockmode = "default"; 
+
         var count = function() {
             var now = new Date();
             var hours = addZero(now.getHours());
@@ -60,7 +99,14 @@
 
 
             var elem = document.getElementById('time');
-            elem.innerHTML = hours + ':' + minutes + ':' + seconds;
+          
+            if (clockmode == "noclock") { 
+            elem.innerHTML = " "; 
+            } else if( clockmode == "noseconds") { 
+                elem.innerHTML = hours + ':' + minutes;
+            } else { 
+                elem.innerHTML = hours + ':' + minutes + ':' + seconds;
+            }
 
             var video = document.getElementById("thecam");
             // var wVideo = 0.9 * video.offsetWidth; 
@@ -77,14 +123,14 @@
 
 
             elem.style.fontSize = fontsizecount + "px";
+
+            var btn = document.getElementById('config')
+            if (opnew > 0) {
+                opnew = opnew - 0.001;
+            }
+
+            btn.style.opacity = opnew;
         }
-/*
-        window.addEventListener('resize', function(event) {
-            var elem = document.getElementById('time');
-            elem.style.fontSize = fontsizecount = 1000;
-            // do stuff here
-        });
-        */
 
         // From: https://www.htmlgoodies.com/html5/display-iframe-contents-without-scrollbars/
         var setIframeSize = function(iframe = null) {
@@ -120,6 +166,16 @@
             ?>
 
         }
+
+        var toggleClock = function() { 
+            if( clockmode == "noclock") { 
+                clockmode = "noseconds"; 
+            } else if( clockmode == "default") { 
+                clockmode = "noclock"; 
+            } else { 
+                clockmode = "default"; 
+            }
+        }
         window.addEventListener("DOMContentLoaded", startUp, false);
     </script>
     <style>
@@ -144,7 +200,7 @@
             position: absolute;
             top: 0%;
             /* position the top  edge of the element at the middle of the parent */
-            left: 0%;
+            right: 0%;
             /* position the left edge of the element at the middle of the parent */
 
           
@@ -166,10 +222,54 @@
             letter-spacing: -20px;
             font-stretch: ultra-condensed;
         }
+
+        #config {
+            position: absolute;
+            top: 0.51%;
+            left: 0.51%;
+            height: 25%;
+            width: 25%;
+            z-index: 20;
+            opacity: 0.3;
+            font-size: 15px;
+            font-weight: bold;
+            color: yellow;
+            font-family: Helvetica, monospace;
+            /* background-color: darkolivegreen; */
+            border: none;
+            cursor: none;
+
+        }
+
+        .btnConfig {
+            height: 50%;
+            width: 100%;
+            z-index: 10;
+            opacity: 0.3;
+            font-size: 15px;
+            font-weight: bold;
+            color: yellow;
+            font-family: Helvetica, monospace;
+            background-color: red; 
+            border: none;
+            cursor: none;
+
+        }
+
+        .btnConfig:hover {
+            background-color: lightgoldenrodyellow;
+            color: brown;
+        }
+
     </style>
 </head>
 
 <body>
+    <div id="config">
+<input class="btnConfig" id="btnFullscreen" type="button" value="Full Screen On/Off" onclick="toggleFullscreen()" /><br>
+<input class="btnConfig" id="btnSecondsToggle" type="button" value="Clock On/Off/Seconds" onclick="toggleClock()" />
+    </div>
+
     <div id="thecamdiv">
         <?php 
         if( isset($_GET["deviceid"])) { 
@@ -192,7 +292,7 @@
         }
         ?>
            </div>
-    <div id="time">tbc</div>
+    <div id="time">!</div>
 
 </body>
 
