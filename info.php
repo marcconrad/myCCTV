@@ -11,6 +11,7 @@
 
     include "util.php";
     if (isset($_GET["statusemoji"]) && isset($_GET["id"])) {
+        header('Access-Control-Allow-Origin: *');
         $x = getLastInfo($_GET["id"]);
         $wx = $x["emoji"];
         if ($wx == "👍") {
