@@ -378,7 +378,7 @@ if (count($_POST) > 0) {
     echo ', "hrtime" : "' . $eta . '"';
 
 
-    if (strpos($servertargeteta[$myId], "auto") !== false) {
+    if ($servertargeteta !== NULl && strpos($servertargeteta[$myId], "auto") !== false) {
         $targeteta[$myId] = array(99, $servertargeteta[$myId]);
     } else {
         $targeteta[$myId] = array(intval($servertargeteta[$myId] ?? 149), false);
