@@ -1,4 +1,4 @@
-    <?php
+<?php
     $myVarfileId = intval($_GET["id"] ?? 99);
     if ($myVarfileId < 0 || $myVarfileId > 20) {
         $myVarfileId = 99;
