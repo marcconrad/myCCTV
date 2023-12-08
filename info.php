@@ -1,4 +1,5 @@
 <?php
+ header('Access-Control-Allow-Origin: *');
     $myVarfileId = intval($_GET["id"] ?? 99);
     if ($myVarfileId < 0 || $myVarfileId > 20) {
         $myVarfileId = 99;
@@ -11,7 +12,7 @@
 
     include "util.php";
     if (isset($_GET["statusemoji"]) && isset($_GET["id"])) {
-        header('Access-Control-Allow-Origin: *');
+       
         $x = getLastInfo($_GET["id"]);
         $wx = $x["emoji"];
         if ($wx == "👍") {
