@@ -114,8 +114,9 @@
             var wSoll = Math.floor(0.9 * window.innerWidth);
             var tIst = elem.offsetWidth;
 
-
-            if (tIst > wSoll) {
+            if( clockmode == "noclock") { 
+                    // do nothing
+            } else if (tIst > wSoll) {
                 fontsizecount--;
             } else if (tIst < wSoll - 30) {
                fontsizecount++;
