@@ -2811,12 +2811,12 @@ if (isset($_GET["imgout"])) {
             return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
 
-        $clarifai_app_key = $clarifaicount["appkey"] ?? "simulation";
-        $clarifai_user_id = $clarifaicount["userid"] ?? "not set";
+        $clarifai_app_key = $clarifaicount["appkey"] ?? "not set";
+        $clarifai_user_id = $clarifaicount["userid"] ?? "simulation";
         $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
 
         $clarifai_url = "https://example.org"; 
-        if ($clarifai_app_key !== "simulation") {
+        if ($clarifai_user_id !== "simulation") {
             if ($clarifai_app_key === "not set") {
                 return "no app key set!";
             }
