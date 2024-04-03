@@ -321,8 +321,8 @@ if (count($_POST) > 0) {
 
     if (isset($clarifaicount)) {
         $clarifaicountgap = $clarifaicount[720] ?? 720;
-        if ((time() - $clarifaicount[1]) > $clarifaicountgap) { // 1200 = every 20 minutes; every x seconds
-            $clarifaicount[0] = max($clarifaicount[0] - 1, 0);
+        if ((time() - ($clarifaicount[1] ?? 0)) > $clarifaicountgap) { // 1200 = every 20 minutes; every x seconds
+            $clarifaicount[0] = max(($clarifaicount[0] ?? 0) - 1, 0);
             $clarifaicount[1] = time();
             write2config(true, true);
         }
@@ -352,15 +352,15 @@ if (count($_POST) > 0) {
     echo ', "imsaved" : ' . $countImagesSaved;
     echo ', "lastbgnoise" : ' . $lastbgnoise;
 
-    $distancezerocount = 0; 
+    $distancezerocount = 0;
 
     foreach (myTargets($myId) as $j) {
 
         cleanFiles($j);
     }
 
-    echo ',"d0" : '.$distancezerocount;
-   
+    echo ',"d0" : ' . $distancezerocount;
+
     /**
      * Tell the camera every how many seconds it should send something to the server (default 60, onces a minute) 
      */
@@ -555,15 +555,15 @@ function autocat_log($myId, $log_msg)
 
     $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount["count"] / $ctd, 0);
-    $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth ."; ".($clarifaicount["callgap"] ?? "y");
+    $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth . "; " . ($clarifaicount["callgap"] ?? "y");
     $targetclarifaipermonth = ($clarifaicount["target"] ?? 700);
-    if ($clarifaipermonth > $targetclarifaipermonth ) {
-        $clarifaicount["callgap"] = min( 60 * 60, ($clarifaicount["callgap"] ?? 783) + 10); // gap max one hour 
+    if ($clarifaipermonth > $targetclarifaipermonth) {
+        $clarifaicount["callgap"] = min(60 * 60, ($clarifaicount["callgap"] ?? 783) + 10); // gap max one hour 
         $clarifaicount[720] += 60;
         write2config(true);
-    } else if ($clarifaipermonth < $targetclarifaipermonth ) {
+    } else if ($clarifaipermonth < $targetclarifaipermonth) {
         $clarifaicount[720] = max($clarifaicount[720] - 60, 0);
-        $clarifaicount["callgap"] = max( 60 * 5, ($clarifaicount["callgap"] ?? 783) - 10); // gap min every 5 minutes
+        $clarifaicount["callgap"] = max(60 * 5, ($clarifaicount["callgap"] ?? 783) - 10); // gap min every 5 minutes
         write2config(true);
     }
 
@@ -572,7 +572,7 @@ function autocat_log($myId, $log_msg)
     $autocatadjust = $autocat[$myId]["mode"] ?? "not set";
     if ($autocatadjust === "auto") {
         $t1 = $targetclarifaipermonth;
-        $gapbetweencalls = 1 + floor(($clarifaicount["callgap"] ?? 783) / 60.0); 
+        $gapbetweencalls = 1 + floor(($clarifaicount["callgap"] ?? 783) / 60.0);
         if ($clarifaipermonth > $t1) {
             $autocat[$myId]["d"] = min(1440, $howlongminutes + 1);
         } else {
@@ -583,7 +583,7 @@ function autocat_log($myId, $log_msg)
 
     $howlongnew = $autocat[$myId]["d"] ?? 60;
 
-    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "; ".$howlongnew."<br>\n";
+    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "; " . $howlongnew . "<br>\n";
     file_put_contents($logFile, $logtxt, FILE_APPEND);
 
     if (filesize($logFile) > 123456) { // bytes
@@ -780,9 +780,9 @@ if (isset($_GET["imgout"])) {
                     optionli.innerHTML = "<a href=\"www.sanfoh.com\">"+myid+" yyy "+device.deviceId + " xxx "+ (device.label || 'camera ' + (i + 1))+"</a>";
                     document.getElementById("videoSourceOl").appendChild(optionli);
 */
-                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>  "
-                         + "<a class=\"camchoice\" target=\"_blank\" href=\"clock.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + ((device.label || 'Camera ' + jj )+ ' (clock)') + "</a>";
-                       
+                        optionli.innerHTML = "<a class=\"camchoice\" target=\"_blank\" href=\"cam.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + (device.label || 'Camera ' + jj) + "</a>  " +
+                            "<a class=\"camchoice\" target=\"_blank\" href=\"clock.php?inputmode=cam&deviceid=" + device.deviceId + "&id=" + myid + "\">" + ((device.label || 'Camera ' + jj) + ' (clock)') + "</a>";
+
                         jj++;
                         var vs = document.getElementById("videoSourceOl");
                         // vs.appendChild(optionli);
@@ -1446,12 +1446,14 @@ if (isset($_GET["imgout"])) {
 
         if ($_GET["autocatduration"] === "auto") {
             $autocat[$myId]['mode'] = "auto";
+            $autocat[$myId]['d'] = $currentminutes;
         } else {
             $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
             $autocat[$myId]['mode'] = "manual";
         }
         write2config();
         echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
+        echo "<p> Mode is " . $autocat[$myId]['mode'] . ". <p> ";
         echo "Thank You";
         //  var_dump($autocat);
         echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
@@ -1837,7 +1839,7 @@ if (isset($_GET["imgout"])) {
             echo '</div>';
 
             $k = $stats[$myId] ?? array();
-           
+
             echo "" . ($k["bgnc"] ?? "x") . " repeats (same image send over different requests?).";
             echo "<br> \r\n";
             echo "The Camera is live since: " . (isset($k["alivesince"]) ?  gmdate("M j, H:i:s",  $k["alivesince"]) : "(not recorded)") . ". ";
@@ -1866,7 +1868,7 @@ if (isset($_GET["imgout"])) {
             echo "<br> \r\n";
             echo "" . round(60 * $imgsreceivedpersecond, 2) . " imgs / minute since stats reset on server.";
 
-         
+
 
             echo "<br> \r\n";
             $togp = ($toggleCapture[$myId] ?? 0);
@@ -2080,45 +2082,49 @@ if (isset($_GET["imgout"])) {
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
 
             echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-          
 
-            echo "<br>"; 
+
+            echo "<br>";
 
             $d3 = $clarifaicount["count"] ?? 0;
             $d4 =  $clarifaicount["time"] ?? localtimeCam($myId);
-            echo "Local: $d3  Clarifai since " . gmdate("M j H:i", $d4); 
+            echo "Local: $d3  Clarifai since " . gmdate("M j H:i", $d4);
             $dtd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
             $dclarifaipermonth = round(60.0 * 60 * 24 * 30 * $d3 / $dtd, 0);
 
             echo " means <b> $dclarifaipermonth </b> Clarifai per 30 days. ";
 
-            echo "<br>"; 
+            echo "<br>";
 
             echo "Target is " . ($clarifaicount["target"] ?? 700) . " per month.<br> ";
             echo "Clarifai call is suspended if count > " . ($clarifaicount["max"] ?? 25) . ". ";
             echo "Current count: " . ($clarifaicount[0] ?? 0) . ". ";
 
-            $t720 =  ($clarifaicount[720] ?? 720); 
-            $m720 = floor( $t720 / 60.0); 
-            $s720 = $t720 - (60 * $m720); 
-            
-            echo "Countdown every $m720 mins"; 
-            if($s720 != 0)  { echo " and $s720 sec";  }
-            echo ". <br>"; 
+            $t720 =  ($clarifaicount[720] ?? 720);
+            $m720 = floor($t720 / 60.0);
+            $s720 = $t720 - (60 * $m720);
+
+            echo "Countdown every $m720 mins";
+            if ($s720 != 0) {
+                echo " and $s720 sec";
+            }
+            echo ". <br>";
 
 
-            $tgap =  ($clarifaicount["callgap"] ?? 783); 
-            $mgap = floor( $tgap / 60.0); 
-            $sgap = $tgap - (60 * $mgap); 
-            
-            echo "Clarifai is called every $mgap mins"; 
-            if($sgap != 0)  { echo " and $sgap sec";  }
-            echo ". <br>"; 
+            $tgap =  ($clarifaicount["callgap"] ?? 783);
+            $mgap = floor($tgap / 60.0);
+            $sgap = $tgap - (60 * $mgap);
+
+            echo "Clarifai is called every $mgap mins";
+            if ($sgap != 0) {
+                echo " and $sgap sec";
+            }
+            echo ". <br>";
 
 
 
             echo '<form action="index.php">';
-            echo '<label for="clarifaiauthdata">Set Authentication Data:</label><br>';
+            echo '<label for="clarifaiauthdata">Set Authentication Data (use <b>simulation</b> as User Id to bypass the clarifai call):</label><br>';
             echo '<table><tr><td>';
             echo 'User Id:</td><td> <input class="clarifaiauth" type="text" id="clarifaiuserid" name="clarifaiuserid" value="' . ($clarifaicount["userid"] ?? "not set") . '" >';
             echo "</td> </tr><tr><td>";
@@ -2209,6 +2215,8 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<em>Use the concept &quot;everything&quot; as a wildcard to always do an animated gif. This overrides using the clarifai service.";
+            echo "<br><em>The simulation returns always &quot;something&quot as a concept.";
+
             echo "<br>";
             echo "<p>";
 
@@ -2280,8 +2288,8 @@ if (isset($_GET["imgout"])) {
             }
             if (($clarifaicount["target"] ?? NULL) != intval($_GET["clarifaimonthtarget"])) {
                 $clarifaicount["target"] = intval($_GET["clarifaimonthtarget"]);
-                $clarifaicount["count"] = 0; 
-                $clarifaicount["time"] = time(); 
+                $clarifaicount["count"] = 0;
+                $clarifaicount["time"] = time();
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&clarifaimonthtarget=" . $_GET["clarifaimonthtarget"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -2569,11 +2577,11 @@ if (isset($_GET["imgout"])) {
     function autocat($myId, $test = FALSE)
     {
         global $autocat;
-        global $clarifaicount; 
+        global $clarifaicount;
 
         $outputfolder = "agifs/";
 
-        $defaultsearchterms = array("cat", "bird",  "squirrel", "rodent", "mammal", "animal", "dog", "wildlife", "lifestyle");
+        $defaultsearchterms = array("cat", "bird",  "squirrel", "rodent", "mammal", "animal", "dog", "wildlife", "lifestyle", "something");
 
         if (!isset($autocat)) {
             $autocat = array();
@@ -2588,7 +2596,7 @@ if (isset($_GET["imgout"])) {
         }
         $searchterms = $autocat[$myId][5];
 
-        $mingapbetweencalls = $clarifaicount["callgap"] ?? 783; 
+        $mingapbetweencalls = $clarifaicount["callgap"] ?? 783;
 
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
         if (($autocat[$myId][1] ?? false) !== false && $tdiff < $mingapbetweencalls && $test === false) {
@@ -2803,22 +2811,25 @@ if (isset($_GET["imgout"])) {
             return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
 
-        $clarifai_app_key = $clarifaicount["appkey"] ?? "not set";
+        $clarifai_app_key = $clarifaicount["appkey"] ?? "simulation";
         $clarifai_user_id = $clarifaicount["userid"] ?? "not set";
         $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
 
-        if ($clarifai_app_key === "not set") {
-            return "no app key set!"; 
-        }
+        $clarifai_url = "https://example.org"; 
+        if ($clarifai_app_key !== "simulation") {
+            if ($clarifai_app_key === "not set") {
+                return "no app key set!";
+            }
 
-        if ($clarifai_app_id === "not set") {
-            return "no app id set!"; 
-        }
-        if ($clarifai_user_id === "not set") {
-            return "no user id set!"; 
-        }
+            if ($clarifai_app_id === "not set") {
+                return "no app id set!";
+            }
+            if ($clarifai_user_id === "not set") {
+                return "no user id set!";
+            }
+        
         $clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
-
+        }
 
 
         $ch = curl_init();
@@ -2845,31 +2856,38 @@ if (isset($_GET["imgout"])) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
         // grab URL and pass it to the browser 
-        $result = curl_exec($ch);
-
-        if ($silent === FALSE) {
-            echo '<h2>Result=' . $result . '</h2>';
-        }
-
-        $mydata = json_decode($result, true);
-
-        if ($silent === FALSE) {
-            echo "<p>Using new version</p>";
-            echo "<p> mydata=";
-            var_dump($mydata);
-        }
-
-
-        $max = 0;
-
-        if (isset($mydata["outputs"][0])) {
-            $concepts = $mydata["outputs"][0]["data"]["concepts"];
-            $max = sizeof($concepts);
-        }
         $ret = array();
-        for ($i = 0; $i < $max; $i++) {
-            $value = $concepts[$i];
-            $ret[] = $value["name"];
+
+        if ($clarifai_user_id !== "simulation") {
+            $result = curl_exec($ch);
+
+
+            if ($silent === FALSE) {
+                echo '<h2>Result=' . $result . '</h2>';
+            }
+
+            $mydata = json_decode($result, true);
+
+            if ($silent === FALSE) {
+                echo "<p>Using new version</p>";
+                echo "<p> mydata=";
+                var_dump($mydata);
+            }
+
+
+            $max = 0;
+
+            if (isset($mydata["outputs"][0])) {
+                $concepts = $mydata["outputs"][0]["data"]["concepts"];
+                $max = sizeof($concepts);
+            }
+
+            for ($i = 0; $i < $max; $i++) {
+                $value = $concepts[$i];
+                $ret[] = $value["name"];
+            }
+        } else {
+            $ret = array("something");
         }
         $clarifaicount[0]  = $clarifaicount[0]  + 1;
         $clarifaicount[1] = time();
@@ -3492,10 +3510,10 @@ if (isset($_GET["imgout"])) {
         return ($bn0 == "nopic.jpg" ? 'na' : floatval(explode('d', $bn0)[1]));
     }
 
-   
+
     function distance($bn0, $bn1)
     {
-        global $distancezerocount; 
+        global $distancezerocount;
         $a0 = explode('d', $bn0);
         $a1 = explode('d', $bn1);
 
@@ -3508,10 +3526,10 @@ if (isset($_GET["imgout"])) {
         }
 
         $dd = abs($a0[1] - $a1[1]);
-        if( $dd == 0 ) { 
-            $distancezerocount++; 
+        if ($dd == 0) {
+            $distancezerocount++;
         }
-        return $dd; 
+        return $dd;
     }
 
 
@@ -3520,7 +3538,7 @@ if (isset($_GET["imgout"])) {
     function cleanFiles($tgt, $yyyymmdd = FALSE)
     {
         global $keephowmany;
-        global $distancezerocount; 
+        global $distancezerocount;
 
         $i = 0;
         $basenames = array();
@@ -3530,7 +3548,7 @@ if (isset($_GET["imgout"])) {
         $srcfiles =  glob($imgfoldername . "aa*z.???");
         $n = count($srcfiles);
         echo ',"clean' . $tgt . '" : "';
-        
+
         echo "Enter Clean: n=$n cleanUpConst=" . $cleanUpConst . "; ";
 
         if ($n < $cleanUpConst * 1.3) {
@@ -3597,7 +3615,6 @@ if (isset($_GET["imgout"])) {
             }
         }
         echo '..' . $r . ' files removed."';
-      
     }
     // END cleanFiles
 
@@ -4110,8 +4127,8 @@ if (isset($_GET["imgout"])) {
             }
 
 
-            $imgsizeinfo[$myId][1] += strlen($fileData); //equals filesize( $imgfoldername.$newfilename )
-            $imgsizeinfo[$myId][2]++;
+            $imgsizeinfo[$myId][1] = ($imgsizeinfo[$myId][1] ?? 0) + strlen($fileData); //equals filesize( $imgfoldername.$newfilename )
+            $imgsizeinfo[$myId][2] = ($imgsizeinfo[$myId][2] ?? 0) + 1;
 
 
 
