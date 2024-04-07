@@ -2815,7 +2815,7 @@ if (isset($_GET["imgout"])) {
         $clarifai_user_id = $clarifaicount["userid"] ?? "simulation";
         $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
 
-        $clarifai_url = "https://example.org"; 
+        $clarifai_url = "https://example.org";
         if ($clarifai_user_id !== "simulation") {
             if ($clarifai_app_key === "not set") {
                 return "no app key set!";
@@ -2827,8 +2827,8 @@ if (isset($_GET["imgout"])) {
             if ($clarifai_user_id === "not set") {
                 return "no user id set!";
             }
-        
-        $clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
+
+            $clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
         }
 
 
@@ -4061,12 +4061,17 @@ if (isset($_GET["imgout"])) {
 		    As we also save the index $i below, one $count for each batch is sufficient
 		 */
         $countfile = "countlog4.txt";
+        $count = 35;
         $datei = @fopen($countfile, "r");
-        $count = @fgets($datei, 1000);
-        if ($count === FALSE) {
-            $count = 37;
+        if ($datei !== FALSE) {
+            $count = @fgets($datei, 1000);
+            if ($count === FALSE) {
+                $count = 37;
+            }
+            @fclose($datei);
+        } else {
+            $count = 36;
         }
-        @fclose($datei);
         $count = $count + 1;
         $datei = fopen($countfile, "w");
         fwrite($datei, $count);
