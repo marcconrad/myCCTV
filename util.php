@@ -186,9 +186,9 @@ function id2color($myId, $im = null, $s = 3.0)
     $g = floor($myId / 4) % 4;
     $b = floor( $myId / 16) % 4;
 
-    $rr = floor($r * 255 / $s);
-    $gg = floor($g * 255 / $s);
-    $bb = floor($b * 255 / $s);
+    $rr = floor($r * 255 / $s) % 256;
+    $gg = floor($g * 255 / $s) % 256;;
+    $bb = floor($b * 255 / $s) % 256;;
 
     $res =  array($rr, $gg, $bb);
     if ($im === "hexbg") {
