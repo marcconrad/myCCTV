@@ -2744,7 +2744,7 @@ if (isset($_GET["imgout"])) {
         $c = 1;
         foreach ($bns as $x) {
             $dist = abs(basename2timestamp($x) - $avgtime);
-            $dms = $dist * 100 + $c++;
+            $dms = floor($dist * 100 + $c++);
             $ret[$dms] = $x;
         }
         ksort($ret);
