@@ -180,10 +180,11 @@ function id2color($myId, $im = null, $s = 3.0)
 {
     if(is_int($myId)=== false ) { $myId = 17; }
     $myId = $myId * 37 % 64; // 64 different colours, mix then a little bit up
+    if( $s > 3.0 ) { $s = 3.0; }
 
     $r = $myId % 4;
-    $g = ($myId / 4) % 4;
-    $b = ($myId / 16) % 4;
+    $g = floor($myId / 4) % 4;
+    $b = floor( $myId / 16) % 4;
 
     $rr = floor($r * 255 / $s);
     $gg = floor($g * 255 / $s);
