@@ -121,6 +121,10 @@
             <button class="button button5" onclick="interrupt(300, 'from cam - 5')">Interrupt 5 mins</button>
             <button class="button button3" onclick="interrupt(3600, 'from cam - 60')">Interrupt 60 mins</button>
         </p>
+
+        <p>
+            Number of lines for Debug: <input type="number" id="maxAddLiValue" value="4">
+        </p>
         <script>
 
             <?php echo "var myId=" . intval($_GET["id"] ?? 0); ?>;
@@ -326,8 +330,16 @@
             document.getElementsByTagName("canvas")[0].setAttribute("height", theight);
             <?php
             // echo 'var maxImagesPost = ' . (intval($_GET["imagesperpost"]) ? intval($_GET["imagesperpost"]) : 60) . ';';
-            echo 'var maxImagesPost = ' . intval($_GET["imagesperpost"] ?? 60);
+            echo 'var maxImagesPost = ' . intval($_GET["imagesperpost"] ?? 60). ';';;
+            echo '     '; 
+            echo 'var maxAddLiItemsNOTUSED = ' . intval($_GET["debuginfo"] ?? 5). ';';;
             ?>
+/*
+            function updateMaxAddLi() { 
+                var x = document.getElementById("maxAddLiValue").value;
+               maxAddLiItems = x;
+            }
+            */
 
             var timeTaken = "notworking";
             var timeMillies = 0;
@@ -356,8 +368,9 @@
             var dt = new Date();
             var alivesince = Math.round(dt.getTime() / 1000);
 
-            function addLI(listId, what, maxNumber = 5) {
-
+            function addLI(listId, what, parameterNotUsed = 4) {
+                var maxNumber = document.getElementById("maxAddLiValue").value;
+             
                 var newItem = document.createElement("LI");
                 var txt = document.createTextNode(what);
                 newItem.appendChild(txt);
@@ -376,7 +389,7 @@
                         try {
                             theItems.removeChild(theItems.children[i]);
                         } catch (e) {
-                            document.getElementById('info8').innerHTML = "addLI error. e=" + e + ' at ' + getTimeNow();
+                            document.getElementById('info8').innerHTML = "addLI error. e=" + e + ' at ' + getTimeNow()+" listId = "+listId+" what="+what;
                         }
                     }
                 }
