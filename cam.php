@@ -454,7 +454,9 @@
                         skiplevel = 1;
                     }
 
+                   if(skiplevel > 1) { 
                     addLI("skipped", getTimeNow() + ": skiplevel=" + skiplevel + " countImages=" + countImages, 3);
+                   }
                     var cc = 10000.0;
                     var d = 0.132;
                     try {
@@ -565,6 +567,8 @@
                         } else if (window.ActiveXObject) {
                             ajax = new ActiveXObject("Microsoft.XMLHTTP");
                         }
+
+                        ajax.starttime = (new Date()).getTime(); 
                         var tzo = (new Date()).getTimezoneOffset(); // sending this allows the server to know what timezone the client is. 
                         <?php echo "var NOTTOOmyId=" . intval($_GET["id"] ?? 0); ?>;
 
@@ -607,6 +611,7 @@
 
                         ajax.timeout = 120000;
                         ajax.ontimeout = function(e) {
+                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Timeout"); 
                             document.getElementById('info6').innerHTML = 'timeout: ' + e + ' at ' + getTimeNow();
                             addLI("timeout", getTimeNow() + ": " + e, 10);
                             donotsend = false;
@@ -616,6 +621,8 @@
                         };
 
                         ajax.onerror = function(e) {
+                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Error"); 
+                         
                             document.getElementById('info7').innerHTML = 'Error: ' + e + ' at ' + getTimeNow();
                             addLI("ajaxerror", getTimeNow() + ": Loaded=" + e.loaded + " State=" + ajax.readyState, 10);
                             donotsend = false;
@@ -624,6 +631,13 @@
                         // ajax.onreadystatechange = function() { // see https://teamtreehouse.com/community/xhronreadystatechange-vs-xhronload
                         ajax.onload = function() {
                             document.getElementById('ajaxresponse').innerHTML = ajax.responseText;
+
+                            var w = new Date(); 
+                            var dw = w.getTime() - this.starttime;
+
+                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - OK"); 
+
+                        
 
                             var resp = ajax.responseText;
 
@@ -820,6 +834,8 @@
             <li>[video error]<ol id="videoerror"></ol>
             </li>
             <li>[timeout]<ol id="timeout"></ol>
+            </li>
+            <li>[turnaround]<ol id="turnaround"></ol>
             </li>
             <li>[connect issue]<ol id="ajaxerror"></ol>
             </li>
