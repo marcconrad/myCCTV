@@ -117,6 +117,16 @@ include_once $varfile_config;
 
 include_once "./util.php";
 
+$collecttimenotes = gmdate("His"); 
+$timenotezero = time(); 
+
+function noteTime($a) { 
+    global $collecttimenotes, $timenotezero; 
+    $w = time() - $timenotezero; 
+    $collecttimenotes = $collecttimenotes . "; ".$w."-".$a;
+}
+noteTime("A"); 
+
 if (isset($systempassword["c"])) {
     // setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'None', 'secure' => true]);
     setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'lax']);
@@ -149,6 +159,7 @@ $theight = $imagedimensions[$myIdx]["h"];
 
 $countImagesSaved = 0;
 if (count($_POST) > 0) {
+    noteTime("B"); 
     // error_reporting(-1);
     $myId = intval($_POST["id"] ?? -1);
 
@@ -348,16 +359,19 @@ if (count($_POST) > 0) {
      * This is actually where the images are saved to files. 
      */
     $countImagesSaved = 0;
+    noteTime("B1"); 
     $lastbgnoise = receiveImagesA($myId);
+    noteTime("B2"); 
     echo ', "imsaved" : ' . $countImagesSaved;
     echo ', "lastbgnoise" : ' . $lastbgnoise;
 
     $distancezerocount = 0;
-
+    noteTime("B3"); 
     foreach (myTargets($myId) as $j) {
 
         cleanFiles($j);
     }
+    noteTime("B4"); 
 
     echo ',"d0" : ' . $distancezerocount;
 
@@ -443,6 +457,8 @@ if (count($_POST) > 0) {
     echo ', "twidth" : ' . $twidth;
     echo ', "theight" : ' . $theight;
     echo ', "post_max_size" : ' . return_bytes(ini_get('post_max_size'));
+    noteTime("Z"); 
+    echo ', "timenotes" : ' . '"'.$collecttimenotes.'"';
 
 
 
