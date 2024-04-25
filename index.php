@@ -1,4 +1,14 @@
 <?php
+$collecttimenotes = gmdate("His"); 
+$timenotezero = time(); 
+
+function noteTime($a) { 
+    global $collecttimenotes, $timenotezero; 
+    $w = time() - $timenotezero; 
+    $collecttimenotes = $collecttimenotes . "; ".$w."-".$a;
+}
+
+noteTime("A1"); 
 $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
 $iowntheconfigfile = false;
@@ -117,14 +127,7 @@ include_once $varfile_config;
 
 include_once "./util.php";
 
-$collecttimenotes = gmdate("His"); 
-$timenotezero = time(); 
 
-function noteTime($a) { 
-    global $collecttimenotes, $timenotezero; 
-    $w = time() - $timenotezero; 
-    $collecttimenotes = $collecttimenotes . "; ".$w."-".$a;
-}
 noteTime("A"); 
 
 if (isset($systempassword["c"])) {
@@ -457,13 +460,8 @@ if (count($_POST) > 0) {
     echo ', "twidth" : ' . $twidth;
     echo ', "theight" : ' . $theight;
     echo ', "post_max_size" : ' . return_bytes(ini_get('post_max_size'));
+  
     noteTime("Z"); 
-    echo ', "timenotes" : ' . '"'.$collecttimenotes.'"';
-
-
-
-    echo " }";  // close JSON
-
     /**
      * Some cummulative performane data: in particular how much eta (see above) is used on the server on average; 
      * separatly calculated for normal and fastmode
@@ -489,6 +487,14 @@ if (count($_POST) > 0) {
      */
     $reloadnow[$myId] = "no";
     write2config();
+
+    noteTime("Z1"); 
+    echo ', "timenotes" : ' . '"'.$collecttimenotes.'"';
+
+
+
+    echo " }";  // close JSON
+
     die();
 }
 
