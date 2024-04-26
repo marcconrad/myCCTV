@@ -279,6 +279,7 @@ if (count($_POST) > 0) {
         $nreq, $avdpf,
         "uqt" => $uqt,
         "updms" => ($_POST["updms"] ?? false),
+        "turnaround" => ($_POST["turnaround"] ?? false),
         "alivesince" => localtimeCam($myId, ($_POST["alivesince"] ?? false)),
         "requests" => ($_POST["requests"] ?? false),
         "timeouts" => ($_POST["timeouts"] ?? false),
@@ -293,6 +294,7 @@ if (count($_POST) > 0) {
         "totalImgsSaved" => ($_POST["totalImgsSaved"] ?? false),
         "bgnc" => ($_POST["bgnc"] ?? -13)
     );
+  
 
 
 
@@ -1861,6 +1863,9 @@ if (isset($_GET["imgout"])) {
             echo '</div>';
 
             $k = $stats[$myId] ?? array();
+            echo "Latest turnaround info: " . ($k["turnaround"] ?? "[nothing recrived from cam]") . "; ";
+                                          
+            echo "<br> \r\n";
 
             echo "" . ($k["bgnc"] ?? "x") . " repeats (same image send over different requests?).";
             echo "<br> \r\n";

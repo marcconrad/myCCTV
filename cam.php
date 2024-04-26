@@ -324,6 +324,8 @@
             var lastConnect = Date.now();
             var minWaitBetweenConnections = 30000; // in milliseconds
 
+            var latestturninfo = "no turnaround time recorded";
+
 
 
             document.getElementsByTagName("canvas")[0].setAttribute("width", twidth);
@@ -577,6 +579,7 @@
                         info += "vw" + video.videoWidth + "vh" + video.videoHeight;
                         totalImagesSent += imagesAdded;
                         var statusInfo = "n=" + imagesAdded + "&tzo=" + tzo + "&bat=" + batteryinfo +
+                            "&turnaround=" + latestturninfo +
                             "&alivesince=" + alivesince +
                             "&jsonerr=" + totaljsonreturnerror +
                             "&jsoninvalid=" + totalinvalidjson +
@@ -611,7 +614,11 @@
 
                         ajax.timeout = 120000;
                         ajax.ontimeout = function(e) {
-                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Timeout"); 
+
+                            var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Timeout"; 
+                            addLI("turnaround", turninfo); 
+                            latestturninfo = turninfo; 
+                           
                             document.getElementById('info6').innerHTML = 'timeout: ' + e + ' at ' + getTimeNow();
                             addLI("timeout", getTimeNow() + ": " + e, 10);
                             donotsend = false;
@@ -621,8 +628,11 @@
                         };
 
                         ajax.onerror = function(e) {
-                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Error"); 
-                         
+
+                            var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Error"; 
+                            addLI("turnaround", turninfo); 
+                            latestturninfo = turninfo; 
+                            
                             document.getElementById('info7').innerHTML = 'Error: ' + e + ' at ' + getTimeNow();
                             addLI("ajaxerror", getTimeNow() + ": Loaded=" + e.loaded + " State=" + ajax.readyState, 10);
                             donotsend = false;
@@ -632,10 +642,9 @@
                         ajax.onload = function() {
                             document.getElementById('ajaxresponse').innerHTML = ajax.responseText;
 
-                            var w = new Date(); 
-                            var dw = w.getTime() - this.starttime;
-
-                            addLI("turnaround", getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - OK"); 
+                            var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - OK"; 
+                            addLI("turnaround", turninfo); 
+                            latestturninfo = turninfo; 
 
                         
 
