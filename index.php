@@ -331,6 +331,12 @@ if (count($_POST) > 0) {
     echo ', "cole"  : ' . '"' . $_SERVER['CONTENT_LENGTH'] . '"';
 
     /**
+     * How long history of data capturing; to be implemented later; currently equals 5
+     */
+    $turninfomax = 6; 
+    echo ', "turninfomax"  : ' . '"' . $turninfomax . '"';
+
+    /**
      * Clarifai is a paid service so we use a counter to ensure that there are not too many requests, the counter 
      * is decreased by 1 every 720 seconds allowing on average a request every 720 seconds.
      */
