@@ -410,8 +410,10 @@ if (count($_POST) > 0) {
 
     if( $mgp < $lastturnaround ) { 
         $maxadjustimagesperpost[$myId] = max(   $tmpx - 2, 1); 
-    } else { 
+    } else if ( $mgp > ($lastturnaround * 1.1 ) ) { 
         $maxadjustimagesperpost[$myId] = min(  $tmpx + 1, ($maximagesperpost[$myId] ?? 120)); 
+    } else { 
+        $maxadjustimagesperpost[$myId] = $tmpx;  
     }
 
 
