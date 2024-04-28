@@ -280,6 +280,7 @@ if (count($_POST) > 0) {
         "uqt" => $uqt,
         "updms" => ($_POST["updms"] ?? false),
         "turnaround" => ($_POST["turnaround"] ?? false),
+        "lastturnaround" => ($_POST["lastturnaround"] ?? false),
         "alivesince" => localtimeCam($myId, ($_POST["alivesince"] ?? false)),
         "requests" => ($_POST["requests"] ?? false),
         "timeouts" => ($_POST["timeouts"] ?? false),
@@ -295,7 +296,7 @@ if (count($_POST) > 0) {
         "bgnc" => ($_POST["bgnc"] ?? -13)
     );
   
-
+    $lastturnaround = $stats[$myId]["lastturnaround"]; 
 
 
     /** 
@@ -401,6 +402,17 @@ if (count($_POST) > 0) {
 
     $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
     echo ', "hrtime" : "' . $eta . '"';
+    echo ', "lastturnaround" : "' . $lastturnaround. '"';
+
+
+    $mgp = $mingapbeforeposts[$myId]  ?? 60; 
+    $tmpx = ($maxadjustimagesperpost[$myId] ?? ($maximagesperpost[$myId] ?? 120)); 
+
+    if( $mgp < $lastturnaround ) { 
+        $maxadjustimagesperpost[$myId] = max(   $tmpx - 2, 1); 
+    } else { 
+        $maxadjustimagesperpost[$myId] = min(  $tmpx + 1, ($maximagesperpost[$myId] ?? 120)); 
+    }
 
 
     if ($servertargeteta !== NULl && strpos($servertargeteta[$myId], "auto") !== false) {
@@ -424,7 +436,7 @@ if (count($_POST) > 0) {
     if ($eta >  $tgteta) {
         $imagesperpost[$myId] = max(1, ($imagesperpost[$myId] ?? 60) - 1);
     } else if ($eta <  $tgteta && ($fastmode[$myId] ?? 0) == 0) {
-        $imagesperpost[$myId] = min(($maximagesperpost[$myId] ?? 120), ($imagesperpost[$myId] ?? 60));
+        $imagesperpost[$myId] = min(($maxadjustimagesperpost[$myId] ?? 120), ($imagesperpost[$myId] ?? 60));
         if ($imagesperpost[$myId] < 1) {
             $imagesperpost[$myId] = 1;
         }
@@ -1768,7 +1780,7 @@ if (isset($_GET["imgout"])) {
             $ntgt = count(myTargets($myId));
             echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
             if ($togp != 2) { // otherwise paused
-                echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
+                echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; adjmax ".($maxadjustimagesperpost[$myId]  ?? 120)."; max ". ($maximagesperpost[$myId] ?? 120) . " imgs.";
                 echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             } else {
                 echo "The Camera will call every " . ($mingapbeforeposts[$myId] ?? 60) . "s (recording is paused; no images are made).";
@@ -1869,7 +1881,8 @@ if (isset($_GET["imgout"])) {
             echo '</div>';
 
             $k = $stats[$myId] ?? array();
-            echo "Latest turnaround info: " . ($k["turnaround"] ?? "[nothing recrived from cam]") . "; ";
+            $lastturnaround = ($k["lastturnaround"] ?? "-/-"); 
+            echo "Latest turnaround info (".$lastturnaround."): " . ($k["turnaround"] ?? "[nothing recrived from cam]") . "; ";
                                           
             echo "<br> \r\n";
 
@@ -3050,7 +3063,7 @@ if (isset($_GET["imgout"])) {
 
         global $batteryinfo, $interrupt;
         global $timezoneoffset, $toggleCapture;
-        global $fastmode, $imagesperpost,  $stats, $resetstats;
+        global $fastmode, $imagesperpost,  $stats, $resetstats, $maxadjustimagesperpost;
         global $videoinfo, $clarifaicount, $performance, $sessionpostinfo, $targeteta, $imgsizeinfo;
         global $systempassword, $autocat;
         global $reloadnow;;
@@ -3075,6 +3088,7 @@ if (isset($_GET["imgout"])) {
         } else {
 
             $content .= PHP_EOL . " \$imagesperpost = " . var_export($imagesperpost, true) . "; ";
+            $content .= PHP_EOL . " \$maxadjustimagesperpost= " . var_export($maxadjustimagesperpost, true) . "; ";
             $content .= PHP_EOL . " \$batteryinfo = " . var_export($batteryinfo, true) . "; ";
             $content .= PHP_EOL . " \$performance = " . var_export($performance, true) . "; ";
             $content .= PHP_EOL . " \$sessionpostinfo = " . var_export($sessionpostinfo, true) . "; ";

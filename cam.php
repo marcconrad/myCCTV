@@ -324,6 +324,7 @@
 
             var lastConnect = Date.now();
             var minWaitBetweenConnections = 30000; // in milliseconds
+            var lastturntime = 0; 
 
            
 
@@ -594,6 +595,7 @@
                         var statusInfo = "n=" + imagesAdded + "&tzo=" + tzo + "&bat=" + batteryinfo +
                             "&turnaround=" + recentturninfo.join("; ") +
                             "&alivesince=" + alivesince +
+                            "&lastturnaround=" + lastturntime +
                             "&jsonerr=" + totaljsonreturnerror +
                             "&jsoninvalid=" + totalinvalidjson +
                             "&requests=" + numberOfRequests +
@@ -627,7 +629,7 @@
 
                         ajax.timeout = 120000;
                         ajax.ontimeout = function(e) {
-
+                            lastturntime = ((new Date()).getTime() - this.starttime)/1000.0;
                             var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Timeout"; 
                             addLI("turnaround", turninfo); 
                            addTurninfo( turninfo ); 
@@ -641,6 +643,7 @@
                         };
 
                         ajax.onerror = function(e) {
+                            lastturntime = ((new Date()).getTime() - this.starttime)/1000.0;
 
                             var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - Error"; 
                             addLI("turnaround", turninfo); 
@@ -654,7 +657,7 @@
                         // ajax.onreadystatechange = function() { // see https://teamtreehouse.com/community/xhronreadystatechange-vs-xhronload
                         ajax.onload = function() {
                             document.getElementById('ajaxresponse').innerHTML = ajax.responseText;
-
+                            lastturntime = ((new Date()).getTime() - this.starttime)/1000.0;
                             var turninfo = getTimeNow() + ": " + (((new Date()).getTime() - this.starttime)/1000.0)+"s - OK"; 
                             addLI("turnaround", turninfo); 
                             addTurninfo( turninfo ); 
@@ -693,7 +696,7 @@
                                     recentturninfo = [ "new max ="+turninfomax ]; 
                                 }
 
-                                console.log(turninfomax);
+                               // console.log(turninfomax);
 
                                 zoom = (parsed.zoom ? parsed.zoom : 1.0);
                                 zoomX = (parsed.zoomX ? parsed.zoomX : 0.5);
