@@ -413,7 +413,7 @@ if (count($_POST) > 0) {
 
     if( $mgp < $lastturnaround ) { 
         $rat = max(0.5, (1.0 *  max($mgp, 1)) / max($lastturnaround, 1) ); 
-        $maxadjustimagesperpost[$myId] =  round(max(   $tmpx * $rat, 1),0); 
+        $maxadjustimagesperpost[$myId] =  round(max(   $tmpx * $rat, 1),1); 
     } else if ( $mgp * 0.9 > $lastturnaround  ) { 
         $maxadjustimagesperpost[$myId] = min(  $tmpx + 1, ($maximagesperpost[$myId] ?? 120)); 
     } else { 
@@ -442,7 +442,7 @@ if (count($_POST) > 0) {
     if ($eta >  $tgteta) {
         $imagesperpost[$myId] = max(1, ($imagesperpost[$myId] ?? 60) - 1);
     } else if ($eta <  $tgteta && ($fastmode[$myId] ?? 0) == 0) {
-        $imagesperpost[$myId] = min(($maxadjustimagesperpost[$myId] ?? 120), ($imagesperpost[$myId] ?? 60));
+        $imagesperpost[$myId] = floor(min(($maxadjustimagesperpost[$myId] ?? 120), ($imagesperpost[$myId] ?? 60)));
         if ($imagesperpost[$myId] < 1) {
             $imagesperpost[$myId] = 1;
         }
