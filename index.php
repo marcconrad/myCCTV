@@ -404,13 +404,17 @@ if (count($_POST) > 0) {
     echo ', "hrtime" : "' . $eta . '"';
     echo ', "lastturnaround" : "' . $lastturnaround. '"';
 
+    $lastturnaround = $lastturnaround; 
+
 
     $mgp = $mingapbeforeposts[$myId]  ?? 60; 
     $tmpx = ($maxadjustimagesperpost[$myId] ?? ($maximagesperpost[$myId] ?? 120)); 
 
+
     if( $mgp < $lastturnaround ) { 
-        $maxadjustimagesperpost[$myId] = max(   $tmpx - 2, 1); 
-    } else if ( $mgp > ($lastturnaround * 1.1 ) ) { 
+        $rat = max(0.5, (1.0 *  max($mgp, 1)) / max($lastturnaround, 1) ); 
+        $maxadjustimagesperpost[$myId] =  round(max(   $tmpx * $rat, 1),0); 
+    } else if ( $mgp * 0.9 > $lastturnaround  ) { 
         $maxadjustimagesperpost[$myId] = min(  $tmpx + 1, ($maximagesperpost[$myId] ?? 120)); 
     } else { 
         $maxadjustimagesperpost[$myId] = $tmpx;  
