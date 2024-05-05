@@ -407,7 +407,7 @@ if (count($_POST) > 0) {
     $lastturnaround = $lastturnaround; 
 
 
-    $mgp = $mingapbeforeposts[$myId]  ?? 60; 
+    $mgp = 0.75 * ($mingapbeforeposts[$myId]  ?? 60); 
     $tmpx = ($maxadjustimagesperpost[$myId] ?? ($maximagesperpost[$myId] ?? 120)); 
 
 
