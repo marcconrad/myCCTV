@@ -437,7 +437,7 @@ if (count($_POST) > 0) {
     $tgteta = $targeteta[$myId][0] ?? 123;
 
     if ($eta > 2 * $tgteta || ($eta < $tgteta * 0.5 && ($fastmode[$myId] ?? 0) == 0)) {
-        $imagesperpost[$myId] = ceil($imagesperpost[$myId] * $tgteta / $eta);
+        $imagesperpost[$myId] = ceil(( $imagesperpost[$myId] ?? 60) * $tgteta / $eta);
     }
     if ($eta >  $tgteta) {
         $imagesperpost[$myId] = max(1, ($imagesperpost[$myId] ?? 60) - 1);
