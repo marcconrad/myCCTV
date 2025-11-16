@@ -62,16 +62,15 @@ if (isset($_GET["repeats"]) && isset($_GET["id"])) {
         echo "Error: unexpected fgets() fail\n";
     }
 
-    //  $size = substr($size, 0, strpos($size, "\t"));
     pclose($handle);
-    // echo 'Directory: ' . $f . ' => Size: ' . $size;
+
 
     ?>
-<h3>Tree</h3>
-        <?php
+    <h3>Find</h3>
+    <?php
 
 
-    $handle = popen('/usr/bin/tree .', 'r');
+    $handle = popen('/usr/bin/find . ', 'r');
     while (($buffer = fgets($handle, 4096)) !== false) {
         echo $buffer;
         echo "<br>";
@@ -80,18 +79,18 @@ if (isset($_GET["repeats"]) && isset($_GET["id"])) {
         echo "Error: unexpected fgets() fail\n";
     }
 
-   
+
     pclose($handle);
-   
+
 
     ?>
-   
+
 </body>
 
 </html>
 <?php
 
- /*
+/*
     echo "<h1>Zip Test...</h1>";
     var_dump($_GET);
 
@@ -123,4 +122,4 @@ if (isset($_GET["repeats"]) && isset($_GET["id"])) {
     </p>
     <p>
         */
-    ?>
+?>
