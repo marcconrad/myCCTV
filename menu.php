@@ -281,6 +281,7 @@ include_once "./util.php";
     <button class="buttontop button" id="target" onClick="toggleTarget()">🎯</button>
     <button class="buttontop button" id="justGO" onClick="goFromTo()">🔄</button>
     <button class="buttontop button tooltip" id="sortbtn" title="Order chronologically or by importance." onClick="toggleSort()">🕰️</button>
+    <button hidden=1 class="buttontop button tooltip" id="archivebtn" title="Archive everything." onClick="goTo('choosedate.php?autoarchive=1&archive7=1&id=0&t='+Date.now()+' &howmany=12')">🧹</button>
 
 
     <button hidden=1 class="buttontop button" id="testbestimage" onClick="goTo('index.php?t='+Date.now()+'&howmany=7&testbestimage=1')">🔮</button>
@@ -374,6 +375,24 @@ include_once "./util.php";
             // document.getElementById("infoT").innerHTML = e.detail;
             howmanychange(e.detail);
         }
+
+        function createIframe() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'choosedate.php';
+            iframe.width = '300';
+            iframe.height = '200';
+            iframe.style.border = '1px solid #ccc';
+            iframe.style.position = 'absolute';
+            iframe.style.top = '10px';
+            iframe.style.left = '10px';
+            iframe.style.zIndex = '120'; 
+            iframe.id = 'archiveframe'; // ID setzen
+
+            document.body.appendChild(iframe);
+        }
+
+        // createIframe(); 
+
 
 
         function goFromTo(mode = false) {
