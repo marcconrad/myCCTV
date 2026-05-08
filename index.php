@@ -2879,7 +2879,7 @@ if (isset($_GET["imgout"])) {
             if ($clarifai_user_id === "not set") {
                 return "no user id set!";
             }
-            $clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/florence2-large/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
+            $clarifai_url = "https://api.clarifai.com/v2/users/clarifai/apps/open-world/models/florence2-large/versions/6ed0b7a96c374bb1829d9a30663b4aab/outputs";
   
             $NOT_clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
         }
