@@ -1,14 +1,15 @@
 <?php
-$collecttimenotes = gmdate("His"); 
-$timenotezero = time(); 
+$collecttimenotes = gmdate("His");
+$timenotezero = time();
 
-function noteTime($a) { 
-    global $collecttimenotes, $timenotezero; 
-    $w = time() - $timenotezero; 
-    $collecttimenotes = $collecttimenotes . "; ".$w."-".$a;
+function noteTime($a)
+{
+    global $collecttimenotes, $timenotezero;
+    $w = time() - $timenotezero;
+    $collecttimenotes = $collecttimenotes . "; " . $w . "-" . $a;
 }
 
-noteTime("A1"); 
+noteTime("A1");
 $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
 $iowntheconfigfile = false;
@@ -128,7 +129,7 @@ include_once $varfile_config;
 include_once "./util.php";
 
 
-noteTime("A"); 
+noteTime("A");
 
 if (isset($systempassword["c"])) {
     // setcookie("sanfcctv", $systempassword["c"] ?? "a" . time() . "b", ['expires' => (time() + 8640000), 'samesite' => 'None', 'secure' => true]);
@@ -148,7 +149,7 @@ if (!isset($imagedimensions[$myIdx])) {
 }
 
 if (isset($_GET["checkinterrupt"])) {
-    echo $interrupt[$myIdx];
+    // echo  $interrupt[$myIdx];
     $t = time();
     $w = gmdate("Ymd-His");
     @file_put_contents("vars/interrupt" . $myIdx . ".txt", $t . "; " . $w);
@@ -162,7 +163,7 @@ $theight = $imagedimensions[$myIdx]["h"];
 
 $countImagesSaved = 0;
 if (count($_POST) > 0) {
-    noteTime("B"); 
+    noteTime("B");
     // error_reporting(-1);
     $myId = intval($_POST["id"] ?? -1);
 
@@ -276,7 +277,8 @@ if (count($_POST) > 0) {
     $avdpf = $_POST["avdpf"] ?? die('{"error"  : "no avdpf" }');
     $nreq = $_POST["nreq"] ?? die('{"error"  : "no nreq" }');
     $stats[$myId] = array(
-        $nreq, $avdpf,
+        $nreq,
+        $avdpf,
         "uqt" => $uqt,
         "updms" => ($_POST["updms"] ?? false),
         "turnaround" => ($_POST["turnaround"] ?? false),
@@ -295,8 +297,8 @@ if (count($_POST) > 0) {
         "totalImgsSaved" => ($_POST["totalImgsSaved"] ?? false),
         "bgnc" => ($_POST["bgnc"] ?? -13)
     );
-  
-    $lastturnaround = $stats[$myId]["lastturnaround"]; 
+
+    $lastturnaround = $stats[$myId]["lastturnaround"];
 
 
     /** 
@@ -334,7 +336,7 @@ if (count($_POST) > 0) {
     /**
      * How long history of data capturing; to be implemented later; currently equals 5
      */
-    $turninfomax = 6; 
+    $turninfomax = 6;
     echo ', "turninfomax"  : ' . '"' . $turninfomax . '"';
 
     /**
@@ -371,19 +373,19 @@ if (count($_POST) > 0) {
      * This is actually where the images are saved to files. 
      */
     $countImagesSaved = 0;
-    noteTime("B1"); 
+    noteTime("B1");
     $lastbgnoise = receiveImagesA($myId);
-    noteTime("B2"); 
+    noteTime("B2");
     echo ', "imsaved" : ' . $countImagesSaved;
     echo ', "lastbgnoise" : ' . $lastbgnoise;
 
     $distancezerocount = 0;
-    noteTime("B3"); 
+    noteTime("B3");
     foreach (myTargets($myId) as $j) {
 
         cleanFiles($j);
     }
-    noteTime("B4"); 
+    noteTime("B4");
 
     echo ',"d0" : ' . $distancezerocount;
 
@@ -402,22 +404,22 @@ if (count($_POST) > 0) {
 
     $eta = (hrtime(true) - $GLOBALS["start"]) / 1e+6;
     echo ', "hrtime" : "' . $eta . '"';
-    echo ', "lastturnaround" : "' . $lastturnaround. '"';
+    echo ', "lastturnaround" : "' . $lastturnaround . '"';
 
-    $lastturnaround = $lastturnaround; 
-
-
-    $mgp = 0.75 * ($mingapbeforeposts[$myId]  ?? 60); 
-    $tmpx = ($maxadjustimagesperpost[$myId] ?? ($maximagesperpost[$myId] ?? 120)); 
+    $lastturnaround = $lastturnaround;
 
 
-    if( $mgp < $lastturnaround ) { 
-        $rat = max(0.5, (1.0 *  max($mgp, 1)) / max($lastturnaround, 1) ); 
-        $maxadjustimagesperpost[$myId] =  round(max(   $tmpx * $rat, 1),1); 
-    } else if ( $mgp * 0.9 > $lastturnaround  ) { 
-        $maxadjustimagesperpost[$myId] = min(  $tmpx + 1, ($maximagesperpost[$myId] ?? 120)); 
-    } else { 
-        $maxadjustimagesperpost[$myId] = $tmpx;  
+    $mgp = 0.75 * ($mingapbeforeposts[$myId]  ?? 60);
+    $tmpx = ($maxadjustimagesperpost[$myId] ?? ($maximagesperpost[$myId] ?? 120));
+
+
+    if ($mgp < $lastturnaround) {
+        $rat = max(0.5, (1.0 *  max($mgp, 1)) / max($lastturnaround, 1));
+        $maxadjustimagesperpost[$myId] =  round(max($tmpx * $rat, 1), 1);
+    } else if ($mgp * 0.9 > $lastturnaround) {
+        $maxadjustimagesperpost[$myId] = min($tmpx + 1, ($maximagesperpost[$myId] ?? 120));
+    } else {
+        $maxadjustimagesperpost[$myId] = $tmpx;
     }
 
 
@@ -437,7 +439,7 @@ if (count($_POST) > 0) {
     $tgteta = $targeteta[$myId][0] ?? 123;
 
     if ($eta > 2 * $tgteta || ($eta < $tgteta * 0.5 && ($fastmode[$myId] ?? 0) == 0)) {
-        $imagesperpost[$myId] = ceil(( $imagesperpost[$myId] ?? 60) * $tgteta / $eta);
+        $imagesperpost[$myId] = ceil(($imagesperpost[$myId] ?? 60) * $tgteta / $eta);
     }
     if ($eta >  $tgteta) {
         $imagesperpost[$myId] = max(1, ($imagesperpost[$myId] ?? 60) - 1);
@@ -486,8 +488,8 @@ if (count($_POST) > 0) {
     echo ', "twidth" : ' . $twidth;
     echo ', "theight" : ' . $theight;
     echo ', "post_max_size" : ' . return_bytes(ini_get('post_max_size'));
-  
-    noteTime("Z"); 
+
+    noteTime("Z");
     /**
      * Some cummulative performane data: in particular how much eta (see above) is used on the server on average; 
      * separatly calculated for normal and fastmode
@@ -514,8 +516,8 @@ if (count($_POST) > 0) {
     $reloadnow[$myId] = "no";
     write2config();
 
-    noteTime("Z1"); 
-    echo ', "timenotes" : ' . '"'.$collecttimenotes.'"';
+    noteTime("Z1");
+    echo ', "timenotes" : ' . '"' . $collecttimenotes . '"';
 
 
 
@@ -544,7 +546,7 @@ function return_bytes($val)
     $last = strtolower($val[strlen($val) - 1]);
     $val = intval($val);
     switch ($last) {
-            // The 'G' modifier is available since PHP 5.1.0
+        // The 'G' modifier is available since PHP 5.1.0
         case 'g':
             $val *= 1024;
         case 'm':
@@ -1383,8 +1385,7 @@ if (isset($_GET["imgout"])) {
 
 
     if (isset($_GET["enterclarifai"])) {
-        echo '<h1>This feature will be depreacted after March 2023. Use new authentication method instead. Please enter your Clarifai Key below, then submit</h1>';
-        echo '<a href="https://www.clarifai.com/">More information about Clarifai</a><p>';
+        echo '<h1>(Clarifai work in progress))</h1>';
         echo '<form action="index.php">';
         echo '<label for="clarifaikey">Enter Key:</label><br>';
         echo '<input type="text" id="clarifaikey" name="clarifaikey">';
@@ -1786,7 +1787,7 @@ if (isset($_GET["imgout"])) {
             $ntgt = count(myTargets($myId));
             echo '<br>Using ' . $ntgt . ' target' . ($ntgt === 1 ? '' : 's') . '; ';
             if ($togp != 2) { // otherwise paused
-                echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; adjmax ".($maxadjustimagesperpost[$myId]  ?? 120)."; max ". ($maximagesperpost[$myId] ?? 120) . " imgs.";
+                echo "<b>" . ($imagesperpost[$myId] ?? 60) . "</b> imgs every " . ($mingapbeforeposts[$myId] ?? 60) . "s; adjmax " . ($maxadjustimagesperpost[$myId]  ?? 120) . "; max " . ($maximagesperpost[$myId] ?? 120) . " imgs.";
                 echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             } else {
                 echo "The Camera will call every " . ($mingapbeforeposts[$myId] ?? 60) . "s (recording is paused; no images are made).";
@@ -1887,9 +1888,9 @@ if (isset($_GET["imgout"])) {
             echo '</div>';
 
             $k = $stats[$myId] ?? array();
-            $lastturnaround = ($k["lastturnaround"] ?? "-/-"); 
-            echo "Latest turnaround info (".$lastturnaround."): " . ($k["turnaround"] ?? "[nothing recrived from cam]") . "; ";
-                                          
+            $lastturnaround = ($k["lastturnaround"] ?? "-/-");
+            echo "Latest turnaround info (" . $lastturnaround . "): " . ($k["turnaround"] ?? "[nothing recrived from cam]") . "; ";
+
             echo "<br> \r\n";
 
             echo "" . ($k["bgnc"] ?? "x") . " repeats (same image send over different requests?).";
@@ -2123,9 +2124,8 @@ if (isset($_GET["imgout"])) {
             }
 
             echo '<br>';
-            echo '<a target="_blank" href="https://www.clarifai.com/">More information about the Clarifai Service</a> or ';
-            echo '<a target="_blank" href="https://www.clarifai.com/pricing" >Get a Clarifai Key here</a> ';
-            echo '(link opens in new tab) <p>';
+           
+            echo 'Note that Clarifai is discontinued. Work is in progress for a replacement solution.<p>';
 
             $c3 = $clarifaicount[3] ?? 0;
             $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
@@ -2843,105 +2843,83 @@ if (isset($_GET["imgout"])) {
         }
     }
 
-    function clarifaiImage($bn, $silent = FALSE)
+     function clarifaiImage($bn, $silent = FALSE)
     {
+
         global $clarifaicount;
         if (!isset($clarifaicount)) {
             $clarifaicount = array("0", time(), false);
         }
-
-        // $clarifaikey = ($clarifaicount[2] ?? false);
-
 
         $files = glob("img/*/" . substr($bn, 0, 24) . "*.jpg");
         if (count($files) < 1) {
             return "file cannot be found";
         }
 
+        $imageData = file_get_contents($files[0]);
+        $base64String = base64_encode($imageData);
+
+        $postData = ['image_base64' => $base64String];
+
         $maxclarifaicount = ($clarifaicount["max"] ?? 25); // magic clarifai constant = 50
         if ($clarifaicount[0] > $maxclarifaicount) {
             return "request over quota: Counter =  " . $clarifaicount[0] . ".";
         } // Request over quota 
 
-        $clarifai_app_key = $clarifaicount["appkey"] ?? "not set";
+        // $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
+        // $clarifai_app_key = $clarifaicount["appkey"] ?? "not set";
         $clarifai_user_id = $clarifaicount["userid"] ?? "simulation";
-        $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
+
 
         $clarifai_url = "https://example.org";
         if ($clarifai_user_id !== "simulation") {
-            if ($clarifai_app_key === "not set") {
-                return "no app key set!";
-            }
 
-            if ($clarifai_app_id === "not set") {
-                return "no app id set!";
-            }
             if ($clarifai_user_id === "not set") {
                 return "no user id set!";
             }
-            $clarifai_url = "https://api.clarifai.com/v2/users/clarifai/apps/open-world/models/florence2-large/versions/6ed0b7a96c374bb1829d9a30663b4aab/outputs";
-  
-            $NOT_clarifai_url = "https://api.clarifai.com/v2/users/" . $clarifai_user_id . "/apps/" . $clarifai_app_id . "/models/general-image-recognition/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs";
-        }
 
 
-        $ch = curl_init();
-
-        // set URL and other appropriate options
-        curl_setopt($ch, CURLOPT_VERBOSE, '1');
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_URL, $clarifai_url);
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // curl_exec returns the value
-
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $clarifai_url = $clarifai_user_id;
 
 
-        $headers = array(
-            'Content-Type: application/json',
-            "Authorization: Key " . $clarifai_app_key
-        );
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        $t = file_get_contents($files[0]);
-        $fields = '{"inputs":[{"data":{"image":{"base64":"' . base64_encode($t) . '"}}}]}';
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+            $ch = curl_init($clarifai_url);
 
-        // grab URL and pass it to the browser 
-        $ret = array();
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData)); // Encodes data as application/x-www-form-urlencoded
+            // grab URL and pass it to the browser 
+            $ret = array();
 
-        if ($clarifai_user_id !== "simulation") {
-            $result = curl_exec($ch);
+            $response = curl_exec($ch);
+       
+            // Decode the JSON response from the server into an associative array
+            $result = json_decode($response, true);
+          
+            if ($result !== null && is_array($result) && !isset($result['error'])) {
 
+                // 1. Create an empty array to collect just the object names
+                $collectedObjects = [];
 
-            if ($silent === FALSE) {
-                echo '<h2>Result=' . $result . '</h2>';
-            }
+                // 2. Loop through the results and extract the 'object' field
+                foreach ($result as $item) {
+                    //   var_dump($item);
+                    if (isset($item['object'])) {
+                        $collectedObjects[] = $item['object'];
+                    }
+                }
 
-            $mydata = json_decode($result, true);
+                // 3. Remove duplicates if the AI found multiple of the same item (e.g., three "chair"s)
+                $uniqueObjects = array_unique($collectedObjects);
 
-            if ($silent === FALSE) {
-                echo "<p>Using new version</p>";
-                echo "<p> mydata=";
-                var_dump($mydata);
-            }
-
-
-            $max = 0;
-
-            if (isset($mydata["outputs"][0])) {
-                $concepts = $mydata["outputs"][0]["data"]["concepts"];
-                $max = sizeof($concepts);
-            }
-
-            for ($i = 0; $i < $max; $i++) {
-                $value = $concepts[$i];
-                $ret[] = $value["name"];
+                $ret = $uniqueObjects;
+            } else {
+                $ret = "An error occurred: " . $response;
             }
         } else {
             $ret = array("something");
         }
+
         $clarifaicount[0]  = $clarifaicount[0]  + 1;
         $clarifaicount[1] = time();
         $clarifaicount[2] = $clarifaicount[2] ?? false;
@@ -2955,6 +2933,7 @@ if (isset($_GET["imgout"])) {
 
         return $ret;
     }
+
 
 
     function myTargets($myId, $includedefunct = false)
