@@ -222,8 +222,9 @@ if (count($_POST) > 0) {
     $sessionpostinfo[$myId] = $_SERVER;
     $nowaccess = $sessionpostinfo[$myId]["REQUEST_TIME"] ?? 3;
 
-    $dprev = gmdate("Ymd", $previousaccess -  ($timezoneoffset[$myId] * 60 ?? 0));
-    $dnow = gmdate("Ymd", $nowaccess - ($timezoneoffset[$myId] * 60 ?? 0));
+    $dprev = gmdate("Ymd", $previousaccess -  (60 * ($timezoneoffset[$myId] ?? 0)));
+    $dnow = gmdate("Ymd", $nowaccess - (60 * ($timezoneoffset[$myId]  ?? 0)));
+
     echo '{ "pacc"  : "' . $dprev . 'to' . $dnow . '"';
     $max = 30;
     if ($nowaccess - $previousaccess >  1209600) { // last call was more than 2 weeks ago; archive last 400 days. 
@@ -1289,7 +1290,7 @@ if (isset($_GET["imgout"])) {
     }
 
     if (isset($_GET["csv"]) && isset($_GET["id"])) {
-        global $tmptgt;
+        global $tmptgt, $lastgallery;
         $allImages = array();
         $minTimestamp = PHP_INT_MAX;
         $maxTimestamp = 0;
@@ -1300,7 +1301,7 @@ if (isset($_GET["imgout"])) {
             //var_dump(myTargets(intval($_GET["id"]))); 	
             if (isset($_GET["last"])) {
                 $tmptgt = $j;
-                $tmp = $lastgallery["full" . $_GET["id"]];
+                $tmp = $lastgallery["full" . $_GET["id"]] ?? "none";
                 $allImages = array_filter($tmp, "isBnFromId");
             } else {
                 $files = glob("img/" . $j . "/aa*.*");
@@ -1433,7 +1434,7 @@ if (isset($_GET["imgout"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
         $myId = $_GET["id"] ?? die("Error in setting concept. No id set.");
         autocat($myId, "initonly");
-        $concepts = $autocat[$myId][5];
+        $concepts = $autocat[$myId][5] ?? array();
         $c = $_GET["clarifaiconcept"];
         if ($dc = $_GET["deleteconcept"] ?? false) {
             if (isset($concepts[$dc])) {
@@ -1605,7 +1606,7 @@ if (isset($_GET["imgout"])) {
             die();
         }
         if (isset($_GET["thetargeteta"])) {
-            if ($servertargeteta[$myId] != $_GET["thetargeteta"]) {
+            if (($servertargeteta[$myId] ?? "xnone") != $_GET["thetargeteta"]) {
                 $servertargeteta[$myId] = $_GET["thetargeteta"];
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -1613,7 +1614,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2configS();
             } else {
-                echo "<h2>Target eta now set to " . $servertargeteta[$myId] . " seconds</h2>";
+                echo "<h2>Target eta now set to " . ( $servertargeteta[$myId] ?? "not set" ) . " seconds</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -1623,7 +1624,7 @@ if (isset($_GET["imgout"])) {
         }
 
         if (isset($_GET["reloadnow"])) {
-            if ($reloadnow[$myId] != $_GET["reloadnow"]) {
+            if (($reloadnow[$myId] ?? "Ynone") != $_GET["reloadnow"]) {
                 $reloadnow[$myId] = $_GET["reloadnow"];
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -1631,7 +1632,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2config();
             } else {
-                echo "<h2>Reload now set to:" . $reloadnow[$myId] . ".</h2>";
+                echo "<h2>Reload now set to:" . ($reloadnow[$myId] ?? "not set") . ".</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -1709,7 +1710,7 @@ if (isset($_GET["imgout"])) {
         }
         if (isset($_GET["savecurrentasgifs"])) {
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b><p>';
-            $t = $lastgallery[$myId];
+            $t = $lastgallery[$myId] ?? array();
             sort($t);
             saveasgifs($t, 20, isset($_GET["showdate"]));
             sleep(1);
@@ -1754,10 +1755,10 @@ if (isset($_GET["imgout"])) {
                 echo "<h2>This image contains: $conceptlist</h2>";
             } else {
                 echo "<h2>Clarifai not possible because of $clarifaiinfo</h2>";
-                echo "<p>Last request: " . gmdate(DATE_RFC822, $clarifaicount[1]) . "<p>";
+                echo "<p>Last request: " . gmdate(DATE_RFC822, $clarifaicount[1] ?? 0) . "<p>";
             }
             echo '<p><b><a href="index.php?time=' . time() . '">Home</a></b>';
-            echo "  clarifaicount=$clarifaicount[0]  <p>";
+            echo "  clarifaicount= " . ($clarifaicount[0] ?? "not set") . "  <p>";
             write2config();
             sleep(1);
             die();
@@ -1876,7 +1877,7 @@ if (isset($_GET["imgout"])) {
             echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             echo '</div>';
             echo '<div>';
-            echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" . $fastmode[$myId] . ")" : "off") . "</b>";
+            echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" .( $fastmode[$myId] ?? "not set" ). ")" : "off") . "</b>";
             echo '</div>';
             echo '<div>';
             echo "Logmode is <b>" . ($logmode[$myId] ?? "off") . ".</b> Change to: ";
@@ -2357,7 +2358,7 @@ if (isset($_GET["imgout"])) {
             die();
         }
         if (isset($_GET["setgap"])) {
-            if ($mingapbeforeposts[$myId] != intval($_GET["setgap"])) {
+            if (($mingapbeforeposts[$myId] ?? "Znone") != intval($_GET["setgap"])) {
                 $mingapbeforeposts[$myId] = intval($_GET["setgap"]);
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -2365,7 +2366,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2configS();
             } else {
-                echo "<h2>The Camera will send something to you every " . $mingapbeforeposts[$myId] . " seconds</h2>";
+                echo "<h2>The Camera will send something to you every " . ($mingapbeforeposts[$myId] ?? "not set") . " seconds</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -2375,7 +2376,7 @@ if (isset($_GET["imgout"])) {
         }
 
         if (isset($_GET["setmaximages"])) {
-            if ($maximagesperpost[$myId] != intval($_GET["setmaximages"])) {
+            if (($maximagesperpost[$myId] ?? "Znone") != intval($_GET["setmaximages"])) {
                 $maximagesperpost[$myId] = intval($_GET["setmaximages"]);
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -2383,7 +2384,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2configS();
             } else {
-                echo "<h2>The Camera will send a maximum of " . $maximagesperpost[$myId] . " images with each post.</h2>";
+                echo "<h2>The Camera will send a maximum of " . ($maximagesperpost[$myId] ?? "not set") . " images with each post.</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -2392,7 +2393,7 @@ if (isset($_GET["imgout"])) {
             die();
         }
         if (isset($_GET["keephowmany"])) {
-            if ($keephowmany[$myId] != intval($_GET["keephowmany"])) {
+            if (($keephowmany[$myId] ?? "Znone") != intval($_GET["keephowmany"])) {
                 $keephowmany[$myId] = intval($_GET["keephowmany"]);
                 echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
                 echo " <script> ";
@@ -2400,7 +2401,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2configS();
             } else {
-                echo "<h2>The System will keep at least " . $keephowmany[$myId] . " images on the server for each bucket.</h2>";
+                echo "<h2>The System will keep at least " . ($keephowmany[$myId] ?? "not set") . " images on the server for each bucket.</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -2549,7 +2550,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script>";
             } else {
                 echo '<h1>Interruption Requested</h1>';
-                echo 'for ' . $interrupt[$myId] . " Seconds";
+                echo 'for ' . ($interrupt[$myId] ?? "not set") . " Seconds";
                 echo '<p><a href="index.php?time=' . time() . '&id=' . $myId . '">Back</a></h1>';
             }
 
@@ -2749,7 +2750,7 @@ if (isset($_GET["imgout"])) {
         $dd = gmdate("Ymd-His", localTimeCam($myId));
         file_put_contents($outputfolder . "aa" . $t . "z" . $myId . "x" . $dd . ".txt", implode(", ", $concepts));
 
-        $myNeigtbours = array();
+        $myNeighbours = array();
         $bnt = basename2timestamp($bn);
 
         $deltaseconds =  $autocat[$myId][8] ?? 300;
@@ -2796,7 +2797,7 @@ if (isset($_GET["imgout"])) {
         $c = 1;
         foreach ($bns as $x) {
             $dist = abs(basename2timestamp($x) - $avgtime);
-            $dms = floor($dist * 100 + $c++);
+            $dms = intval(floor($dist * 100 + $c++)); 
             $ret[$dms] = $x;
         }
         ksort($ret);
@@ -3459,6 +3460,7 @@ if (isset($_GET["imgout"])) {
             $r = $g = $b = 0;
             $inc = 0.02;
             srand(1881);
+            $i = 0; 
             for ($img && $i = 0; $i < $numberOfChecks; $i++) {
                 $x = rand(0, $w - 1);
                 $y = rand(0, $h - 1);
@@ -4142,6 +4144,7 @@ if (isset($_GET["imgout"])) {
 
             $bgavg = averageBackgroundNoise($imgout);
             $ret = $bgavg;
+            $newfilename = "filenameNotSet.jpg";
 
             $GLOBALS["countImagesSaved"]++;
 
