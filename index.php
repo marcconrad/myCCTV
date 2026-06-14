@@ -2,7 +2,7 @@
 $collecttimenotes = gmdate("His");
 $timenotezero = time();
 
-function noteTime($a)
+function noteTime(string $a)
 {
     global $collecttimenotes, $timenotezero;
     $w = time() - $timenotezero;
@@ -14,7 +14,7 @@ $start = hrtime(true);
 $lockfile = "tmp/lockpost.txt";
 $iowntheconfigfile = false;
 
-function addIndex($dirname, $doit = true)
+function addIndex(string $dirname, bool $doit = true)
 {
     echo "Dirname: $dirname <p>";
     if (!is_string(($dirname)) || strlen($dirname) < 2 || strpos($dirname, "./") !== 0) {
@@ -34,7 +34,7 @@ function addIndex($dirname, $doit = true)
     }
 }
 
-function addAllIndex($doit = true)
+function addAllIndex(bool $doit = true)
 {
     $dirs = array("tmp", "img", "log", "zip", "loga");
     foreach ($dirs as $dir) {
@@ -137,7 +137,8 @@ if (isset($systempassword["c"])) {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 }
 
-$myIdx = $_GET["id"] ?? $_POST["id"] ?? 0;
+$myIdx = intval($_GET["id"] ?? $_POST["id"] ?? 0);
+
 if (!isset($targeteta[$myIdx])) {
     $targeteta[$myIdx] = array((isLocalHost() ? 15000 : 100), false);
 }
@@ -541,7 +542,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 /**
  * Utility function to return post_max_size in bytes.
  */
-function return_bytes($val)
+function return_bytes(string $val)
 {
     $val = trim($val);
     $last = strtolower($val[strlen($val) - 1]);
@@ -562,7 +563,7 @@ function return_bytes($val)
  * Logs any interaction with Clarifai service. 
  */
 
-function received_log($myId, $mode, $log_msg)
+function received_log(int $myId, string $mode, string $log_msg)
 {
     $logFileFolder = "loga/" . $myId . "_" . $mode . "/";
     if (!file_exists($logFileFolder)) {
@@ -595,7 +596,7 @@ function received_log($myId, $mode, $log_msg)
  * Logs any interaction with Clarifai service. 
  */
 
-function autocat_log($myId, $log_msg)
+function autocat_log(int $myId,  string $log_msg)
 {
     $logFile = "log/__log.html";
     $myip = getenv("REMOTE_ADDR");
@@ -651,7 +652,7 @@ if (isset($_GET["imgout"])) {
     $im = false;
     $text = "...";
 
-    $myId = $_GET["id"] ?? 1;
+    $myId = intval($_GET["id"] ?? "1");
     $minutes = $_GET["minutes"] ?? 20;
     $minutesfrom = $_GET["minutesfrom"] ?? 5;
     $bucket = $_GET["bucket"] ?? FALSE;
@@ -1270,7 +1271,7 @@ if (isset($_GET["imgout"])) {
     }
 
     // Export as csv starts here. 
-    function getClosestKey($search, $arr)
+    function getClosestKey( $search, array $arr)
     {
         $closest = null;
         foreach ($arr as $key => $item) {
@@ -1282,7 +1283,7 @@ if (isset($_GET["imgout"])) {
     }
 
     $tmptgt = 0;
-    function isBnFromId($bn)
+    function isBnFromId(string $bn): bool
     {
         global $tmptgt;
         if (count(explode("z" . $tmptgt . "z", $bn)) > 1) return true;
@@ -1411,7 +1412,7 @@ if (isset($_GET["imgout"])) {
         die();
     }
     if (isset($_GET["clarifaiuserid"])) {
-        $myId = $_GET["id"] ?? die("Error in setting authdata. No id set.");
+        $myId = intval($_GET["id"] ?? die("Error in setting authdata. No id set."));
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
         if (!isset($clarifaicount)) {
             $clarifaicount = array("0", time(), "notset");
@@ -1432,7 +1433,7 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["clarifaiconcept"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = $_GET["id"] ?? die("Error in setting concept. No id set.");
+        $myId = intval($_GET["id"] ?? die("Error in setting concept. No id set."));
         autocat($myId, "initonly");
         $concepts = $autocat[$myId][5] ?? array();
         $c = $_GET["clarifaiconcept"];
@@ -1457,7 +1458,7 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["setautocatdelta"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
         autocat($myId, "initonly");
         $currentgap = $autocat[$myId][8] ?? 300;
 
@@ -1473,7 +1474,7 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["autocatstart"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
         autocat($myId, "initonly");
         $currentminutes = $autocat[$myId]['s'] ?? 30;
 
@@ -1490,7 +1491,7 @@ if (isset($_GET["imgout"])) {
 
     if (isset($_GET["autocatduration"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = $_GET["id"] ?? die("Error in setting autocat delta. No id set.");
+        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
         autocat($myId, "initonly");
         $currentminutes = $autocat[$myId]['d'] ?? 60;
 
@@ -1519,7 +1520,7 @@ if (isset($_GET["imgout"])) {
     if (isset($_GET["id"]) && !isset($_GET["home"])) {
         error_reporting(-1);
 
-        $myId = intval($_GET["id"] ?? 0);
+        $myId = intval($_GET["id"] ?? "0");
 
         $sessiongetinfo[$myId] = $_SERVER;
 
@@ -1614,7 +1615,7 @@ if (isset($_GET["imgout"])) {
                 echo " </script> </body></html>";
                 write2configS();
             } else {
-                echo "<h2>Target eta now set to " . ( $servertargeteta[$myId] ?? "not set" ) . " seconds</h2>";
+                echo "<h2>Target eta now set to " . ($servertargeteta[$myId] ?? "not set") . " seconds</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
@@ -1726,7 +1727,7 @@ if (isset($_GET["imgout"])) {
             die("Thank you");
         }
         if (isset($_GET["deletethis"])) {
-            $myId = intval($_GET["id"] ?? 0);
+            $myId = intval($_GET["id"] ?? "0");
             echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
             $bntd = bn2bntd($_GET["deletethis"]);
             $path = bntd2file($myId, $bntd, true);
@@ -1877,7 +1878,7 @@ if (isset($_GET["imgout"])) {
             echo ' <a href="index.php?t=' . time() . '&id=' . $myId . '&setupcontrolA=2&nomenu=1">Change</a>';
             echo '</div>';
             echo '<div>';
-            echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" .( $fastmode[$myId] ?? "not set" ). ")" : "off") . "</b>";
+            echo "Fastmode is <b>" . (($fastmode[$myId] ?? -1) > 0 ? "ON (" . ($fastmode[$myId] ?? "not set") . ")" : "off") . "</b>";
             echo '</div>';
             echo '<div>';
             echo "Logmode is <b>" . ($logmode[$myId] ?? "off") . ".</b> Change to: ";
@@ -2125,7 +2126,7 @@ if (isset($_GET["imgout"])) {
             }
 
             echo '<br>';
-           
+
             echo 'Note that Clarifai is discontinued. Work is in progress for a replacement solution.<p>';
 
             $c3 = $clarifaicount[3] ?? 0;
@@ -2627,7 +2628,7 @@ if (isset($_GET["imgout"])) {
         die();
     }
 
-    function autocat($myId, $test = FALSE)
+    function autocat(int $myId, $test = FALSE)
     {
         global $autocat;
         global $clarifaicount;
@@ -2772,7 +2773,7 @@ if (isset($_GET["imgout"])) {
         return "<b>Animated GIF</b> about $theconcept been made for " . $bnlink . "; " . $filename . " - " . implode(", ", $concepts);
     }
 
-    function findBestImageB($myId, $minutes = 60, $minimumage = 30)
+    function findBestImageB(int $myId, int $minutes = 60, int $minimumage = 30)
     {
         $data["minimumage"] = 60 * $minimumage; // 1800;
         $data["agelimit"] = 60 * ($minimumage + $minutes); // 5400;
@@ -2785,7 +2786,7 @@ if (isset($_GET["imgout"])) {
         return false;
     }
 
-    function orderByClosestToAverage($bns)
+    function orderByClosestToAverage(array $bns)
     {
         // var_dump($bns); 
         $avgtime = 0;
@@ -2797,7 +2798,7 @@ if (isset($_GET["imgout"])) {
         $c = 1;
         foreach ($bns as $x) {
             $dist = abs(basename2timestamp($x) - $avgtime);
-            $dms = intval(floor($dist * 100 + $c++)); 
+            $dms = intval(floor($dist * 100 + $c++));
             $ret[$dms] = $x;
         }
         ksort($ret);
@@ -2806,7 +2807,7 @@ if (isset($_GET["imgout"])) {
         return $ret;
     }
 
-    function findBestImageA($myId, $minutes = 30, $minimumage = 0, $bucket = FALSE)
+    function findBestImageA(int $myId, int $minutes = 30, int $minimumage = 0,  $bucket = FALSE)
     {
 
         $buckets = myTargets($myId);
@@ -2844,7 +2845,7 @@ if (isset($_GET["imgout"])) {
         }
     }
 
-     function clarifaiImage($bn, $silent = FALSE)
+    function clarifaiImage(string $bn, $silent = FALSE)
     {
 
         global $clarifaicount;
@@ -2893,10 +2894,10 @@ if (isset($_GET["imgout"])) {
             $ret = array();
 
             $response = curl_exec($ch);
-       
+
             // Decode the JSON response from the server into an associative array
             $result = json_decode($response, true);
-          
+
             if ($result !== null && is_array($result) && !isset($result['error'])) {
 
                 // 1. Create an empty array to collect just the object names
@@ -2937,7 +2938,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function myTargets($myId, $includedefunct = false)
+    function myTargets(int $myId, bool $includedefunct = false)
     {
         global $targets;
         if ($includedefunct) {
@@ -2955,7 +2956,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function add_caption($str)
+    function add_caption(string $str)
     {
         echo '<em class="bottom-left">' . $str . '</em>';
         if (($_GET["id"] ?? "") === "9999") { // maybe used in the future?
@@ -3106,7 +3107,7 @@ if (isset($_GET["imgout"])) {
         }
         $errinfo["unlocktwice"] = gmdate("Y-m-d H:i:s") . " - Attempt to unlock lockfile twice?!"; // this will only be saved if write2config is called again.
     }
-    function echoSetupMenuA($myId)
+    function echoSetupMenuA(int $myId)
     {
         global $imagesperpost, $targeteta;
         global $toggleCapture, $zoom, $zoomX, $zoomY, $mingapbeforeposts, $maximagesperpost;
@@ -3168,7 +3169,7 @@ if (isset($_GET["imgout"])) {
         echo '</ol></p>';
     }
 
-    function findImagesByDate($myId, $dd = array())
+    function findImagesByDate(int $myId, array $dd = array())
     {
         $thedayfrom = $_GET["day"] ?? "notset";
         $thedayto = ($_GET["dayto"] ?? $thedayfrom);
@@ -3370,7 +3371,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function saveasgifs($myBn, $delay = 20, $showdate = true, $outpath = FALSE, $silent = FALSE)
+    function saveasgifs( $myBn, int $delay = 20, bool $showdate = true, $outpath = FALSE, bool $silent = FALSE)
     {
         include 'GIFEncoder.class.php';
 
@@ -3460,7 +3461,7 @@ if (isset($_GET["imgout"])) {
             $r = $g = $b = 0;
             $inc = 0.02;
             srand(1881);
-            $i = 0; 
+            $i = 0;
             for ($img && $i = 0; $i < $numberOfChecks; $i++) {
                 $x = rand(0, $w - 1);
                 $y = rand(0, $h - 1);
@@ -3482,7 +3483,7 @@ if (isset($_GET["imgout"])) {
             return -1;
         }
     }
-    function average($tgt, $img, $addTarget = false, $highlight = false)
+    function average(int $tgt,  $img, bool $addTarget = false, bool $highlight = false) 
     {
         global $focusX, $focusY;
         if ($img === false) {
@@ -3570,7 +3571,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function cleanFiles($tgt, $yyyymmdd = FALSE)
+    function cleanFiles(int $tgt,  $yyyymmdd = FALSE)
     {
         global $keephowmany;
         global $distancezerocount;
@@ -3667,13 +3668,16 @@ if (isset($_GET["imgout"])) {
 
 
     $findImagesStats = array();
-    function findImages($tgt, $howmany = 6, $important = true, $bnmiddle = false, $addlast = false, $bnfrom = 0, $bnto = PHP_INT_MAX, $includeold = false)
+    function findImages(int $tgt, $howmany = 6, $important = true, $bnmiddle = false, $addlast = false, $bnfrom = 0, $bnto = null, $includeold = false)
     {
 
         // echo "includeold = $includeold <p>"; 
         global $oldestbn, $newestbn;
         global $findImagesStats;
         $fulltotal = 0;
+        if($bnto === null) {
+            $bnto = PHP_INT_MAX;
+        }
         /*
         if (isset($_GET["minimumage"])) {
             $bnto = localtimeCam(myCam($tgt)) - $_GET["minimumage"];
@@ -3843,7 +3847,7 @@ if (isset($_GET["imgout"])) {
 
     function getFrameFile($theId = NULL, $w = 320, $h = 240)
     {
-        $myId = $theId ?? $_GET["id"] ?? 10;
+        $myId = intval($theId ?? $_GET["id"] ?? "0");
         $filename = "tmp/rectangle" . $w . "x" . $h . "a" . $myId . "a.png";
         if (!file_exists($filename)) {
             $im = getTransparentImage($w, $h);
@@ -3858,7 +3862,7 @@ if (isset($_GET["imgout"])) {
         return $filename;
     }
 
-    function addTargets($myId, $bn = false)
+    function addTargets(int $myId, $bn = false)
     {
         global $focusX, $focusY;
         global $twidth, $theight;
@@ -3918,7 +3922,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function displayImages($basenames)
+    function displayImages(array $basenames)
     {
         global $lastgallery, $videoinfo, $zoom, $zoomX, $zoomY;
         //  echo '<h1>New Gallery starts here</h1>'; 		
@@ -3959,7 +3963,7 @@ if (isset($_GET["imgout"])) {
         }
         $i = 0;
 
-        $myId = intval($_GET["id"]);
+        $myId = intval($_GET["id"] ?? "0");
         $lastgallery[$myId] = $basenamesNoDuplicates;
         // $lastgallery["full" . $myId] = $basenames;
         $lastgallery["nonce"] = "AADKJADSK" . time() . rand(28, 999999);
@@ -4079,7 +4083,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function receiveImagesA($myId)
+    function receiveImagesA(int $myId)
     {
         global $keephowmany, $imgsizeinfo;
         global $errinfo, $logmode;
