@@ -34,6 +34,42 @@ function addIndex(string $dirname, bool $doit = true)
     }
 }
 
+function sortOutAutocatParameters(int $myId)
+{
+    global $autocat;
+    if (!isset($autocat)) {
+        $autocat = array();
+    }
+    if (!isset($autocat[$myId])) {
+        $autocat[$myId] = array();
+    }
+    if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
+        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
+    }
+    if ($autocat[$myId]["d"] > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
+    }
+    if ($autocat[$myId]["frequency"] < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
+        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
+    }
+    if ($autocat[$myId]["frequency"] > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
+        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
+    }
+
+    $gapbetweencalls = 1 + floor(($autocat[$myId]["frequency"] ?? 610) / 60.0);
+    if (($autocat[$myId]["searchgapmin"] ?? 5) < $gapbetweencalls) {
+        $autocat[$myId]["searchgapmin"] = $gapbetweencalls + 5;
+    }
+
+    if (($autocat[$myId]["searchgapmin"] ?? 5) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+        $autocat[$myId]["searchgapmax"] = ($autocat[$myId]["searchgapmin"] ?? 5) + 1;
+    }
+    // Assume there is a write2config() elsewhere
+
+
+
+
+}
 function addAllIndex(bool $doit = true)
 {
     $dirs = array("tmp", "img", "log", "zip", "loga");
@@ -345,7 +381,7 @@ if (count($_POST) > 0) {
      * Clarifai is a paid service so we use a counter to ensure that there are not too many requests, the counter 
      * is decreased by 1 every 720 seconds allowing on average a request every 720 seconds.
      */
-
+/*
     if (isset($clarifaicount)) {
         $clarifaicountgap = $clarifaicount[720] ?? 720;
         if ((time() - ($clarifaicount[1] ?? 0)) > $clarifaicountgap) { // 1200 = every 20 minutes; every x seconds
@@ -354,6 +390,7 @@ if (count($_POST) > 0) {
             write2config(true, true);
         }
     }
+        */
 
 
 
@@ -363,10 +400,10 @@ if (count($_POST) > 0) {
      * not log that. 
      */
     if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-        $res = autocat($myId);
+        $res = doAutocat($myId);
         echo ', "autocat" : "running"';
         if (strpos($res, "Previous request too recently") === FALSE) {
-            autocat_log($myId, $res);
+            doAutocat_log($myId, $res);
         }
     } else {
         echo ', "autocat" : "not enabled"';
@@ -596,7 +633,7 @@ function received_log(int $myId, string $mode, string $log_msg)
  * Logs any interaction with Clarifai service. 
  */
 
-function autocat_log(int $myId,  string $log_msg)
+function doAutocat_log(int $myId,  string $log_msg)
 {
     $logFile = "log/__log.html";
     $myip = getenv("REMOTE_ADDR");
@@ -607,35 +644,65 @@ function autocat_log(int $myId,  string $log_msg)
 
     $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
     $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $clarifaicount["count"] / $ctd, 0);
-    $clarifaiinfo = ($clarifaicount[0] ?? "x") . "; " . $clarifaipermonth . "; " . ($clarifaicount["callgap"] ?? "y");
+    $clarifaiinfo = ($clarifaicount[3] ?? "x") . "; " . $clarifaipermonth . "; ";
     $targetclarifaipermonth = ($clarifaicount["target"] ?? 700);
+    /*
     if ($clarifaipermonth > $targetclarifaipermonth) {
-        $clarifaicount["callgap"] = min(60 * 60, ($clarifaicount["callgap"] ?? 783) + 10); // gap max one hour 
-        $clarifaicount[720] += 60;
+        $clarifaicount["callgap"] = min(60 * ($autocat[$myId]["frequencymax"] ?? 1440), ($clarifaicount["callgap"] ?? 783) + 10); // gap max one hour 
+        // $clarifaicount[720] += 60;
         write2config(true);
-    } else if ($clarifaipermonth < $targetclarifaipermonth) {
-        $clarifaicount[720] = max($clarifaicount[720] - 60, 0);
-        $clarifaicount["callgap"] = max(60 * 5, ($clarifaicount["callgap"] ?? 783) - 10); // gap min every 5 minutes
+    } else if ($clarifaipermonth <= $targetclarifaipermonth) {
+        // $clarifaicount[720] = max($clarifaicount[720] - 60, 0);
+        $clarifaicount["callgap"] = max(60 * ($autocat[$myId]["frequencymin"] ?? 5), ($clarifaicount["callgap"] ?? 783) - 10); // gap min every 5 minutes
         write2config(true);
     }
+        */
 
 
     $howlongminutes = $autocat[$myId]["d"] ?? 60;
-    $autocatadjust = $autocat[$myId]["mode"] ?? "not set";
-    if ($autocatadjust === "auto") {
-        $t1 = $targetclarifaipermonth;
-        $gapbetweencalls = 1 + floor(($clarifaicount["callgap"] ?? 783) / 60.0);
-        if ($clarifaipermonth > $t1) {
-            $autocat[$myId]["d"] = min(1440, $howlongminutes + 1);
-        } else {
-            $autocat[$myId]["d"] = max($howlongminutes  - 1, $gapbetweencalls); // make this greater than the callgap second gap between calls.
-        }
-        // Assume there is a write2config() elsewhere
+
+    $t1 = $targetclarifaipermonth;
+
+
+
+    if ($clarifaipermonth > $t1) {
+        $autocat[$myId]["d"] =  $howlongminutes + 1;
+        $autocat[$myId]["frequency"] =    ($autocat[$myId]["frequency"] ?? 610) + 10;
+    } else if ($clarifaipermonth < $t1) {
+        $autocat[$myId]["d"] = $howlongminutes - 1;
+        $autocat[$myId]["frequency"] =    ($autocat[$myId]["frequency"] ?? 610) - 10;
     }
 
-    $howlongnew = $autocat[$myId]["d"] ?? 60;
+    sortOutAutocatParameters($myId);
+    /*
+    if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
+        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
+    }
+    if ($autocat[$myId]["d"] > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
+    }
+    if ($autocat[$myId]["frequency"] < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
+        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
+    }
+    if ($autocat[$myId]["frequency"] > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
+        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
+    }
 
-    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " Cfai: " . $clarifaiinfo . "; " . $howlongnew . "<br>\n";
+    $gapbetweencalls = 1 + floor(($autocat[$myId]["frequency"] ?? 610) / 60.0);
+    if (($autocat[$myId]["searchgapmin"] ?? 5) < $gapbetweencalls) {
+        $autocat[$myId]["searchgapmin"] = $gapbetweencalls + 5;
+    }
+
+    if (($autocat[$myId]["searchgapmin"] ?? 5) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+        $autocat[$myId]["searchgapmax"] = ($autocat[$myId]["searchgapmin"] ?? 5) + 1;
+    }
+        */
+    // Assume there is a write2config() elsewhere
+
+
+    $howlongnew = ($autocat[$myId]["d"] ?? "(d)") . "; " . ($autocat[$myId]["frequency"] ?? "(f)");
+
+    $logtxt = gmdate("Ymd-His", localtimeCam(1)) . ": " . $myId . ";" . $log_msg . " from " . $ipNo . " A: " . $clarifaiinfo . "; " . $howlongnew . "<br>\n";
     file_put_contents($logFile, $logtxt, FILE_APPEND);
 
     if (filesize($logFile) > 123456) { // bytes
@@ -1271,7 +1338,7 @@ if (isset($_GET["imgout"])) {
     }
 
     // Export as csv starts here. 
-    function getClosestKey( $search, array $arr)
+    function getClosestKey($search, array $arr)
     {
         $closest = null;
         foreach ($arr as $key => $item) {
@@ -1434,7 +1501,7 @@ if (isset($_GET["imgout"])) {
     if (isset($_GET["clarifaiconcept"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
         $myId = intval($_GET["id"] ?? die("Error in setting concept. No id set."));
-        autocat($myId, "initonly");
+        doAutocat($myId, "initonly");
         $concepts = $autocat[$myId][5] ?? array();
         $c = $_GET["clarifaiconcept"];
         if ($dc = $_GET["deleteconcept"] ?? false) {
@@ -1458,8 +1525,8 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["setautocatdelta"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
-        autocat($myId, "initonly");
+        $myId = intval($_GET["id"] ?? die("Error in setting doAutocat delta. No id set."));
+        doAutocat($myId, "initonly");
         $currentgap = $autocat[$myId][8] ?? 300;
 
         $autocat[$myId][8] = intval($_GET["setautocatdelta"]);
@@ -1474,8 +1541,8 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["autocatstart"])) {
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
-        autocat($myId, "initonly");
+        $myId = intval($_GET["id"] ?? die("Error in setting doAutocat delta. No id set."));
+        doAutocat($myId, "initonly");
         $currentminutes = $autocat[$myId]['s'] ?? 30;
 
         $autocat[$myId]['s'] = intval($_GET["autocatstart"]);
@@ -1490,9 +1557,11 @@ if (isset($_GET["imgout"])) {
     }
 
     if (isset($_GET["autocatduration"])) {
+
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
-        $myId = intval($_GET["id"] ?? die("Error in setting autocat delta. No id set."));
-        autocat($myId, "initonly");
+        $myId = intval($_GET["id"] ?? die("Error in setting doAutocat delta. No id set."));
+        /*
+          doAutocat($myId, "initonly");
         $currentminutes = $autocat[$myId]['d'] ?? 60;
 
         if ($_GET["autocatduration"] === "auto") {
@@ -1505,7 +1574,8 @@ if (isset($_GET["imgout"])) {
         write2config();
         echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
         echo "<p> Mode is " . $autocat[$myId]['mode'] . ". <p> ";
-        echo "Thank You";
+        */
+        echo "This feature has been deprecated; use min and max values please. Thank You";
         //  var_dump($autocat);
         echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
         echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
@@ -1585,7 +1655,7 @@ if (isset($_GET["imgout"])) {
         if (isset($_GET["testautocat"])) {
             var_dump($_GET);
             echo "<p>Auto Cat<p>";
-            $result = autocat($myId, "userinitiated");
+            $result = doAutocat($myId, "userinitiated");
             echo "<p>";
             var_dump($result);
             echo '<p><a id="homebutton" href="index.php">Home</a>';
@@ -1811,23 +1881,21 @@ if (isset($_GET["imgout"])) {
             }
             echo '; <a href="index.php?time=' . time() . '&settargeteta=1&id=' . $myId . '" >Set Target ETA</a>';
 
-            if (true || isset($clarifaicount[2])) {
-                echo '<br>';
-                $c3 = $clarifaicount["count"] ?? 0;
-                $c4 =  $clarifaicount["time"] ?? localtimeCam($myId);
-                echo "$c3  Clarifai since " . gmdate("M j H:i", $c4);
-                $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
-                $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
-                echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
-            } else {
-                echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a> ';
-            }
+
+            echo '<br>';
+            $c3 = $clarifaicount["count"] ?? 0;
+            $c4 =  $clarifaicount["time"] ?? localtimeCam($myId);
+            echo "$c3  API calls since " . gmdate("M j H:i", $c4);
+            $ctd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
+            $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
+            echo " means <b> $clarifaipermonth </b> API calls per 30 days. ";
+
             if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-                echo " Autocat is <b>on</b>. ";
+                echo " doAutocat is <b>on</b>. ";
 
                 //  echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
             } else {
-                echo " Autocat is <b>off</b>. ";
+                echo " doAutocat is <b>off</b>. ";
                 //    echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
             }
 
@@ -2117,79 +2185,127 @@ if (isset($_GET["imgout"])) {
             die();
         }
         if (isset($_GET["showclarifai"])) {
-            // var_dump($clarifaicount);
-            if (isset($_GET["resetclarifai"])) {
-                unset($clarifaicount);
-                write2config(true);
-                sleep(1);
-                echo "Clarifai key reset. ";
+
+            if (!isset($autocat)) {
+                $autocat = array();
+            }
+            if (!isset($autocat[$myId])) {
+                $autocat[$myId] = array();
             }
 
+            // var_dump($clarifaicount);
+            if (isset($_GET["resetclarifai"])) {
+                $clarifaicount[3] = 0;
+                $clarifaicount[4] = time();
+                write2config(true);
+                sleep(1);
+            }
+
+            echo "<h2>Parameters for this Camera $myId</h2>";
+            echo '<form action="index.php">';
+            // echo '<label for="autocatparams">Set Camera specific parameters:</label>:';
+
+            // $autocat[$myId]['frequency'] = ($clarifaicount["callgap"] ?? 783);
+
+            $tgap =   $autocat[$myId]['frequency'] ?? 610;;
+            $mgap = floor($tgap / 60.0);
+            $sgap = $tgap - (60 * $mgap);
+
+            echo "The API is called every $mgap mins";
+            if ($sgap != 0) {
+                echo " and $sgap sec";
+            }
+            echo ". <br>";
+
+            echo ' Min: <input size="5em" class="autocat26" type="text" id="frequencymin" name="frequencymin" value="' . ($autocat[$myId]["frequencymin"] ?? "5") . '" >';
+            echo ' Max: <input size="5em" class="autocat26" type="text" id="frequencymax" name="frequencymax" value="' . ($autocat[$myId]["frequencymax"] ?? "1440") . '" >';
             echo '<br>';
 
-            echo 'Note that Clarifai is discontinued. Work is in progress for a replacement solution.<p>';
+            echo 'When calling the API, images from "now minus ';
+            echo ' <input size="5em" class="autocat26" type="text" id="searchstart" name="searchstart" value="' . ($autocat[$myId]["searchstart"] ?? "10") . '" >';
+
+            echo  ' minutes" ';
+            echo ' to  "now minus (' . ($autocat[$myId]['searchstart'] ?? 10) . ' + <b>' . ($autocat[$myId]['d'] ?? 30) . ')</b> minutes are checked. <br>';
+            echo 'Set boundaries for the  "<b>' . ($autocat[$myId]['d'] ?? 30) . '</b>": '; 
+            echo ' Min: <input size="5em" class="autocat26" type="text" id="searchgapmin" name="searchgapmin" value="' . ($autocat[$myId]["searchgapmin"] ?? "5") . '" >';
+            echo ' Max: <input size="5em" class="autocat26" type="text" id="searchgapmax" name="searchgapmax" value="' . ($autocat[$myId]["searchgapmax"] ?? "1440") . '" >';
+            echo '<br>To change enter different values and click submit.';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="hidden" id="autocatlastchange" name="autocatlastchange" value="' . time() . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '<br><a href="index.php?time=' . time() . '&id=' . $myId . '&frequencymin=5&frequencymax=1440&searchstart=10&searchgapmin=30&searchgapmax=1440">Default for Network API.</a> ';
+            echo ' <a href="index.php?time=' . time() . '&id=' . $myId . '&frequencymin=1&frequencymax=5&searchstart=2&searchgapmin=5&searchgapmax=60">Default for localhost API</a> ';
+
+
+            echo '</form>';
+           // echo '<br>Note: minimum search gap cannot be smaller than minimum current frequency. ';
+            if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
+                echo "<br>Autocat is <b>on</b>. ";
+
+                echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
+            } else {
+                echo "<br>Autocat is <b>off</b>. ";
+                echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
+            }
+            echo "<p>";
+            echo "<h2>Parameters for all Cameras:</h2>";
+            echo '<form action="index.php">';
+            echo '<label for="clarifaimonthtarget">Target for number of API calls / month:</label> ';
+
+            echo '<input size="5em" type="text" id="clarifaimonthtarget" name="clarifaimonthtarget" value="' . ($clarifaicount["target"] ?? 700) . '" >';
+
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" > ';
+            echo '<input type="submit" value="Submit">';
+
+
+            echo '<br>The values above will be changed within their boundaries to hit the target of ' . ($clarifaicount["target"] ?? 700) . ' calls per month.';
+
+
+
+            echo '</form>';
+
+
+            echo "<p>";
+            echo '<form action="index.php">';
+            echo '<label for="clarifaiauthdata">Set link to API (use <b>simulation</b> to bypass):</label>  ';
+
+            echo '<input class="clarifaiauth" type="text" id="clarifaiuserid" name="clarifaiuserid" value="' . ($clarifaicount["userid"] ?? "not set") . '" >';
+            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
+            echo '<input type="submit" value="Submit">';
+            echo '</form>';
+            echo "<p>";
+
+
 
             $c3 = $clarifaicount[3] ?? 0;
             $c4 =  $clarifaicount[4] ?? localtimeCam($myId);
-            echo "Global: $c3  Clarifai since " . gmdate("M j H:i", $c4); // . " <b>(" . $clarifaicount[0] . ")</b>";
+            echo "Since reset: $c3  API Calls since " . gmdate("M j H:i", $c4); // . " <b>(" . $clarifaicount[0] . ")</b>";
             $ctd = 1.0 + time() - ($clarifaicount[4] ?? 0); // add one to avoid division by zero.
             $clarifaipermonth = round(60.0 * 60 * 24 * 30 * $c3 / $ctd, 0);
 
-            echo " means <b> $clarifaipermonth </b> Clarifai per 30 days. ";
+            echo " means <b> $clarifaipermonth </b> API Calls per 30 days. ";
+            echo '<a href="index.php?t=' . time() . '&id=' . $myId . '&resetclarifai=1&showclarifai=1">Reset.</a>';
+
 
 
             echo "<br>";
 
             $d3 = $clarifaicount["count"] ?? 0;
             $d4 =  $clarifaicount["time"] ?? localtimeCam($myId);
-            echo "Local: $d3  Clarifai since " . gmdate("M j H:i", $d4);
+            echo "Since target reset: $d3  API Calls since " . gmdate("M j H:i", $d4);
             $dtd = 1.0 + time() - ($clarifaicount["time"] ?? 0); // add one to avoid division by zero.
             $dclarifaipermonth = round(60.0 * 60 * 24 * 30 * $d3 / $dtd, 0);
 
-            echo " means <b> $dclarifaipermonth </b> Clarifai per 30 days. ";
+            echo " means <b> $dclarifaipermonth </b> API Calls per 30 days. ";
 
-            echo "<br>";
+            echo "Target is " . ($clarifaicount["target"] ?? 'not set') . " per month.<br> ";
 
-            echo "Target is " . ($clarifaicount["target"] ?? 700) . " per month.<br> ";
-            echo "Clarifai call is suspended if count > " . ($clarifaicount["max"] ?? 25) . ". ";
-            echo "Current count: " . ($clarifaicount[0] ?? 0) . ". ";
+            /*
 
-            $t720 =  ($clarifaicount[720] ?? 720);
-            $m720 = floor($t720 / 60.0);
-            $s720 = $t720 - (60 * $m720);
-
-            echo "Countdown every $m720 mins";
-            if ($s720 != 0) {
-                echo " and $s720 sec";
-            }
-            echo ". <br>";
-
-
-            $tgap =  ($clarifaicount["callgap"] ?? 783);
-            $mgap = floor($tgap / 60.0);
-            $sgap = $tgap - (60 * $mgap);
-
-            echo "Clarifai is called every $mgap mins";
-            if ($sgap != 0) {
-                echo " and $sgap sec";
-            }
-            echo ". <br>";
+            echo '<h2> DEPRECATED</h2><p>Note that Clarifai is discontinued. Work is in progress for a replacement solution.<p>';
 
 
 
-            echo '<form action="index.php">';
-            echo '<label for="clarifaiauthdata">Set Authentication Data (use <b>simulation</b> as User Id to bypass the clarifai call):</label><br>';
-            echo '<table><tr><td>';
-            echo 'User Id:</td><td> <input class="clarifaiauth" type="text" id="clarifaiuserid" name="clarifaiuserid" value="' . ($clarifaicount["userid"] ?? "not set") . '" >';
-            echo "</td> </tr><tr><td>";
-            echo 'App Id: </td><td> <input class="clarifaiauth" type="text" id="clarifaiappid" name="clarifaiappid" value="' . ($clarifaicount["appid"] ?? "not set") . '" >';
-            echo "</td> </tr><tr><td>";
-            echo 'App Key: </td><td> <input class="clarifaiauth" type="text" id="clarifaiappkey" name="clarifaiappkey" value="' . ($clarifaicount["appkey"] ?? "not set") . '" >';
-            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
-            echo '<input type="submit" value="Submit">';
-            echo '</form>';
-            echo '</td></tr> </table>';
-            echo "<p>";
 
             echo '<form action="index.php">';
             echo '<label for="clarifaimonthtarget">Change target per month:</label><br>';
@@ -2199,8 +2315,7 @@ if (isset($_GET["imgout"])) {
             echo '</form>';
             echo "<p>";
 
-
-
+           
             echo '<form action="index.php">';
             echo '<label for="clarifaimaxcount">Change max count:</label><br>';
             echo '<input type="text" id="clarifaimaxcount" name="clarifaimaxcount" value="' . ($clarifaicount["max"] ?? 25) . '" >';
@@ -2208,11 +2323,12 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<p>";
+            
             if (isset($autocat[$myId]) === FALSE) {
                 $autocat[$myId] = array();
             }
             echo '<form action="index.php">';
-            echo '<label for="autocatstart">Change minutes of passed time for autocat to start searching for best image:</label><br>';
+            echo '<label for="autocatstart">Change minutes of passed time for doAutocat to start searching for best image:</label><br>';
             echo '<input type="text" id="autocatstart" name="autocatstart" value="' . ($autocat[$myId]['s'] ?? 30) . '" >';
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
@@ -2228,7 +2344,7 @@ if (isset($_GET["imgout"])) {
             }
 
             echo '<form action="index.php">';
-            echo '<label for="autocatstart">Change duration of passed time for autocat to search for best image (minutes). Use "auto" for automatic adjustment.</label><br>';
+            echo '<label for="autocatstart">Change duration of passed time for doAutocat to search for best image (minutes). Use "auto" for automatic adjustment.</label><br>';
             echo '<input type="text" id="autocatduration" name="autocatduration" value="' . $du_txt . '" >';
             if ($du_mode === "auto") {
                 echo " (" . $du_d . ") ";
@@ -2237,16 +2353,10 @@ if (isset($_GET["imgout"])) {
             echo '<input type="submit" value="Submit">';
             echo '</form>';
             echo "<p>";
+            */
 
             echo '<a href="viewlog.php">View Log</a>';
-            if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
-                echo "<br>Autocat is <b>on</b>. ";
 
-                echo '<a id="autocatdisable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=disable">Disable</a>';
-            } else {
-                echo "<br>Autocat is <b>off</b>. ";
-                echo '<a id="autocatenable" href="index.php?showmarked=1&time=' . time() . '&id=' . $myId . '&setautocat=cat">Enable</a>  &nbsp;';
-            }
 
             echo "\r\n";
             /*
@@ -2257,9 +2367,8 @@ if (isset($_GET["imgout"])) {
                 echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
             }
             */
-            echo '<br><a href="index.php?t=' . time() . '&id=' . $myId . '&resetclarifai=1&showclarifai=1">Reset and delete all Clarifai data.</a>';
 
-            autocat($myId, "initonly"); // Initialise autocat variable. 
+            doAutocat($myId, "initonly"); // Initialise doAutocat variable. 
             echo "<h2>Concepts:</h2>";
             //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
             echo '<form action="index.php">';
@@ -2268,7 +2377,7 @@ if (isset($_GET["imgout"])) {
             echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
-            echo "<em>Use the concept &quot;everything&quot; as a wildcard to always do an animated gif. This overrides using the clarifai service.";
+            echo "<em>Use the concept &quot;everything&quot; as a wildcard to always do an animated gif. This overrides using the API.";
             echo "<br><em>The simulation returns always &quot;something&quot as a concept.";
 
             echo "<br>";
@@ -2335,7 +2444,85 @@ if (isset($_GET["imgout"])) {
             }
             die();
         }
+        if (isset($_GET["frequencymin"]) && isset($_GET["frequencymax"]) && isset($_GET["searchstart"]) && isset($_GET["searchgapmin"]) && isset($_GET["searchgapmax"])) {
+
+            $myId = $_GET["id"] ?? 0;
+            //   echo '<h2>Parameters for each Camera:</h2>';
+            if (!isset($autocat)) {
+                $autocat = array();
+            }
+            if (!isset($autocat[$myId])) {
+                $autocat[$myId] = array();
+            }
+            if (($autocat[$myId]["frequencymin"] ?? 0) != intval($_GET["frequencymin"])
+                || ($autocat[$myId]["frequencymax"] ?? 0) != intval($_GET["frequencymax"])
+                || ($autocat[$myId]["searchstart"] ?? 0) != intval($_GET["searchstart"])
+                || ($autocat[$myId]["searchgapmin"] ?? 0) != intval($_GET["searchgapmin"])
+                || ($autocat[$myId]["searchgapmax"] ?? 0) != intval($_GET["searchgapmax"])
+            ) {
+
+                $autocat[$myId]["frequencymin"] = intval($_GET["frequencymin"]);
+                $autocat[$myId]["frequencymax"] = intval($_GET["frequencymax"]);
+                $autocat[$myId]["searchstart"] = intval($_GET["searchstart"]);
+                $autocat[$myId]["searchgapmin"] = intval($_GET["searchgapmin"]);
+                $autocat[$myId]["searchgapmax"] = intval($_GET["searchgapmax"]);
+
+         
+                if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
+                    $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
+                }
+                if ($autocat[$myId]["d"] > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+                    $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
+                }
+                if ($autocat[$myId]["frequency"] < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
+                    $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
+                }
+                if ($autocat[$myId]["frequency"] > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
+                    $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
+                }
+
+
+                echo "<h2>Please wait...      (" . ($_GET["cc"] ?? 0) . ")</h2>";
+
+
+                echo " <script> ";
+                echo "setTimeout(function(){ window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&frequencymin=" . $_GET["frequencymin"] . "&frequencymax=" . $_GET["frequencymax"] . "&searchstart=" . $_GET["searchstart"] . "&searchgapmin=" . $_GET["searchgapmin"] . "&searchgapmax=" . $_GET["searchgapmax"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+
+                echo " </script> </body></html>";
+                write2config();
+                sleep(1);
+                die();
+            } else {
+
+                echo "<h2>Parameters for Camera $myId:</h2>";
+                echo "Frequency min: " . ($autocat[$myId]["frequencymin"] ?? 0) . "<br>";
+                echo "Frequency max: " . ($autocat[$myId]["frequencymax"] ?? 0) . "<br>";
+                echo "Search start: " . ($autocat[$myId]["searchstart"] ?? 0) . "<br>";
+                echo "Search gap min: " . ($autocat[$myId]["searchgapmin"] ?? 0) . "<br>";
+                echo "Search gap max: " . ($autocat[$myId]["searchgapmax"] ?? 0) . "<br>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo '<a href="index.php?showclarifai=yes&time=' . time() . '&id=' . $myId . '" >Back to Manage Clarifai</a><p>';
+                echo '<p><hr><p>';
+                //  var_dump($autocat);
+                sortOutAutocatParameters($myId);
+                // var_dump($autocat);
+                echo "<h2>Adjusted parameters for Camera $myId:</h2>";
+                echo "Frequency min: " . ($autocat[$myId]["frequencymin"] ?? 0) . "<br>";
+                echo "Frequency max: " . ($autocat[$myId]["frequencymax"] ?? 0) . "<br>";
+                echo "Search start: " . ($autocat[$myId]["searchstart"] ?? 0) . "<br>";
+                echo "Search gap min: " . ($autocat[$myId]["searchgapmin"] ?? 0) . "<br>";
+                echo "Search gap max: " . ($autocat[$myId]["searchgapmax"] ?? 0) . "<br>";
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo '<a href="index.php?showclarifai=yes&time=' . time() . '&id=' . $myId . '" >Back to Manage Clarifai</a><p>';
+                echo '<p><hr><p>';
+                write2config();
+                sleep(1); // not a big problem if the config is not written. It will be written next time a post call comes. 
+                die();
+            }
+        }
+
         if (isset($_GET["clarifaimonthtarget"])) {
+
             if (!isset($clarifaicount)) {
                 $clarifaicount = array("0", time(), false);
                 $clarifaicount["target"] = NULL;
@@ -2344,16 +2531,22 @@ if (isset($_GET["imgout"])) {
                 $clarifaicount["target"] = intval($_GET["clarifaimonthtarget"]);
                 $clarifaicount["count"] = 0;
                 $clarifaicount["time"] = time();
-                echo "Please wait...      (" . ($_GET["cc"] ?? 0) . ")";
+                echo "<h2>Please wait...      (" . ($_GET["cc"] ?? 0) . ")</h2>";
+
                 echo " <script> ";
                 echo "setTimeout(function(){ console.log('(B)'); window.location = 'index.php?cc=" . (($_GET["cc"] ?? 0) + 1) . "&clarifaimonthtarget=" . $_GET["clarifaimonthtarget"] . "&t=" . time() . "&id=" . $myId . "' }, 600);";
+
                 echo " </script> </body></html>";
                 write2config(true);
             } else {
-                echo "<h2>Clarifaimonthtarget set to: " . $clarifaicount["target"] . " seconds.</h2>";
+                echo "<h2>API Calls / month set to: " . $clarifaicount["target"] . " calls.</h2>";
                 echo '<a href="index.php?time=' . time() . '&id=' . $myId . '" >Back</a><p>';
+                echo '<a href="index.php?showclarifai=yes&time=' . time() . '&id=' . $myId . '" >Manage API</a><p>';
+
+
                 echo " <script> ";
-                echo "setTimeout(function(){ console.log('(Cfai)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
+
+                //   echo "setTimeout(function(){ console.log('(Cfai)'); window.location = 'index.php?showstats=1&t=" . time() . "&id=" . $myId . "' }, 600);";
                 echo " </script> </body></html>";
             }
             die();
@@ -2574,7 +2767,6 @@ if (isset($_GET["imgout"])) {
             write2config();
             sleep(1);
         } else {
-            echo '<p>Choose an option above</p>';
             echo '<p>Thank you. <a href="index.php?time=' . time() . '&a=1">Home</a></p>';
         }
         echo '</body>   </html>';
@@ -2628,7 +2820,7 @@ if (isset($_GET["imgout"])) {
         die();
     }
 
-    function autocat(int $myId, $test = FALSE)
+    function doAutocat(int $myId, $test = FALSE)
     {
         global $autocat;
         global $clarifaicount;
@@ -2650,7 +2842,8 @@ if (isset($_GET["imgout"])) {
         }
         $searchterms = $autocat[$myId][5];
 
-        $mingapbetweencalls = $clarifaicount["callgap"] ?? 783;
+        $mingapbetweencalls =  $autocat[$myId]["frequency"] ?? 607;
+        // $clarifaicount["callgap"] ?? 783;
 
         $tdiff = localtimeCam($myId) - ($autocat[$myId][4] ?? 0);
         if (($autocat[$myId][1] ?? false) !== false && $tdiff < $mingapbetweencalls && $test === false) {
@@ -2658,6 +2851,7 @@ if (isset($_GET["imgout"])) {
         } else if ($test !== "initonly") {
             $autocat[$myId][4] = localtimeCam($myId);
             write2config();
+            sleep(1);
         } else {
             write2config();
             sleep(1);
@@ -2665,7 +2859,7 @@ if (isset($_GET["imgout"])) {
         }
 
         $howlongminutes = $autocat[$myId]["d"] ?? 60;
-        $whenstartminutes = $autocat[$myId]["s"] ?? 30;
+        $whenstartminutes =  $autocat[$myId]["searchstart"] ?? 10;
         $bn = findBestImageA($myId, $howlongminutes, $whenstartminutes); // From 30+60 minutes ago to 30 minutes ago
 
         if ($bn === FALSE) {
@@ -2863,13 +3057,6 @@ if (isset($_GET["imgout"])) {
 
         $postData = ['image_base64' => $base64String];
 
-        $maxclarifaicount = ($clarifaicount["max"] ?? 25); // magic clarifai constant = 50
-        if ($clarifaicount[0] > $maxclarifaicount) {
-            return "request over quota: Counter =  " . $clarifaicount[0] . ".";
-        } // Request over quota 
-
-        // $clarifai_app_id = $clarifaicount["appid"] ?? "not set";
-        // $clarifai_app_key = $clarifaicount["appkey"] ?? "not set";
         $clarifai_user_id = $clarifaicount["userid"] ?? "simulation";
 
 
@@ -3371,7 +3558,7 @@ if (isset($_GET["imgout"])) {
 
 
 
-    function saveasgifs( $myBn, int $delay = 20, bool $showdate = true, $outpath = FALSE, bool $silent = FALSE)
+    function saveasgifs($myBn, int $delay = 20, bool $showdate = true, $outpath = FALSE, bool $silent = FALSE)
     {
         include 'GIFEncoder.class.php';
 
@@ -3483,7 +3670,7 @@ if (isset($_GET["imgout"])) {
             return -1;
         }
     }
-    function average(int $tgt,  $img, bool $addTarget = false, bool $highlight = false) 
+    function average(int $tgt,  $img, bool $addTarget = false, bool $highlight = false)
     {
         global $focusX, $focusY;
         if ($img === false) {
@@ -3675,7 +3862,7 @@ if (isset($_GET["imgout"])) {
         global $oldestbn, $newestbn;
         global $findImagesStats;
         $fulltotal = 0;
-        if($bnto === null) {
+        if ($bnto === null) {
             $bnto = PHP_INT_MAX;
         }
         /*

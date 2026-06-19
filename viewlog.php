@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>Clarifai Log</title>
+    <title>API Call Log</title>
     <style>
         body {
 
@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <h2>Clarifai Log File</h2>
+    <h2>API Call Log File</h2>
     <em>Times are in UTC.</em>
     <p>
         <?php
