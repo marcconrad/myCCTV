@@ -43,16 +43,16 @@ function sortOutAutocatParameters(int $myId)
     if (!isset($autocat[$myId])) {
         $autocat[$myId] = array();
     }
-    if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
+    if (($autocat[$myId]["d"] ?? 30) < ($autocat[$myId]["searchgapmin"] ?? 5)) {
         $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
     }
-    if ($autocat[$myId]["d"] > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
+    if (($autocat[$myId]["d"] ?? 30) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
         $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
     }
-    if ($autocat[$myId]["frequency"] < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
+    if (( $autocat[$myId]["frequency"] ?? 610) < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
         $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
     }
-    if ($autocat[$myId]["frequency"] > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
+    if (( $autocat[$myId]["frequency"] ?? 610)> 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
         $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
     }
 
