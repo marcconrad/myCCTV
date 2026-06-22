@@ -49,20 +49,20 @@ function sortOutAutocatParameters(int $myId)
     if (($autocat[$myId]["d"] ?? 30) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
         $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
     }
-    if (( $autocat[$myId]["frequency"] ?? 610) < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
+    if (($autocat[$myId]["frequency"] ?? 610) < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
         $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
     }
-    if (( $autocat[$myId]["frequency"] ?? 610)> 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
+    if (($autocat[$myId]["frequency"] ?? 610) > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
         $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
     }
 
     $gapbetweencalls = 1 + floor(($autocat[$myId]["frequency"] ?? 610) / 60.0);
     if (($autocat[$myId]["searchgapmin"] ?? 5) < $gapbetweencalls) {
-        $autocat[$myId]["searchgapmin"] = $gapbetweencalls + 5;
+        $autocat[$myId]["searchgapmin"] = intval($gapbetweencalls + 1);
     }
 
     if (($autocat[$myId]["searchgapmin"] ?? 5) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
-        $autocat[$myId]["searchgapmax"] = ($autocat[$myId]["searchgapmin"] ?? 5) + 1;
+        $autocat[$myId]["searchgapmax"] = ($autocat[$myId]["searchgapmin"] ?? 1) + 1;
     }
     // Assume there is a write2config() elsewhere
 
@@ -674,30 +674,6 @@ function doAutocat_log(int $myId,  string $log_msg)
     }
 
     sortOutAutocatParameters($myId);
-    /*
-    if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
-        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
-    }
-    if ($autocat[$myId]["d"] > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
-        $autocat[$myId]["d"] = $autocat[$myId]["searchgapmax"];
-    }
-    if ($autocat[$myId]["frequency"] < 60 * ($autocat[$myId]["frequencymin"] ?? 5)) {
-        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymin"] ?? 5);
-    }
-    if ($autocat[$myId]["frequency"] > 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24)) {
-        $autocat[$myId]["frequency"] = 60 * ($autocat[$myId]["frequencymax"] ?? 60 * 24);
-    }
-
-    $gapbetweencalls = 1 + floor(($autocat[$myId]["frequency"] ?? 610) / 60.0);
-    if (($autocat[$myId]["searchgapmin"] ?? 5) < $gapbetweencalls) {
-        $autocat[$myId]["searchgapmin"] = $gapbetweencalls + 5;
-    }
-
-    if (($autocat[$myId]["searchgapmin"] ?? 5) > ($autocat[$myId]["searchgapmax"] ?? 1440)) {
-        $autocat[$myId]["searchgapmax"] = ($autocat[$myId]["searchgapmin"] ?? 5) + 1;
-    }
-        */
-    // Assume there is a write2config() elsewhere
 
 
     $howlongnew = ($autocat[$myId]["d"] ?? "(d)") . "; " . ($autocat[$myId]["frequency"] ?? "(f)");
@@ -1499,28 +1475,45 @@ if (isset($_GET["imgout"])) {
         die();
     }
     if (isset($_GET["clarifaiconcept"])) {
-        // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
+        // var_dump($_GET);
+        $x = http_build_query($_GET);
+        echo "x: $x <p>";
+
         $myId = intval($_GET["id"] ?? die("Error in setting concept. No id set."));
+
         doAutocat($myId, "initonly");
         $concepts = $autocat[$myId][5] ?? array();
-        $c = $_GET["clarifaiconcept"];
-        if ($dc = $_GET["deleteconcept"] ?? false) {
+        $c = trim(urldecode($_GET["clarifaiconcept"]));
+
+        if (isset($_GET["cleanunusedconcepts"]) && $_GET["cleanunusedconcepts"] == "y") {
+            unset($autocat[$myId]['allconcepts']);
+        } else if ($dca = $_GET["deleteconcept"] ?? false) {
+            $dc = urldecode($dca);
             if (isset($concepts[$dc])) {
                 unset($concepts[$dc]);
-                echo "The concept $dc has been removed.";
+                echo "<h2>The concept $dc has been removed.</h2>";
             } else {
-                echo "The concept $dc has not been found.";
+                echo "<h2>The concept $dc has not been found.</h2>";
             }
         } else {
             $concepts[$c] = $c;
+            echo "<h2>The concept $c has been added.</h2>";
         }
         $autocat[$myId][5] = $concepts;
+        // Repeat because of possible race conditions with camera. 
         write2config();
+        sleep(1);
+        write2config();
+        sleep(1);
+        write2config();
+        sleep(1);
         echo "Thank You";
-        //  var_dump($autocat);
-        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
-        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
 
+        echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Autocat API</a><p>';
+        echo '<p><a href="index.php?time=' . time() . '">Home</a><p>';
+        echo '<em>Note: If the action didn\'t work please try again.</em>';
+        echo '<p>'; 
+       // var_dump($autocat);
         die();
     }
     if (isset($_GET["setautocatdelta"])) {
@@ -1560,21 +1553,7 @@ if (isset($_GET["imgout"])) {
 
         // https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt
         $myId = intval($_GET["id"] ?? die("Error in setting doAutocat delta. No id set."));
-        /*
-          doAutocat($myId, "initonly");
-        $currentminutes = $autocat[$myId]['d'] ?? 60;
 
-        if ($_GET["autocatduration"] === "auto") {
-            $autocat[$myId]['mode'] = "auto";
-            $autocat[$myId]['d'] = $currentminutes;
-        } else {
-            $autocat[$myId]['d'] = intval($_GET["autocatduration"]);
-            $autocat[$myId]['mode'] = "manual";
-        }
-        write2config();
-        echo "<p> Changed from $currentminutes minutes to " . $autocat[$myId]['d'] . " minutes. <p> ";
-        echo "<p> Mode is " . $autocat[$myId]['mode'] . ". <p> ";
-        */
         echo "This feature has been deprecated; use min and max values please. Thank You";
         //  var_dump($autocat);
         echo '<p><a href="index.php?showclarifai=1&id=' . $myId . '&time=' . time() . '">Manage Clarifai</a><p>';
@@ -2225,8 +2204,8 @@ if (isset($_GET["imgout"])) {
             echo ' <input size="5em" class="autocat26" type="text" id="searchstart" name="searchstart" value="' . ($autocat[$myId]["searchstart"] ?? "10") . '" >';
 
             echo  ' minutes" ';
-            echo ' to  "now minus (' . ($autocat[$myId]['searchstart'] ?? 10) . ' + <b>' . ($autocat[$myId]['d'] ?? 30) . ')</b> minutes are checked. <br>';
-            echo 'Set boundaries for the  "<b>' . ($autocat[$myId]['d'] ?? 30) . '</b>": '; 
+            echo ' to  "now minus (' . ($autocat[$myId]['searchstart'] ?? 10) . ' + <b>' . ($autocat[$myId]["d"] ?? 30) . ')</b> minutes are checked. <br>';
+            echo 'Set boundaries for the  "<b>' . ($autocat[$myId]["d"] ?? 30) . '</b>": ';
             echo ' Min: <input size="5em" class="autocat26" type="text" id="searchgapmin" name="searchgapmin" value="' . ($autocat[$myId]["searchgapmin"] ?? "5") . '" >';
             echo ' Max: <input size="5em" class="autocat26" type="text" id="searchgapmax" name="searchgapmax" value="' . ($autocat[$myId]["searchgapmax"] ?? "1440") . '" >';
             echo '<br>To change enter different values and click submit.';
@@ -2238,7 +2217,7 @@ if (isset($_GET["imgout"])) {
 
 
             echo '</form>';
-           // echo '<br>Note: minimum search gap cannot be smaller than minimum current frequency. ';
+            // echo '<br>Note: minimum search gap cannot be smaller than minimum current frequency. ';
             if (isset($autocat[$myId]) && isset($autocat[$myId][1]) && $autocat[$myId][1] === TRUE) {
                 echo "<br>Autocat is <b>on</b>. ";
 
@@ -2300,77 +2279,40 @@ if (isset($_GET["imgout"])) {
 
             echo "Target is " . ($clarifaicount["target"] ?? 'not set') . " per month.<br> ";
 
-            /*
 
-            echo '<h2> DEPRECATED</h2><p>Note that Clarifai is discontinued. Work is in progress for a replacement solution.<p>';
-
-
-
-
-            echo '<form action="index.php">';
-            echo '<label for="clarifaimonthtarget">Change target per month:</label><br>';
-            echo '<input type="text" id="clarifaimonthtarget" name="clarifaimonthtarget" value="' . ($clarifaicount["target"] ?? 700) . '" >';
-            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
-            echo '<input type="submit" value="Submit">';
-            echo '</form>';
-            echo "<p>";
-
-           
-            echo '<form action="index.php">';
-            echo '<label for="clarifaimaxcount">Change max count:</label><br>';
-            echo '<input type="text" id="clarifaimaxcount" name="clarifaimaxcount" value="' . ($clarifaicount["max"] ?? 25) . '" >';
-            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
-            echo '<input type="submit" value="Submit">';
-            echo '</form>';
-            echo "<p>";
-            
-            if (isset($autocat[$myId]) === FALSE) {
-                $autocat[$myId] = array();
-            }
-            echo '<form action="index.php">';
-            echo '<label for="autocatstart">Change minutes of passed time for doAutocat to start searching for best image:</label><br>';
-            echo '<input type="text" id="autocatstart" name="autocatstart" value="' . ($autocat[$myId]['s'] ?? 30) . '" >';
-            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
-            echo '<input type="submit" value="Submit">';
-            echo '</form>';
-            echo "<p>";
-            $du_mode = ($autocat[$myId]['mode'] ?? "manual");
-            $du_d = ($autocat[$myId]['d'] ?? 60);
-
-            if ($du_mode == "auto") {
-                $du_txt = "auto";
-            } else {
-                $du_txt = $du_d;
-            }
-
-            echo '<form action="index.php">';
-            echo '<label for="autocatstart">Change duration of passed time for doAutocat to search for best image (minutes). Use "auto" for automatic adjustment.</label><br>';
-            echo '<input type="text" id="autocatduration" name="autocatduration" value="' . $du_txt . '" >';
-            if ($du_mode === "auto") {
-                echo " (" . $du_d . ") ";
-            }
-            echo '<input type="hidden" id="id" name="id" value="' . $myId . '" >';
-            echo '<input type="submit" value="Submit">';
-            echo '</form>';
-            echo "<p>";
-            */
 
             echo '<a href="viewlog.php">View Log</a>';
 
 
             echo "\r\n";
-            /*
-            if (isset($clarifaicount[2])) {
-                echo '<br>Legacy. Will not work after March 2023! Enter new data above for new Clarifai authentication system.';
-                echo ' Current Clarifai key is: ' . $clarifaicount[2] . '. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Change Clarifai Key</a>';
-            } else {
-                echo '<br>No Clairfai key has been set. <a href="index.php?enterclarifai=1&time=' . time() . '... ">Enter Clarifai Key</a>';
-            }
-            */
+
 
             doAutocat($myId, "initonly"); // Initialise doAutocat variable. 
             echo "<h2>Concepts:</h2>";
-            //  echo "<h2>🚧To do: set Concepts; link to concepts🚧</h2>";
+
+            $diff = array_diff($autocat[$myId]['allconcepts'] ?? array(), $autocat[$myId][5] ?? array());
+            /*
+            echo "<br>Concepts not used for gif creation: ";
+            echo (empty($diff) ? 'n/a' : implode(', ', $diff));
+            echo "<p>";
+*/
+            if (empty($diff)) {
+                echo 'n/a';
+            } else {
+                echo 'Concepts identified; but not used (click to include them): ';
+                $links = [];
+
+                foreach ($diff as $item) {
+                    $url = 'index.php?id=' . $myId . '&clarifaiconcept=' . urlencode($item);
+                    $links[] = '<a href="' . $url . '">' . htmlspecialchars($item) . '</a>';
+                }
+
+                echo implode(', ', $links);
+            }
+
+            echo '. <a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&cleanunusedconcepts=y">Click to reset</a>';
+
+
             echo '<form action="index.php">';
             echo '<label for="clarifaiconcept">Enter new Concept:</label><br>';
             echo '<input type="text" id="clarifaiconcept" name="clarifaiconcept">';
@@ -2383,11 +2325,11 @@ if (isset($_GET["imgout"])) {
             echo "<br>";
             echo "<p>";
 
-            echo "Click on any of the concepts below to delete them.<br>";
+            echo "Click on any of the concepts below to delete them:<br>";
 
             $concepts = $autocat[$myId][5];
             foreach ($concepts as $c) {
-                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . $c . '">' . $c . '</a>, ';
+                echo '<a href="index.php?time=' . time() . '&id=' . $myId . '&clarifaiconcept=1&deleteconcept=' . urlencode($c) . '">' . $c . '</a>, ';
                 echo "\r\n";
             }
             echo "<h2>Autocat Delta:</h2>";
@@ -2467,7 +2409,7 @@ if (isset($_GET["imgout"])) {
                 $autocat[$myId]["searchgapmin"] = intval($_GET["searchgapmin"]);
                 $autocat[$myId]["searchgapmax"] = intval($_GET["searchgapmax"]);
 
-         
+
                 if ($autocat[$myId]["d"] < ($autocat[$myId]["searchgapmin"] ?? 5)) {
                     $autocat[$myId]["d"] = $autocat[$myId]["searchgapmin"];
                 }
@@ -2915,7 +2857,15 @@ if (isset($_GET["imgout"])) {
         }
         $processedhistory[$t] = $t;
         $autocat[$myId][6] = $processedhistory;
+
+        if (!isset($autocat[$myId]['allconcepts'])) {
+            $autocat[$myId]['allconcepts'] = array();
+        }
+        $autocat[$myId]['allconcepts'] = array_unique(array_merge($autocat[$myId]['allconcepts'], $concepts));
+
         write2config();
+
+
 
         $theconcept = FALSE;
         foreach ($searchterms as $c) {
