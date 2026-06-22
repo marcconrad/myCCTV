@@ -1476,8 +1476,8 @@ if (isset($_GET["imgout"])) {
     }
     if (isset($_GET["clarifaiconcept"])) {
         // var_dump($_GET);
-        $x = http_build_query($_GET);
-        echo "x: $x <p>";
+      //  $x = http_build_query($_GET);
+        // echo "x: $x <p>";
 
         $myId = intval($_GET["id"] ?? die("Error in setting concept. No id set."));
 
